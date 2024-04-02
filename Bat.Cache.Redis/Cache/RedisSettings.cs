@@ -31,6 +31,8 @@ public class RedisSettings
 
     public bool IncludeDetailInExceptions { get; set; } = false;
 
+    public bool AbortOnConnectFail { get; set; } // Wether connect/configuration timeouts should be explicitly notified via TimeoutException
+
     public bool CheckCertificateRevocation { get; set; } = false; //A Boolean value that specifies whether the certificate revocation list is checked during authentication. 
 
     public RedisSslSettings SslSettings { get; set; }

@@ -22,6 +22,7 @@ public class RedisCacheProvider : IRedisCacheProvider
         if (_redisSettings.Server3.IsNullOrWhiteSpace() is false)
             config.EndPoints.Add(_redisSettings.Server3, _redisSettings.Port3);
 
+
         config.AllowAdmin = _redisSettings.AllowAdminCommand;
         config.User = _redisSettings.Username ?? null;
         config.Password = _redisSettings.Password ?? null;
@@ -29,6 +30,7 @@ public class RedisCacheProvider : IRedisCacheProvider
         config.SyncTimeout = _redisSettings.SyncTimeout;
         config.ConnectTimeout = _redisSettings.ConnectTimeout;
         config.ClientName = _redisSettings.ClientName ?? null;
+        config.AbortOnConnectFail = _redisSettings.AbortOnConnectFail;
         config.IncludeDetailInExceptions = _redisSettings.IncludeDetailInExceptions;
         config.CheckCertificateRevocation = _redisSettings.CheckCertificateRevocation;
         if (_redisSettings.DefaultDatabaseIndex > 0) config.DefaultDatabase = _redisSettings.DefaultDatabaseIndex;
