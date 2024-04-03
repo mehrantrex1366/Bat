@@ -27,6 +27,7 @@ for example :
         "Username": "",
         "Password": "Norouzi",
         "ClientName": "Bat.Cache.Redis",
+        "AbortOnConnectFail": false,
         "SyncTimeout": 5,
         "ConnectRetry": 3,
         "ConnectTimeout": 3000,
