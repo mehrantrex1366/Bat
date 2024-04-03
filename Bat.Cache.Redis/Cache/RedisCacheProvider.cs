@@ -12,7 +12,7 @@ public class RedisCacheProvider : IRedisCacheProvider
         if (_redisSettings.Server1.IsNullOrWhiteSpace() ||
             _redisSettings.Server1.IsNullOrWhiteSpace() ||
             _redisSettings.Server1.IsNullOrWhiteSpace())
-            throw new Exception("redisSettings not configured properly !");
+            throw new Exception("redisSettings not configured properly in appSettings !");
 
         ConfigurationOptions config = new();
         if (_redisSettings.Server1.IsNullOrWhiteSpace() is false)
