@@ -39,7 +39,10 @@ public class RedisCacheProvider : IRedisCacheProvider
         config.SslHost = _redisSettings.SslSettings.Host ?? null;
         config.SslProtocols = _redisSettings.SslSettings.Protocol;
 
-        _redisServer = ConnectionMultiplexer.Connect(config);
+        if (_redisSettings.IsSentinelConnect)
+            _redisServer = ConnectionMultiplexer.SentinelConnect(config);
+        else
+            _redisServer = ConnectionMultiplexer.Connect(config);
         _redisDb = _redisServer.GetDatabase();
     }
 
@@ -108,7 +111,7 @@ public class RedisCacheProvider : IRedisCacheProvider
 
     public bool Set(KeyValuePair<string, object>[] values, CommandFlags flags = CommandFlags.None)
     {
-        var list = values.Select(x => new 
+        var list = values.Select(x => new
             KeyValuePair<RedisKey, RedisValue>(x.Key, x.Value.SerializeToJson()))
             .ToArray();
         return _redisDb.StringSet(list);
@@ -129,7 +132,7 @@ public class RedisCacheProvider : IRedisCacheProvider
 
     public async Task<bool> SetAsync(KeyValuePair<string, object>[] values)
     {
-        var list = values.Select(x => new 
+        var list = values.Select(x => new
             KeyValuePair<RedisKey, RedisValue>(x.Key, x.Value.SerializeToJson()))
             .ToArray();
         return await _redisDb.StringSetAsync(list);

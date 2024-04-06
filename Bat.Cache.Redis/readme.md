@@ -32,6 +32,7 @@ for example :
         "ConnectRetry": 3,
         "ConnectTimeout": 3000,
         "DefaultDatabaseIndex": 0,
+        "IsSentinelConnect": false,
         "AllowAdminCommand": false,
         "IncludeDetailInExceptions": false,
         "CheckCertificateRevocation": false,
