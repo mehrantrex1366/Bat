@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 
 namespace Bat.AspNetCore;
@@ -46,8 +45,8 @@ public class SingleUploader : TagHelper
             div.Attributes.Add("data-remove-message", RemoveMessage);
         if (!string.IsNullOrWhiteSpace(FileUrl))
             div.Attributes.Add("data-file-url", FileUrl);
-        if (Params != null && Params.Count > 0) div.Attributes.Add("data-params", JsonConvert.SerializeObject(Params.ToList()));
-        if (RemoveParams != null && RemoveParams.Count > 0) div.Attributes.Add("data-remove-params", JsonConvert.SerializeObject(RemoveParams.ToList()));
+        if (Params != null && Params.Count > 0) div.Attributes.Add("data-params", Params.ToList().SerializeToJson());
+        if (RemoveParams != null && RemoveParams.Count > 0) div.Attributes.Add("data-remove-params", RemoveParams.ToList().SerializeToJson());
         div.Attributes.Add("data-max-files", MaxFiles.ToString());
         div.Attributes.Add("data-max-file-size", MaxFileSize.ToString());
         div.Attributes.Add("data-accepted-files", string.Join(",", AcceptedFiles));

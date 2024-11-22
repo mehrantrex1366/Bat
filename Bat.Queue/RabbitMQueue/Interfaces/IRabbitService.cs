@@ -2,6 +2,6 @@
 
 public interface IRabbitService
 {
-    IConnection CreateConnection();
-    IConnection CreateConnection(ConnectionFactory connectionFactory);
+    Task<IConnection> CreateConnection();
+    Task<IConnection> CreateConnection(ConnectionFactory connectionFactory);
 }

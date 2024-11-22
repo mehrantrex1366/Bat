@@ -2,55 +2,69 @@
 
 public class RabbitProducer(IRabbitService rabbitService) : IRabbitProducer, IDisposable
 {
-	private IModel _model;
-	private IConnection _connection;
-	private string _exchangeName = "Bat_Exchange";
-	private readonly IRabbitService _rabbitService = rabbitService;
+    private IChannel _channel;
+    private IConnection _connection;
+    private string _exchangeName = "Bat_Exchange";
+    private readonly IRabbitService _rabbitService = rabbitService;
 
-	public bool Publish<T>(T message, string exchangeName = null, string routingKey = "",
-		bool mandatory = false, IBasicProperties basicProperties = null)
-	{
-		_connection = _rabbitService.CreateConnection();
-		_model = _connection.CreateModel();
+    public async Task<bool> Publish<T>(T message, string exchangeName = null, string routingKey = "",
+        bool mandatory = false, IDictionary<string, object> headers = null)
+    {
+        _connection = await _rabbitService.CreateConnection();
+        _channel = await _connection.CreateChannelAsync();
 
-		if (!string.IsNullOrWhiteSpace(exchangeName)) _exchangeName = $"{exchangeName}_Exchange";
+        if (!string.IsNullOrWhiteSpace(exchangeName)) _exchangeName = $"{exchangeName}_Exchange";
 
-		_model.BasicPublish(
-			exchange: _exchangeName,
-			routingKey: routingKey,
-			mandatory: mandatory,
-			basicProperties: basicProperties,
-			body: Encoding.UTF8.GetBytes(message.SerializeToJson()));
+        var basicProps = new BasicProperties
+        {
+            ContentType = "application/json",
+            ContentEncoding = "utf-8",
+            Headers = headers
+        };
 
-		return true;
-	}
+        await _channel.BasicPublishAsync(
+                exchange: _exchangeName,
+                routingKey: routingKey,
+                mandatory: mandatory,
+                basicProperties: basicProps,
+                body: Encoding.UTF8.GetBytes(message.SerializeToJson()));
 
-	public bool Publish<T>(IConnection connection, T message, string exchangeName = null, string routingKey = "",
-		bool mandatory = false, IBasicProperties basicProperties = null)
-	{
-		_connection = connection;
-		_model = _connection.CreateModel();
+        return true;
+    }
 
-		if (!string.IsNullOrWhiteSpace(exchangeName)) _exchangeName = $"{exchangeName}_Exchange";
+    public async Task<bool> Publish<T, TProperties>(IConnection connection, T message, string exchangeName = null, string routingKey = "",
+        bool mandatory = false, IDictionary<string, object> headers = default)
+    {
+        _connection = connection;
+        _channel = await _connection.CreateChannelAsync();
 
-		_model.BasicPublish(
-			exchange: _exchangeName,
-			routingKey: routingKey,
-			mandatory: mandatory,
-			basicProperties: basicProperties,
-			body: Encoding.UTF8.GetBytes(message.SerializeToJson()));
+        if (!string.IsNullOrWhiteSpace(exchangeName)) _exchangeName = $"{exchangeName}_Exchange";
 
-		return true;
-	}
+        var basicProps = new BasicProperties
+        {
+            ContentType = "application/json",
+            ContentEncoding = "utf-8",
+            Headers = headers
+        };
 
-	public void Dispose()
-	{
-		if (_model.IsOpen) _model.Close();
-		_model.Dispose();
+        await _channel.BasicPublishAsync(
+                exchange: _exchangeName,
+                routingKey: routingKey,
+                mandatory: mandatory,
+                basicProperties: basicProps,
+                body: Encoding.UTF8.GetBytes(message.SerializeToJson()));
 
-		if (_connection.IsOpen) _connection.Close();
-		_connection.Dispose();
+        return true;
+    }
 
-		GC.SuppressFinalize(this);
-	}
+    public async void Dispose()
+    {
+        if (_channel.IsOpen) await _channel.CloseAsync();
+        _channel.Dispose();
+
+        if (_connection.IsOpen) await _connection.CloseAsync();
+        _connection.Dispose();
+
+        GC.SuppressFinalize(this);
+    }
 }

@@ -2,5 +2,5 @@
 
 public interface IRabbitProducer : IDisposable
 {
-    bool Publish<T>(T message, string exchangeName = null, string routingKey = "", bool mandatory = false, IBasicProperties basicProperties = null);
+    Task<bool> Publish<T>(T message, string exchangeName = null, string routingKey = "", bool mandatory = false, IDictionary<string, object> headers = null);
 }
