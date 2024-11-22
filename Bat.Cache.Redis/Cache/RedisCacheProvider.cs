@@ -2,9 +2,9 @@
 
 public class RedisCacheProvider : IRedisCacheProvider
 {
-    public IDatabase _redisDb;
-    public ConnectionMultiplexer _redisServer;
     private readonly RedisSettings _redisSettings;
+    public IDatabase _redisDb { get; set; }
+    public ConnectionMultiplexer _redisServer { get; set; }
 
     public RedisCacheProvider(IOptions<RedisSettings> redisSettings)
     {
@@ -12,7 +12,7 @@ public class RedisCacheProvider : IRedisCacheProvider
         if (_redisSettings.Server1.IsNullOrWhiteSpace() ||
             _redisSettings.Server1.IsNullOrWhiteSpace() ||
             _redisSettings.Server1.IsNullOrWhiteSpace())
-            throw new Exception("redisSettings not configured properly !");
+            throw new Exception("redisSettings not configured properly in appSettings !");
 
         ConfigurationOptions config = new();
         if (_redisSettings.Server1.IsNullOrWhiteSpace() is false)
@@ -22,6 +22,7 @@ public class RedisCacheProvider : IRedisCacheProvider
         if (_redisSettings.Server3.IsNullOrWhiteSpace() is false)
             config.EndPoints.Add(_redisSettings.Server3, _redisSettings.Port3);
 
+
         config.AllowAdmin = _redisSettings.AllowAdminCommand;
         config.User = _redisSettings.Username ?? null;
         config.Password = _redisSettings.Password ?? null;
@@ -29,6 +30,7 @@ public class RedisCacheProvider : IRedisCacheProvider
         config.SyncTimeout = _redisSettings.SyncTimeout;
         config.ConnectTimeout = _redisSettings.ConnectTimeout;
         config.ClientName = _redisSettings.ClientName ?? null;
+        config.AbortOnConnectFail = _redisSettings.AbortOnConnectFail;
         config.IncludeDetailInExceptions = _redisSettings.IncludeDetailInExceptions;
         config.CheckCertificateRevocation = _redisSettings.CheckCertificateRevocation;
         if (_redisSettings.DefaultDatabaseIndex > 0) config.DefaultDatabase = _redisSettings.DefaultDatabaseIndex;
@@ -37,7 +39,10 @@ public class RedisCacheProvider : IRedisCacheProvider
         config.SslHost = _redisSettings.SslSettings.Host ?? null;
         config.SslProtocols = _redisSettings.SslSettings.Protocol;
 
-        _redisServer = ConnectionMultiplexer.Connect(config);
+        if (_redisSettings.IsSentinelConnect)
+            _redisServer = ConnectionMultiplexer.SentinelConnect(config);
+        else
+            _redisServer = ConnectionMultiplexer.Connect(config);
         _redisDb = _redisServer.GetDatabase();
     }
 
@@ -94,6 +99,9 @@ public class RedisCacheProvider : IRedisCacheProvider
     public bool Set(string key, string value, TimeSpan? expiry = null, bool keepTTL = false)
         => _redisDb.StringSet(key, value, expiry, keepTTL);
 
+    public bool Set(string key, object value, TimeSpan? expiry = null, bool keepTTl = false)
+       => _redisDb.StringSet(key, value.SerializeToJson(), expiry, keepTTl);
+
     public bool Set(KeyValuePair<string, string>[] values)
     {
         var list = new KeyValuePair<RedisKey, RedisValue>[values.Length];
@@ -101,14 +109,52 @@ public class RedisCacheProvider : IRedisCacheProvider
         return _redisDb.StringSet(list);
     }
 
+    public bool Set(KeyValuePair<string, object>[] values, CommandFlags flags = CommandFlags.None)
+    {
+        var list = values.Select(x => new
+            KeyValuePair<RedisKey, RedisValue>(x.Key, x.Value.SerializeToJson()))
+            .ToArray();
+        return _redisDb.StringSet(list);
+    }
+
     public async Task<bool> SetAsync(string key, string value, TimeSpan? expiry = null, bool keepTTL = false)
         => await _redisDb.StringSetAsync(key, value, expiry, keepTTL);
+
+    public async Task<bool> SetAsync(string key, object value, TimeSpan? expiry = null, bool keepTtl = false)
+        => await _redisDb.StringSetAsync(key, value.SerializeToJson(), expiry, keepTtl);
 
     public async Task<bool> SetAsync(KeyValuePair<string, string>[] values)
     {
         var list = new KeyValuePair<RedisKey, RedisValue>[values.Length];
         values.CopyTo(list, 0);
         return await _redisDb.StringSetAsync(list);
+    }
+
+    public async Task<bool> SetAsync(KeyValuePair<string, object>[] values)
+    {
+        var list = values.Select(x => new
+            KeyValuePair<RedisKey, RedisValue>(x.Key, x.Value.SerializeToJson()))
+            .ToArray();
+        return await _redisDb.StringSetAsync(list);
+    }
+
+
+    public T Get<T>(string key) where T : class
+    {
+        var value = _redisDb.StringGet(key);
+        if (value.IsNullOrEmpty)
+            return default;
+
+        return value.ToString().DeSerializeJson<T>();
+    }
+
+    public async Task<T> GetAsync<T>(string key)
+    {
+        var value = await _redisDb.StringGetAsync(key);
+        if (value.IsNullOrEmpty)
+            return default;
+
+        return value.ToString().DeSerializeJson<T>();
     }
 
     public string Get(string key)
@@ -137,6 +183,7 @@ public class RedisCacheProvider : IRedisCacheProvider
 
     public async Task<string> GetSetAsync(string key, string value)
         => await _redisDb.StringGetSetAsync(key, value);
+
 
     public bool Delete(string key)
         => _redisDb.KeyDelete(key);

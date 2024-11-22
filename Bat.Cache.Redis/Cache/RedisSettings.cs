@@ -27,9 +27,13 @@ public class RedisSettings
 
     public int DefaultDatabaseIndex { get; set; } = 0; //Default database index, from 0 to databases - 1
 
+    public bool IsSentinelConnect { get; set; } = false; //ConnectionMultiplexer Connect To Sentinel Or Not
+
     public bool AllowAdminCommand { get; set; } = false; //Enables a range of commands that are considered risky
 
     public bool IncludeDetailInExceptions { get; set; } = false;
+
+    public bool AbortOnConnectFail { get; set; } // Wether connect/configuration timeouts should be explicitly notified via TimeoutException
 
     public bool CheckCertificateRevocation { get; set; } = false; //A Boolean value that specifies whether the certificate revocation list is checked during authentication. 
 
