@@ -33,14 +33,14 @@ Mail : mehrannoruzi@gmail.com
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="EFCore.BulkExtensions" Version="8.1.2" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<None Include="C:\Users\Mehran Norouzi\Downloads\Bat.png">
 			<Pack>True</Pack>
 			<PackagePath></PackagePath>
 		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="EFCore.BulkExtensions.SqlServer" Version="8.1.2" />
 	</ItemGroup>
 
 	<ItemGroup>
