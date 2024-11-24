@@ -459,6 +459,35 @@ public static class HttpRequestTools
         return (response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
     }
 
+    public static async Task<(HttpStatusCode httpStatusCode, string response)> PostFormFileAsync(string url, byte[] fileBytes, string fileName, Dictionary<string, string> header = null, bool byPassServerSertificate = true, CancellationToken cancellationToken = default)
+    {
+        var formData = new MultipartFormDataContent();
+        var fileContent = new ByteArrayContent(fileBytes);
+        fileContent.Headers.ContentType = new MediaTypeHeaderValue("multipart/form-data");
+        formData.Add(fileContent, "file", fileName);
+
+        HttpRequestMessage request = new(HttpMethod.Post, new Uri(url))
+        {
+            Content = formData
+        };
+        if (header.IsNotNull())
+            foreach (var item in header)
+                request.Headers.Add(item.Key, item.Value);
+
+        var handler = new HttpClientHandler();
+        if (byPassServerSertificate)
+        {
+            handler = new HttpClientHandler()
+            {
+                ClientCertificateOptions = ClientCertificateOption.Manual,
+                ServerCertificateCustomValidationCallback = (httpRequestMessage, cert, cetChain, policyErrors) => { return true; }
+            };
+        }
+        using var httpClient = new HttpClient(handler);
+        var response = await httpClient.SendAsync(request, cancellationToken);
+        return (response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
+    }
+
     public static async Task<T> PostFormAsync<T>(string url, Dictionary<string, string> formBody, Dictionary<string, string> header, Encoding resultEncoding, bool byPassServerSertificate, int timeOutSecond, CancellationToken cancellationToken = default)
     {
         var formData = new MultipartFormDataContent();
@@ -581,6 +610,45 @@ public static class HttpRequestTools
         return (response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
     }
 
+    public static async Task<(HttpStatusCode httpStatusCode, string response)> PostFormAsync(HttpClient httpClient, string url, Dictionary<string, string> formBody, Dictionary<string, string> header, Encoding resultEncoding, bool byPassServerSertificate, int timeOutSecond, CancellationToken cancellationToken = default)
+    {
+        var formData = new MultipartFormDataContent();
+        if (formBody.IsNotNull())
+            foreach (var item in formBody)
+                formData.Add(new StringContent(item.Value, resultEncoding ?? Encoding.UTF8), item.Key);
+
+        var request = new HttpRequestMessage(HttpMethod.Post, new Uri(url))
+        {
+            Content = formData
+        };
+        if (header.IsNotNull())
+            foreach (var item in header)
+                request.Headers.Add(item.Key, item.Value);
+
+        httpClient.Timeout = TimeSpan.FromSeconds(timeOutSecond);
+        var response = await httpClient.SendAsync(request, cancellationToken);
+        return (response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
+    }
+
+    public static async Task<(HttpStatusCode httpStatusCode, string response)> PostFormFileAsync(HttpClient httpClient, string url, byte[] fileBytes, string fileName, Dictionary<string, string> header = null, CancellationToken cancellationToken = default)
+    {
+        var formData = new MultipartFormDataContent();
+        var fileContent = new ByteArrayContent(fileBytes);
+        fileContent.Headers.ContentType = new MediaTypeHeaderValue("multipart/form-data");
+        formData.Add(fileContent, "file", fileName);
+
+        HttpRequestMessage request = new(HttpMethod.Post, new Uri(url))
+        {
+            Content = formData
+        };
+        if (header.IsNotNull())
+            foreach (var item in header)
+                request.Headers.Add(item.Key, item.Value);
+
+        var response = await httpClient.SendAsync(request, cancellationToken);
+        return (response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
+    }
+
 
 
 
@@ -697,6 +765,40 @@ public static class HttpRequestTools
         return (response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
     }
 
+    public static async Task<(HttpStatusCode httpStatusCode, string response)> PutFormAsync(string url, Dictionary<string, string> formBody, Dictionary<string, string> header = null, bool byPassServerSertificate = true, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var request = new HttpRequestMessage(HttpMethod.Put, new Uri(url));
+            if (header.IsNotNull())
+                foreach (var item in header)
+                    request.Headers.Add(item.Key, item.Value);
+
+            var formData = new MultipartFormDataContent();
+            if (formBody.IsNotNull())
+                foreach (var item in formBody)
+                    formData.Add(new StringContent(item.Value, Encoding.UTF8), item.Key);
+
+            var handler = new HttpClientHandler();
+            if (byPassServerSertificate)
+            {
+                handler = new HttpClientHandler()
+                {
+                    ClientCertificateOptions = ClientCertificateOption.Manual,
+                    ServerCertificateCustomValidationCallback = (httpRequestMessage, cert, cetChain, policyErrors) => { return true; }
+                };
+            }
+            using var httpClient = new HttpClient(handler);
+            var response = await httpClient.PutAsync(url, formData, cancellationToken);
+            return (response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
+        }
+        catch (Exception e)
+        {
+            FileLoger.CriticalError(e);
+            throw new Exception("AgahTicketAdapter/PutFormAsync", e);
+        }
+    }
+
 
     public static async Task<T> PutAsync<T>(HttpClient httpClient, string url, string contentJsonString, Dictionary<string, string> header = null, Encoding resultEncoding = null, CancellationToken cancellationToken = default) where T : class
     {
@@ -755,6 +857,22 @@ public static class HttpRequestTools
 
         httpClient.Timeout = TimeSpan.FromSeconds(timeOutSecond);
         var response = await httpClient.SendAsync(request, cancellationToken);
+        return (response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
+    }
+
+    public static async Task<(HttpStatusCode httpStatusCode, string response)> PutFormAsync(HttpClient httpClient, string url, Dictionary<string, string> formBody, Dictionary<string, string> header = null, bool byPassServerSertificate = true, CancellationToken cancellationToken = default)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Put, new Uri(url));
+        if (header.IsNotNull())
+            foreach (var item in header)
+                request.Headers.Add(item.Key, item.Value);
+
+        var formData = new MultipartFormDataContent();
+        if (formBody.IsNotNull())
+            foreach (var item in formBody)
+                formData.Add(new StringContent(item.Value, Encoding.UTF8), item.Key);
+
+        var response = await httpClient.PutAsync(url, formData, cancellationToken);
         return (response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
     }
 
