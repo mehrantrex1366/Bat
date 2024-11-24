@@ -9,6 +9,7 @@
     <PackageIcon>Bat.png</PackageIcon>
     <RepositoryUrl>https://github.com/mehrannoruzi/Bat</RepositoryUrl>
     <RepositoryType>GitHub</RepositoryType>
+    <PackageReadmeFile>readme.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
