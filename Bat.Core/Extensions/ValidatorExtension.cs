@@ -2,6 +2,15 @@
 
 namespace Bat.Core;
 
+public class PasswordComplexityConfig
+{
+    public int MinLength { get; set; } = 8;
+    public int MinUpperCase { get; set; } = 1;
+    public int MinLowerCase { get; set; } = 1;
+    public int MinNumbers { get; set; } = 1;
+    public int MinSpecialChars { get; set; } = 1;
+}
+
 public static class ValidatorExtension
 {
     public static bool IsIp(this string ip)
@@ -119,9 +128,14 @@ public static class ValidatorExtension
 
     public static bool IsNationalCode(this string nationalCode)
     {
-        if (string.IsNullOrWhiteSpace(nationalCode)) return false;
-        if (nationalCode.Length != 10) return false;
-        if (!long.TryParse(nationalCode, out long number)) return false;
+        if (string.IsNullOrWhiteSpace(nationalCode))
+            return false;
+
+        if (nationalCode.Length != 10)
+            return false;
+
+        if (!long.TryParse(nationalCode, out long number))
+            return false;
 
         var numbers = nationalCode.ToCharArray().Select(i => Convert.ToInt32(i.ToString())).ToList();
         var checkNumber = numbers.Last();
@@ -138,6 +152,37 @@ public static class ValidatorExtension
             if ((11 - remaining) != checkNumber) return false;
 
         return true;
+    }
+
+    public static bool IsNationalCode2(this string nationalCode)
+    {
+        if (string.IsNullOrWhiteSpace(nationalCode))
+            return false;
+
+        if (nationalCode.Length != 10)
+            return false;
+
+        if (!long.TryParse(nationalCode, out var _))
+            return false;
+
+        List<int> list = (from i in nationalCode.ToCharArray()
+                          select Convert.ToInt32(i.ToString())).ToList();
+        int controlNumber = list.Last();
+
+        list.RemoveAt(9);
+        list.Reverse();
+
+        int sum = 0;
+        for (int j = 0; j < list.Count; j++)
+        {
+            sum += list[j] * (j + 2);
+        }
+
+        int remainder = sum % 11;
+        if (remainder < 2)
+            return remainder == controlNumber;
+
+        return (11 - remainder) == controlNumber;
     }
 
     public static bool IsBankCardNumber(this string bankCardNumber)
@@ -166,4 +211,13 @@ public static class ValidatorExtension
 
         return true;
     }
+
+
+    public static bool IsComplexPassword(this string password, PasswordComplexityConfig config = default)
+    {
+        var regexPattern = $"^(?=.*[A-Z]{{{config.MinUpperCase},}})(?=.*[a-z]{{{config.MinLowerCase},}})(?=.*[0-9]{{{config.MinNumbers},}})(?=.*[^A-Za-z0-9]{{{config.MinSpecialChars},}}).{{{config.MinLength},}}$";
+        var regex = new Regex(regexPattern);
+        return regex.IsMatch(password);
+    }
+
 }

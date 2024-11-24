@@ -147,6 +147,11 @@ public static class StringExtensions
     public static string RemoveHtml(this string text) 
         => Regex.Replace(text, "<.*?>", string.Empty, RegexOptions.Multiline | RegexOptions.IgnoreCase);
 
+    public static string RemoveScript(this string text)
+    {
+        return Regex.Replace(text, @"<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>", string.Empty, RegexOptions.IgnoreCase);
+    }
+
     public static string ReplaceAll(this string text, string regex, string replacement, RegexOptions regexOptions) 
         => Regex.Replace(text, regex, replacement, regexOptions);
 

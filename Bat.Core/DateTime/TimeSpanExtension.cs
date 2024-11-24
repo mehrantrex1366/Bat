@@ -2,6 +2,30 @@
 
 public static class TimeSpanExtension
 {
+    public static string ToTime(this int second)
+    {
+        var hour = second / 3600;
+        var minute = (second - (hour * 3600)) / 60;
+        var sec = second % 60;
+
+        var time = hour < 10 ? $"0{hour}:" : $"{hour}:";
+        time += minute < 10 ? $"0{minute}:" : $"{minute}:";
+        time += sec < 10 ? $"0{sec}" : $"{sec}";
+        return time;
+    }
+
+    public static string ToTime(this long second)
+    {
+        var hour = second / 3600;
+        var minute = (second - (hour * 3600)) / 60;
+        var sec = second % 60;
+
+        var time = hour < 10 ? $"0{hour}:" : $"{hour}:";
+        time += minute < 10 ? $"0{minute}:" : $"{minute}:";
+        time += sec < 10 ? $"0{sec}" : $"{sec}";
+        return time;
+    }
+
     public static string ToTimeFormat(long seconds, TimeFormat format = TimeFormat.Standard)
     {
         if (seconds > 0)
