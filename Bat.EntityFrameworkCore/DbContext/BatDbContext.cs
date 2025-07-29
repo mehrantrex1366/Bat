@@ -3,11 +3,8 @@
 public abstract class BatDbContext : DbContext, IBatDbContext
 {
     protected BatDbContext() { }
-
     protected BatDbContext(DbContextOptions options) : base(options) { }
-
     protected BatDbContext(DbContextOptions<BatDbContext> options) : base(options) { }
-
 
     public virtual void ApplyPersianYK()
     {
@@ -29,7 +26,6 @@ public abstract class BatDbContext : DbContext, IBatDbContext
             }
         }
     }
-
     public virtual void ApplyEnglishNumber()
     {
         var changedEntitis = this.GetChangedEntity();
@@ -54,6 +50,14 @@ public abstract class BatDbContext : DbContext, IBatDbContext
         }
     }
 
+    public virtual void PartialUpdate<TEntity>(TEntity entity, params Expression<Func<TEntity, object>>[] updatedProperties) where TEntity : class, IBaseEntity
+    {
+        if (Entry(entity) is not null)
+            Entry(entity).State = EntityState.Detached;
+
+        foreach (var prop in updatedProperties)
+            Entry(entity).Property(prop).IsModified = true;
+    }
 
     public override int SaveChanges()
     {
@@ -64,7 +68,6 @@ public abstract class BatDbContext : DbContext, IBatDbContext
 
         return base.SaveChanges();
     }
-
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         ApplyPersianYK();
@@ -74,7 +77,6 @@ public abstract class BatDbContext : DbContext, IBatDbContext
 
         return await base.SaveChangesAsync(cancellationToken);
     }
-
     public virtual SaveChangeResult BatSaveChanges()
     {
         var result = new SaveChangeResult();
@@ -146,7 +148,7 @@ public abstract class BatDbContext : DbContext, IBatDbContext
                 result.Message = Strings.DuplicateIndexKeyException;
                 result.ResultType = SaveChangeResultType.DuplicateIndexKeyException;
                 return result;
-            };
+            }
 
             result.IsSuccess = false;
             result.Exception = exception;
@@ -156,7 +158,6 @@ public abstract class BatDbContext : DbContext, IBatDbContext
             #endregion
         }
     }
-
     public virtual async Task<SaveChangeResult> BatSaveChangesAsync(CancellationToken cancellationToken = default)
     {
         var result = new SaveChangeResult();
@@ -228,7 +229,8 @@ public abstract class BatDbContext : DbContext, IBatDbContext
                 result.Message = Strings.DuplicateIndexKeyException;
                 result.ResultType = SaveChangeResultType.DuplicateIndexKeyException;
                 return result;
-            };
+            }
+            ;
 
             result.IsSuccess = false;
             result.Exception = exception;
@@ -238,7 +240,6 @@ public abstract class BatDbContext : DbContext, IBatDbContext
             #endregion
         }
     }
-
     public virtual SaveChangeResult BatSaveChangesWithValidation()
     {
         var result = new SaveChangeResult();
@@ -311,7 +312,8 @@ public abstract class BatDbContext : DbContext, IBatDbContext
                 result.Message = Strings.DuplicateIndexKeyException;
                 result.ResultType = SaveChangeResultType.DuplicateIndexKeyException;
                 return result;
-            };
+            }
+            ;
 
             result.IsSuccess = false;
             result.Exception = exception;
@@ -321,7 +323,6 @@ public abstract class BatDbContext : DbContext, IBatDbContext
             #endregion
         }
     }
-
     public virtual async Task<SaveChangeResult> BatSaveChangesWithValidationAsync(CancellationToken cancellationToken = default)
     {
         var result = new SaveChangeResult();
@@ -394,7 +395,8 @@ public abstract class BatDbContext : DbContext, IBatDbContext
                 result.Message = Strings.DuplicateIndexKeyException;
                 result.ResultType = SaveChangeResultType.DuplicateIndexKeyException;
                 return result;
-            };
+            }
+            ;
 
             result.IsSuccess = false;
             result.Exception = exception;

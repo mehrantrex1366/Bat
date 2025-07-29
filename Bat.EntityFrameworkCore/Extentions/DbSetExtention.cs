@@ -10,6 +10,15 @@ public static class DbSetExtention
         return currentDbContext.Context;
     }
 
+    public static void PartialUpdate<TEntity>(this DbSet<TEntity> dbSet, TEntity entity, params Expression<Func<TEntity, object>>[] updatedProperties) where TEntity : class, IBaseEntity
+    {
+        if (dbSet.Entry(entity) is not null)
+            dbSet.Entry(entity).State = EntityState.Detached;
+
+        foreach (var prop in updatedProperties)
+            dbSet.Entry(entity).Property(prop).IsModified = true;
+    }
+
     public static string SerializeDbSetToJson(this object entry)
     {
         object fieldValue;
