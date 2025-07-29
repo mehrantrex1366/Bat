@@ -5,7 +5,7 @@ public class BulkRepositoryFactory(IServiceProvider serviceProvider) : IBulkRepo
     private readonly IServiceProvider _serviceProvider = serviceProvider;
 
 
-    public EFBulkGenericRepo<T> GetBulkRepository<T>() where T : class, IBaseEntity
+    public virtual EFBulkGenericRepo<T> GetBulkRepository<T>() where T : class, IBaseEntity
         => (EFBulkGenericRepo<T>)_serviceProvider.GetService<IEFBulkGenericRepo<T>>();
 
     public void Dispose()
