@@ -7,16 +7,16 @@ public static class DateTimeExtension
     public static DateTime ToDateTime(this string persianDateTime, int hour, int minute) => PersianDateTime.Parse(persianDateTime).ToDateTime().AddHours(hour).AddMinutes(minute);
 
     public static PersianDateTime ToPersianDateTime(this DateTime date) => PersianDateTime.Parse(date);
-    public static PersianDateTime ToPersianDateTime(this DateTime? date) => date.IsNull() ? null : PersianDateTime.Parse((DateTime)date);
+    public static PersianDateTime ToPersianDateTime(this DateTime? date) => (date.IsNull() || date == DateTime.MinValue) ? null : PersianDateTime.Parse((DateTime)date);
 
     public static string ToPersianDate(this DateTime date) => PersianDateTime.Parse(date).ToString();
-    public static string ToPersianDate(this DateTime? date) => date.IsNull() ? string.Empty : PersianDateTime.Parse(((DateTime)date)).ToString();
+    public static string ToPersianDate(this DateTime? date) => (date.IsNull() || date == DateTime.MinValue) ? string.Empty : PersianDateTime.Parse(((DateTime)date)).ToString();
 
     public static string ToTime(this DateTime date) => date.ToString("HH:mm");
-    public static string ToTime(this DateTime? date) => date.IsNull() ? string.Empty : ((DateTime)date).ToString("HH:mm");
+    public static string ToTime(this DateTime? date) => (date.IsNull() || date == DateTime.MinValue) ? string.Empty : ((DateTime)date).ToString("HH:mm");
 
     public static string ToFullTime(this DateTime date) => date.ToString("HH:mm:ss");
-    public static string ToFullTime(this DateTime? date) => date.IsNull() ? string.Empty : ((DateTime)date).ToString("HH:mm:ss");
+    public static string ToFullTime(this DateTime? date) => (date.IsNull() || date == DateTime.MinValue) ? string.Empty : ((DateTime)date).ToString("HH:mm:ss");
 
     public static bool IsFuture(this DateTime date) => date.IsFuture(DateTime.Now);
 
