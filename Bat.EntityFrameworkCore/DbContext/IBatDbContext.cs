@@ -2,6 +2,9 @@
 
 public interface IBatDbContext : IDisposable, IAsyncDisposable
 {
+    public DatabaseFacade Database { get; }
+    public ChangeTracker ChangeTracker { get; }
+
     void ApplyPersianYK();
     void ApplyEnglishNumber();
 
