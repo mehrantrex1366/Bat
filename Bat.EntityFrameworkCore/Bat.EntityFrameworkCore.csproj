@@ -43,7 +43,7 @@ ForExample : Implementation Of Custom DbContext, DbContext Extension Method, DbS
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Include="C:\Users\Mehran Norouzi\Downloads\Bat.png">
+		<None Include="C:\Users\Mehran\Downloads\Bat.png">
 			<Pack>True</Pack>
 			<PackagePath></PackagePath>
 		</None>
