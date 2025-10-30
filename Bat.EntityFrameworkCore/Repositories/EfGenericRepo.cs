@@ -39,8 +39,8 @@ public class EFGenericRepo<TEntity>(DbContext context) where TEntity : class, IB
     public virtual void UpdateRange(IEnumerable<TEntity> models)
         => _dbSet.UpdateRange(models);
 
-    public virtual void UpdateRange(Expression<Func<SetPropertyCalls<TEntity>, SetPropertyCalls<TEntity>>> setProperties, CancellationToken cancellationToken = default)
-        => _dbSet.ExecuteUpdateAsync(setProperties, cancellationToken);
+    public virtual async Task UpdateRangeAsync(Action<UpdateSettersBuilder<TEntity>> setProperties, CancellationToken cancellationToken = default)
+  => await _dbSet.ExecuteUpdateAsync(setProperties, cancellationToken);
 
     public virtual void Delete(TEntity model)
         => _dbSet.Remove(model);

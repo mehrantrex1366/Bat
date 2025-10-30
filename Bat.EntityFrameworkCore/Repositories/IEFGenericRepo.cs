@@ -10,7 +10,7 @@ public interface IEFGenericRepo<TEntity> : ITransientInjection where TEntity : c
     void PartialUpdate(TEntity entity, List<string> updatedProperties);
     void PartialUpdate(TEntity entity, params Expression<Func<TEntity, object>>[] updatedProperties);
     void UpdateRange(IEnumerable<TEntity> models);
-    void UpdateRange(Expression<Func<SetPropertyCalls<TEntity>, SetPropertyCalls<TEntity>>> setProperties, CancellationToken cancellationToken = default);
+    Task UpdateRangeAsync(Action<UpdateSettersBuilder<TEntity>> setProperties, CancellationToken cancellationToken = default);
     void Delete(TEntity model);
     void DeleteUnAttached(TEntity model);
     void DeleteRange(IEnumerable<TEntity> models);
