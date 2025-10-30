@@ -9,7 +9,7 @@ public static class AspNetCoreExtension
             request.Body.Position = 0;
             request.Body.Seek(0, SeekOrigin.Begin);
             var buffer = new byte[(long)request.ContentLength];
-            await request.Body.ReadAsync(buffer, 0, buffer.Length);
+            await request.Body.ReadExactlyAsync(buffer, 0, buffer.Length);
             var body = Encoding.UTF8.GetString(buffer);
             return body;
         }
