@@ -1,6 +1,6 @@
 ﻿namespace Bat.AspNetCore;
 
-public static class SessionExtension
+public static class SessionExtensions
 {
     public static bool Set(this ISession session, string key, string value)
     {

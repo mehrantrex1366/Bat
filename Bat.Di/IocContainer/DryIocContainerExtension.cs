@@ -2,7 +2,7 @@
 
 namespace Bat.Di;
 
-public static class DryIocContainerExtension
+public static class DryIocContainerExtensions
 {
     public static void AddBatDryIocDynamicTransient(this IRegistrator container, params Assembly[] assemblies)
     {

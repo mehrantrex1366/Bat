@@ -1,6 +1,6 @@
 ﻿namespace Bat.AspNetCore;
 
-public static class AspNetCoreExtension
+public static class AspNetCoreExtensions
 {
     public async static Task<string> ReadRequestBody(this HttpRequest request)
     {

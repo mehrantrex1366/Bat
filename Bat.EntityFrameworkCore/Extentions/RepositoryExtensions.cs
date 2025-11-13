@@ -1,6 +1,6 @@
 ﻿namespace Bat.EntityFrameworkCore;
 
-public static class RepositoryExtension
+public static class RepositoryExtensions
 {
     public static IQueryable<T> AsQueryable<T>(this EFGenericRepo<T> repo) where T : class, IBaseEntity
         => repo._dbSet.AsQueryable();

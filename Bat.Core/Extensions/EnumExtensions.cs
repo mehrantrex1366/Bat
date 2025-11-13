@@ -2,7 +2,7 @@
 
 namespace Bat.Core;
 
-public static class EnumExtension
+public static class EnumExtensions
 {
     public static string GetDisplayName(this Enum enumObj)
     {

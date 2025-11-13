@@ -1,5 +1,4 @@
-﻿using Microsoft.OpenApi.Any;
-using Microsoft.OpenApi.Models;
+﻿using Microsoft.OpenApi;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Controllers;
@@ -15,16 +14,17 @@ public class BatSwaggerAuthenticateFilter : IOperationFilter
             var haveAuthenticateAttribute = context.ApiDescription.CustomAttributes().Any(x => x.GetType().Name.Contains("Authenticate"));
             if (haveAuthenticateAttribute && !context.ApiDescription.CustomAttributes().Any((a) => a is AllowAnonymousAttribute))
             {
-                if (operation.Parameters == null) operation.Parameters = new List<OpenApiParameter>();
+                operation.Parameters ??= [];
                 operation.Parameters.Add(new OpenApiParameter
                 {
                     Name = "Token",
-                    In = ParameterLocation.Header,
                     Required = true,
+                    In = ParameterLocation.Header,
                     Schema = new OpenApiSchema
                     {
-                        Type = "string",
-                        Default = new OpenApiString("33159CFB-06DF-4007-8DFF-17F8D916D782")
+                        Type = JsonSchemaType.String,
+
+                        Default = "33159CFB-06DF-4007-8DFF-17F8D916D782"
                     },
                     Description = "Header Token For Authenticate Request",
                 });

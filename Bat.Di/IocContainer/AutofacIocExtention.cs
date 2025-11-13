@@ -2,7 +2,7 @@
 
 namespace Bat.Di;
 
-public static class AutofacIocExtention
+public static class AutofacIocExtensions
 {
     public static ContainerBuilder AddBatAutofacDynamicTransient(this ContainerBuilder container, Assembly assembly)
     {

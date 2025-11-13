@@ -1,6 +1,6 @@
 ﻿namespace Bat.EntityFrameworkCore;
 
-public static class PublicExtention
+public static class PublicExtensions
 {
     public static void ChangeIsActiveStatus<T>(this T entity) where T : IIsActiveProperty
     {

@@ -1,4 +1,4 @@
-﻿using Microsoft.OpenApi.Models;
+﻿using Microsoft.OpenApi;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Controllers;
@@ -11,29 +11,38 @@ public class BatSwaggerAuthorizeFilter : IOperationFilter
     {
         if (context.ApiDescription.ActionDescriptor is ControllerActionDescriptor descriptor)
         {
-            var haveAuthorizeAttribute = context.ApiDescription.CustomAttributes().Any(x => x.GetType().Name.Contains("Authorize"));
-            if (haveAuthorizeAttribute && !context.ApiDescription.CustomAttributes().Any((a) => a is AllowAnonymousAttribute))
-            {
-                if (operation.Security == null) operation.Security = new List<OpenApiSecurityRequirement>();
-                operation.Security.Add(new OpenApiSecurityRequirement
-                {
-                    {
-                        new OpenApiSecurityScheme
-                        {
-                            Name = "Authorization",
-                            In = ParameterLocation.Header,
-                            BearerFormat = "Bearer token",
+            var hasAllowAnonymous = context.MethodInfo.GetCustomAttributes(true).OfType<AllowAnonymousAttribute>().Any();
 
-                            Reference = new OpenApiReference
-                            {
-                                Type = ReferenceType.SecurityScheme,
-                                Id = "Bearer"
-                            }
-                        },
-                        new string[]{ }
-                    }
-                });
-            }
+            if (hasAllowAnonymous)
+                return;
+
+            var hasAuthorize =
+            context.MethodInfo.DeclaringType?.GetCustomAttributes(true).OfType<AuthorizeAttribute>().Any() == true ||
+            context.MethodInfo.GetCustomAttributes(true).OfType<AuthorizeAttribute>().Any();
+
+            if (hasAuthorize is false)
+                return;
+
+            operation.Responses.TryAdd("401", new OpenApiResponse { Description = "Unauthorized" });
+            operation.Responses.TryAdd("403", new OpenApiResponse { Description = "Forbidden" });
+
+            var jwtScheme = new OpenApiSecuritySchemeReference("")
+            { 
+                Reference = new OpenApiReferenceWithDescription
+                {
+                    Id = "Bearer",
+                    Type = ReferenceType.SecurityScheme,
+                    Description = "Insert JWT with Bearer into field"
+                }
+            };
+
+            operation.Security = new List<OpenApiSecurityRequirement>
+            {
+                new OpenApiSecurityRequirement
+                {
+                    [ jwtScheme ] = []
+                }
+            };
         }
     }
 }

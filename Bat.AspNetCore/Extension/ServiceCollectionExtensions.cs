@@ -2,7 +2,7 @@
 
 namespace Bat.AspNetCore;
 
-public static class ServiceCollectionExtension
+public static class ServiceCollectionExtensions
 {
     public static void AddBatHttpContextAccessor(this IServiceCollection services)
         => services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();

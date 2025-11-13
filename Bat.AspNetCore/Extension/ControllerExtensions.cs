@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc.ViewFeatures;
 
 namespace Bat.AspNetCore;
 
-public static class ControllerExtension
+public static class ControllerExtensions
 {
     public static string RenderViewToString<TModel>(this Controller controller, string viewNameOrPath, TModel model)
     {

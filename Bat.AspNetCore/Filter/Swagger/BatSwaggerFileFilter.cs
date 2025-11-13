@@ -1,4 +1,4 @@
-﻿using Microsoft.OpenApi.Models;
+﻿using Microsoft.OpenApi;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace Bat.AspNetCore;
@@ -13,18 +13,19 @@ public class BatSwaggerFileFilter : IOperationFilter
 
         foreach (var parameter in fileParameters)
         {
-            operation.Parameters = new List<OpenApiParameter>
-            {
+            operation.Parameters =
+            [
                 new OpenApiParameter
                 {
                     Name = parameter.Name,
+                    
                     Schema = new OpenApiSchema
                     {
-                        Type = "file",
+                        Type = JsonSchemaType.Object,
                         Description = "upload file"
-                    },
+                    }
                 }
-            };
+            ];
         }
     }
 }

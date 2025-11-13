@@ -1,6 +1,6 @@
 ﻿namespace Bat.EntityFrameworkCore;
 
-public static class OrderByExtension
+public static class OrderByExtensions
 {
     private static readonly char[] separator = [' '];
     private static readonly char[] separatorArray = [','];

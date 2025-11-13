@@ -3,7 +3,7 @@ using System.Linq.Expressions;
 
 namespace Bat.Core;
 
-public static class ReflectionExtension
+public static class ReflectionExtensions
 {
     public static bool IsInheritFrom(this Type type, Type parentType) => parentType.IsAssignableFrom(type);
 

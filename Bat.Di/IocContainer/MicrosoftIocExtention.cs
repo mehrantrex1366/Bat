@@ -2,7 +2,7 @@
 
 namespace Bat.Di;
 
-public static class MicrosoftIocExtention
+public static class MicrosoftIocExtensions
 {
     public static IServiceCollection AddBatDynamicTransient(this IServiceCollection services, Assembly assembly)
     {

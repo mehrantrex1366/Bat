@@ -1,6 +1,6 @@
 ﻿namespace Bat.Core;
 
-public static class ObjectExtension
+public static class ObjectExtensions
 {
     public static T GetInstance<T>(this T obj) where T : new() => obj == null ? new T() : obj;
 

@@ -1,6 +1,6 @@
 ﻿namespace Bat.AspNetCore;
 
-public static class FileExtension
+public static class FileExtensions
 {
     public static byte[] ToByteArray(this IFormFile file)
     {

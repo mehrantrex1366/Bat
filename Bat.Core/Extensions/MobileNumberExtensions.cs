@@ -1,6 +1,6 @@
 ﻿namespace Bat.Core;
 
-public static class MobileNumberExtension
+public static class MobileNumberExtensions
 {
     public static bool IsMobileNumber(this string mobileNumber)
     {

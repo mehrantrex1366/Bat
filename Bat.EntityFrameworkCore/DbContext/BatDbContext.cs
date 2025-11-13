@@ -6,6 +6,9 @@ public abstract class BatDbContext : DbContext, IBatDbContext
     protected BatDbContext(DbContextOptions options) : base(options) { }
     protected BatDbContext(DbContextOptions<BatDbContext> options) : base(options) { }
 
+    public virtual new DatabaseFacade Database => base.Database;
+    public virtual new ChangeTracker ChangeTracker => base.ChangeTracker;
+    
     public virtual void ApplyPersianYK()
     {
         var changedEntitis = this.GetChangedEntity();
@@ -52,8 +55,7 @@ public abstract class BatDbContext : DbContext, IBatDbContext
 
     public virtual void PartialUpdate<TEntity>(TEntity entity, params Expression<Func<TEntity, object>>[] updatedProperties) where TEntity : class, IBaseEntity
     {
-        if (Entry(entity) is not null)
-            Entry(entity).State = EntityState.Detached;
+        Entry(entity)?.State = EntityState.Detached;
 
         foreach (var prop in updatedProperties)
             Entry(entity).Property(prop).IsModified = true;

@@ -1,6 +1,6 @@
 ﻿namespace Bat.EntityFrameworkCore;
 
-public static class DbContextExtention
+public static class DbContextExtensions
 {
     public async static Task<List<TResult>> ExecuteProcedure<TResult>(this DbContext dbContext, string sqlQuery, params object[] parameters) where TResult : class
     {
@@ -48,33 +48,49 @@ public static class DbContextExtention
             {
                 case EntityState.Added:
                     {
+                        if (entry.Entity is IInsertDateOnlyProperty insertDateOnlyProperty)
+                            insertDateOnlyProperty.InsertDate = DateOnly.FromDateTime(DateTime.Now);
+
+                        if (entry.Entity is IInsertTimeOnlyProperty insertTimeOnlyProperty)
+                            insertTimeOnlyProperty.InsertTime = TimeOnly.FromDateTime(DateTime.Now);
+
                         if (entry.Entity is IInsertDateProperty insertDateProperty)
-                        {
                             insertDateProperty.InsertDateMi = DateTime.Now;
-                        }
+
                         if (entry.Entity is IInsertDateProperties insertDateProperties)
                         {
                             insertDateProperties.InsertDateMi = DateTime.Now;
-                            insertDateProperties.InsertDateSh = PersianDateTime.Now.ToString();
+                            insertDateProperties.InsertDateSh = DateTime.Now.ToPersianDate();
                         }
 
+
+                        if (entry.Entity is IModifyDateOnlyProperty modifyDateOnlyProperty)
+                            modifyDateOnlyProperty.ModifyDate = DateOnly.FromDateTime(DateTime.Now);
+
+                        if (entry.Entity is IModifyTimeOnlyProperty modifyTimeOnlyProperty)
+                            modifyTimeOnlyProperty.ModifyTime = TimeOnly.FromDateTime(DateTime.Now);
+
                         if (entry.Entity is IModifyDateProperty modifyDateProperty)
-                        {
                             modifyDateProperty.ModifyDateMi = DateTime.Now;
-                        }
+
                         if (entry.Entity is IModifyDateProperties modifyDateProperties)
                         {
                             modifyDateProperties.ModifyDateMi = DateTime.Now;
-                            modifyDateProperties.ModifyDateSh = PersianDateTime.Now.ToString();
+                            modifyDateProperties.ModifyDateSh = DateTime.Now.ToPersianDate();
                         }
                         break;
                     }
                 case EntityState.Modified:
                     {
+                        if (entry.Entity is IModifyDateOnlyProperty modifyDateOnlyProperty)
+                            modifyDateOnlyProperty.ModifyDate = DateOnly.FromDateTime(DateTime.Now);
+
+                        if (entry.Entity is IModifyTimeOnlyProperty modifyTimeOnlyProperty)
+                            modifyTimeOnlyProperty.ModifyTime = TimeOnly.FromDateTime(DateTime.Now);
+                        
                         if (entry.Entity is IModifyDateProperty modifyDateProperty)
-                        {
                             modifyDateProperty.ModifyDateMi = DateTime.Now;
-                        }
+                        
                         if (entry.Entity is IModifyDateProperties modifyDateProperties)
                         {
                             modifyDateProperties.ModifyDateMi = DateTime.Now;

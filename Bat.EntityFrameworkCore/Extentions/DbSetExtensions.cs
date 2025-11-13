@@ -1,6 +1,6 @@
 ﻿namespace Bat.EntityFrameworkCore;
 
-public static class DbSetExtention
+public static class DbSetExtensions
 {
     public static DbContext GetDbContext<TEntity>(this DbSet<TEntity> dbSet) where TEntity : class
     {
@@ -12,14 +12,63 @@ public static class DbSetExtention
 
     public static void PartialUpdate<TEntity>(this DbSet<TEntity> dbSet, TEntity entity, params Expression<Func<TEntity, object>>[] updatedProperties) where TEntity : class, IBaseEntity
     {
-        if (dbSet.Entry(entity) is not null)
-            dbSet.Entry(entity).State = EntityState.Detached;
+        dbSet.Entry(entity)?.State = EntityState.Detached;
 
         foreach (var prop in updatedProperties)
             dbSet.Entry(entity).Property(prop).IsModified = true;
     }
 
-    public static string SerializeDbSetToJson(this object entry)
+    public static string SerializeDbSetToJson<TEntity>(this DbSet<TEntity> dbSet) where TEntity : class
+    {
+        object fieldValue;
+        try
+        {
+            var Json = "{";
+            var record = dbSet.GetType().GetProperties();
+            foreach (var field in record)
+            {
+                if (field.PropertyType.IsValueType)
+                {
+                    if (field.PropertyType.Name == "Binary") continue;
+                    fieldValue = field.GetValue(dbSet);
+                    Json += ("\"" + field.Name + "\":\"" + (fieldValue == null ? string.Empty : fieldValue.ToString()) + "\",");
+                }
+            }
+            return Json[..^1] + "}";
+        }
+        catch
+        {
+            return ("{ \"Serializing Error\" : \"true\" }");
+        }
+    }
+
+    public static string SerializeDbSetToJson<TEntity>(this DbSet<TEntity> dbSet, string ignoreFieldType = null) where TEntity : class
+    {
+        object fieldValue;
+        try
+        {
+            var Json = "{";
+            var record = dbSet.GetType().GetProperties();
+            foreach (var field in record)
+            {
+                if (field.PropertyType.IsValueType)
+                {
+                    if (field.PropertyType.Name == "Binary") continue;
+                    if (ignoreFieldType is not null && field.PropertyType.Name == ignoreFieldType) continue;
+                    
+                    fieldValue = field.GetValue(dbSet);
+                    Json += ("\"" + field.Name + "\":\"" + (fieldValue == null ? string.Empty : fieldValue.ToString()) + "\",");
+                }
+            }
+            return Json[..^1] + "}";
+        }
+        catch
+        {
+            return ("{ \"Serializing Error\" : \"true\" }");
+        }
+    }
+
+    public static string SerializeDbSetToJson(this object entry, string ignoreFieldType = null)
     {
         object fieldValue;
         try
@@ -31,6 +80,8 @@ public static class DbSetExtention
                 if (field.PropertyType.IsValueType)
                 {
                     if (field.PropertyType.Name == "Binary") continue;
+                    if (ignoreFieldType is not null && field.PropertyType.Name == ignoreFieldType) continue;
+                    
                     fieldValue = field.GetValue(entry);
                     Json += ("\"" + field.Name + "\":\"" + (fieldValue == null ? string.Empty : fieldValue.ToString()) + "\",");
                 }

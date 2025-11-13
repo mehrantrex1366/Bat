@@ -1,6 +1,6 @@
 ﻿namespace Bat.Core;
 
-public static class LogicExtension
+public static class LogicExtensions
 {
     public static bool IsNull(this string str) => string.IsNullOrWhiteSpace(str);
 

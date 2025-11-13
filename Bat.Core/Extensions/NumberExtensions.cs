@@ -2,7 +2,7 @@
 
 namespace Bat.Core;
 
-public static class NumberExtension
+public static class NumberExtensions
 {
     private static readonly Regex DetectNumberRegex = new(@"^-*[0-9,\.]+$");
 

@@ -1,6 +1,6 @@
 ﻿namespace Bat.EntityFrameworkCore;
 
-public static class PagingExtention
+public static class PagingExtensions
 {
     public static async Task<PagingListDetails<T>> ToPagingListDetailsAsync<T>(this IQueryable<T> source, PagingParameter pagingParameter, CancellationToken cancellationToken = default)
     {

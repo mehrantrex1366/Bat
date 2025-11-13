@@ -3,7 +3,7 @@ using System.Data.Common;
 
 namespace Bat.Core;
 
-public static class PersianCharactersExtension
+public static class PersianCharactersExtensions
 {
     public const char ArabicYeChar = (char)1610;
     public const char PersianYeChar = (char)1740;

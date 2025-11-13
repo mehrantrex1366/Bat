@@ -1,10 +1,10 @@
-﻿using Microsoft.OpenApi.Models;
+﻿using Microsoft.OpenApi;
 using Swashbuckle.AspNetCore.SwaggerUI;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace Bat.AspNetCore;
 
-public static class SwaggerExtension
+public static class SwaggerExtensions
 {
     public static void AddBatSwagger(this IServiceCollection services, SwaggerSetting swaggerSetting)
     {

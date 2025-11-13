@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace Bat.AspNetCore;
 
-public static class MvcExtension
+public static class MvcExtensions
 {
     public static List<SelectListItem> ToSelectListFromDescription(this Enum @enum)
     {

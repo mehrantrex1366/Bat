@@ -11,7 +11,7 @@ public class PasswordComplexityConfig
     public int MinSpecialChars { get; set; } = 1;
 }
 
-public static class ValidatorExtension
+public static class ValidatorExtensions
 {
     public static bool IsIp(this string ip)
     {

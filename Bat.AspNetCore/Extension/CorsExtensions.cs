@@ -2,7 +2,7 @@
 
 namespace Bat.AspNetCore;
 
-public static class CorsExtension
+public static class CorsExtensions
 {
     public static void AddBatCors(this IServiceCollection services, string policyName, CorsPolicy corsPolicy)
     {

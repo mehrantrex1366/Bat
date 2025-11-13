@@ -2,7 +2,7 @@
 
 namespace Bat.Tools;
 
-public static class ExpressionExtension
+public static class ExpressionExtensions
 {
     private class ReplaceExpressionVisitor : ExpressionVisitor
     {

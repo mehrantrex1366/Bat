@@ -14,7 +14,7 @@ public enum NumericCultureType
     EnglishToArabic
 }
 
-public static class EnglishNumberExtension
+public static class EnglishNumberExtensions
 {
     public static string ToEnglishNumber(this string input, NumericCultureType convertType = NumericCultureType.PersianToEnglish)
     {
@@ -137,5 +137,4 @@ public static class EnglishNumberExtension
             }
         }
     }
-
 }
