@@ -69,7 +69,8 @@ public class JwtService : IJwtService
         return new JwtToken(tokenDescriptor);
     }
 
-    public ClaimsPrincipal GetClaimsPrincipal(string token, JwtSettings jwtSettings)
+
+    public ClaimsPrincipal GetClaimsPrincipal(string token, JwtSettings jwtSettings, bool validateLifetime = true)
     {
         var secretKey = Encoding.UTF8.GetBytes(!string.IsNullOrWhiteSpace(jwtSettings.SecretKey) ? jwtSettings.SecretKey : "<-- Mehran@Norouzi|123456789987654321|Mehran@Norouzi -->"); // Longer than 16 character
         var issuerSigningKey = new SymmetricSecurityKey(secretKey);
@@ -83,7 +84,7 @@ public class JwtService : IJwtService
             ValidIssuer = jwtSettings.Issuer,
             ValidateAudience = !string.IsNullOrEmpty(jwtSettings.Audience),
             ValidAudience = jwtSettings.Audience,
-            ValidateLifetime = true,
+            ValidateLifetime = validateLifetime,
             RequireExpirationTime = true,
             RequireSignedTokens = true,
             ClockSkew = TimeSpan.Zero,
@@ -99,11 +100,13 @@ public class JwtService : IJwtService
         return principal;
     }
 
+
     public SecurityToken ReadToken(string token)
         => new JwtSecurityTokenHandler().ReadToken(token);
 
     public JwtSecurityToken ReadJwtToken(string token)
         => new JwtSecurityTokenHandler().ReadJwtToken(token);
+
 
     public TokenValidationTime GetTokenExpireTime(string token, JwtSettings jwtSettings)
     {

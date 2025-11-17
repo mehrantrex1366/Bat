@@ -7,8 +7,11 @@ public interface IJwtService
     JwtToken CreateToken(SecurityTokenDescriptor securityTokenDescriptor);
     JwtToken CreateToken(string userData, JwtSettings jwtSettings);
     JwtToken CreateToken(List<Claim> userClaims, JwtSettings jwtSettings);
-    ClaimsPrincipal GetClaimsPrincipal(string token, JwtSettings jwtSettings);
+
+    ClaimsPrincipal GetClaimsPrincipal(string token, JwtSettings jwtSettings, bool validateLifetime = true);
+
     SecurityToken ReadToken(string token);
     JwtSecurityToken ReadJwtToken(string token);
+
     TokenValidationTime GetTokenExpireTime(string token, JwtSettings jwtSettings);
 }
