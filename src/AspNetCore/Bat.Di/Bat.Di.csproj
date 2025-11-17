@@ -9,45 +9,35 @@
 
 	<PropertyGroup>
 		<TargetFramework>net10.0</TargetFramework>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-		<Authors>Mehran Norouzi</Authors>
-		<Company></Company>
-		<Description>This Package Contain Useful Library And Extension Method For Easy Develop High Tech .Net Application.
-
-
-ForExample : Implementation Of DapperExtensionMethods, ExecuteSp, ExecuteQuery, ExecuteQueryCommand  ...		</Description>
 		<Copyright>© All rights reserved.</Copyright>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Version>10.0.0</Version>
+		<Authors>Mehran Norouzi</Authors>
+		<Company>Mehran Norouzi</Company>
+		<Product>Bat.Di</Product>
+		<Description>This Package Contain Useful Library And Extention Method For Dependency Injection in High Tech .Net Application.
+
+ForExample : ExtensionMethods For Dynamically Register Service And Componnent Base On Inherit From ITransientInjection, IScopedInjection Or ISingletonInjection</Description>
 		<PackageIcon>Bat.png</PackageIcon>
 		<PackageIconUrl />
 		<RepositoryType>GitHub</RepositoryType>
+		<PackageTags>Ioc Di Dependency DependencyInjection AutofacExtension ExtentionMethod Autofac DryIoc</PackageTags>
 		<PackageReleaseNotes>For Contact Us Please Send Mail Or Call To :
-
 
 Tel : +989301919109
 Mail : mehrannoruzi@gmail.com		</PackageReleaseNotes>
-		<PackageTags>Dapper DapperExtensionMethods ExecuteSp ExecuteQuery ExecuteQueryCommand</PackageTags>
 		<NeutralLanguage>en-US</NeutralLanguage>
-		<Version>10.0.0</Version>
 		<PackageReadmeFile>readme.md</PackageReadmeFile>
 		<RepositoryUrl>https://github.com/mehrannoruzi/Bat</RepositoryUrl>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Dapper" Version="2.1.66" />
-		<PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.3" />
-		<PackageReference Include="System.ComponentModel.Annotations" Version="6.0.0-*" />
+		<PackageReference Include="Autofac.Extensions.DependencyInjection" Version="10.0.0" />
+		<PackageReference Include="DryIoc.Microsoft.DependencyInjection" Version="8.0.0-preview-04" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Include="..\Bat.Tools\readme.md">
-		  <Pack>True</Pack>
-		  <PackagePath>\</PackagePath>
-		</None>
-	</ItemGroup>
-
-	<ItemGroup>
-		<ProjectReference Include="..\Bat.Core\Bat.Core.csproj" />
+	  <ProjectReference Include="..\..\Core\Bat.Core\Bat.Core.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -57,7 +47,7 @@ Mail : mehrannoruzi@gmail.com		</PackageReleaseNotes>
 	  </None>
 	  <None Update="readme.md">
 	    <Pack>True</Pack>
-	    <PackagePath>\</PackagePath>
+	  <PackagePath>\</PackagePath>
 	  </None>
 	</ItemGroup>
 

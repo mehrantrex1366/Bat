@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup Label="Globals">
 		<SccProjectName>SAK</SccProjectName>
@@ -14,38 +14,33 @@
 		<Version>10.0.0</Version>
 		<Authors>Mehran Norouzi</Authors>
 		<Company>Mehran Norouzi</Company>
-		<Description>This Package Contain Useful Library And Extension Method For Easy Develop High Tech .Net Application With EntityFrameworkCore.
+		<Description>This Package Contain Useful Library And Method For Easy Develop High Tech .Net Application.
 
-ForExample : Implementation Of Custom Entity Validation, Extension Method, Bulk Operation, Annotation, StoredProcedure ...</Description>
+ForExample : Implementation Of MSM Queue, Rabbit MQueue,  ...</Description>
 		<Copyright>© All rights reserved.</Copyright>
 		<PackageIconUrl></PackageIconUrl>
-		<RepositoryType>GitHub</RepositoryType>
-		<PackageTags>EntityValidation ExtensionMethod Annotation StoredProcedure ModelBuilder</PackageTags>
+		<RepositoryType>Microsoft DevOps Server</RepositoryType>
 		<PackageReleaseNotes>For Contact Us Please Send Mail Or Call To :
 
 Tel : +989301919109
-Mail : mehrannoruzi@gmail.com
-		</PackageReleaseNotes>
+Mail : mehrannoruzi@gmail.com</PackageReleaseNotes>
+		<PackageTags>Queue MSMQ Rabbit RabbitMQ Producer Concumer Publish Subscribe</PackageTags>
 		<PackageIcon>Bat.png</PackageIcon>
 		<NeutralLanguage>en-US</NeutralLanguage>
-		<PackageReadmeFile>readme.md</PackageReadmeFile>
-		<RepositoryUrl>https://github.com/mehrannoruzi/Bat</RepositoryUrl>
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="EFCore.BulkExtensions.SqlServer" Version="9.0.2" />
+		<PackageReference Include="Experimental.System.Messaging" Version="1.1.0" />
+		<PackageReference Include="Microsoft.Extensions.Options" Version="10.0.0" />
+		<PackageReference Include="RabbitMQ.Client" Version="7.2.0" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Bat.EntityFrameworkCore\Bat.EntityFrameworkCore.csproj" />
+	  <ProjectReference Include="..\..\Core\Bat.Core\Bat.Core.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
 	  <None Update="Bat.png">
-	    <Pack>True</Pack>
-	    <PackagePath>\</PackagePath>
-	  </None>
-	  <None Update="readme.md">
 	    <Pack>True</Pack>
 	    <PackagePath>\</PackagePath>
 	  </None>

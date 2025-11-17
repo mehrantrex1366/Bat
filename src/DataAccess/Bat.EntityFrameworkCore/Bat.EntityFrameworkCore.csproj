@@ -43,7 +43,7 @@ ForExample : Implementation Of Custom DbContext, DbContext Extension Method, DbS
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Bat.Core\Bat.Core.csproj" />
+	  <ProjectReference Include="..\..\Core\Bat.Core\Bat.Core.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

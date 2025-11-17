@@ -51,7 +51,7 @@ Mail : mehrannoruzi@gmail.com</PackageReleaseNotes>
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Bat.Core\Bat.Core.csproj" />
+	  <ProjectReference Include="..\..\Core\Bat.Core\Bat.Core.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
