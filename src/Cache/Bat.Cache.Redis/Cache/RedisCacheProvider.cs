@@ -2,8 +2,8 @@
 
 public class RedisCacheProvider : IRedisCacheProvider
 {
+    public IDatabase _redisCache { get; set; }
     private readonly RedisSettings _redisSettings;
-    public IDatabase _redisDb { get; set; }
     public ConnectionMultiplexer _redisServer { get; set; }
 
     public RedisCacheProvider(IOptions<RedisSettings> redisSettings)
@@ -43,25 +43,25 @@ public class RedisCacheProvider : IRedisCacheProvider
             _redisServer = ConnectionMultiplexer.SentinelConnect(config);
         else
             _redisServer = ConnectionMultiplexer.Connect(config);
-        _redisDb = _redisServer.GetDatabase();
+        _redisCache = _redisServer.GetDatabase();
     }
 
     public RedisCacheProvider(ConnectionMultiplexer redisClient, IDatabase database = null)
     {
         _redisServer = redisClient;
         if (database is null)
-            _redisDb = _redisServer.GetDatabase();
+            _redisCache = _redisServer.GetDatabase();
         else
-            _redisDb = database;
+            _redisCache = database;
     }
 
     public RedisCacheProvider(ConfigurationOptions configurationOptions, IDatabase database = null)
     {
         _redisServer = ConnectionMultiplexer.Connect(configurationOptions);
         if (database is null)
-            _redisDb = _redisServer.GetDatabase();
+            _redisCache = _redisServer.GetDatabase();
         else
-            _redisDb = database;
+            _redisCache = database;
     }
 
 
@@ -98,28 +98,28 @@ public class RedisCacheProvider : IRedisCacheProvider
 
     public string Execute(string command, ICollection<object> args, CommandFlags flags = CommandFlags.None)
     {
-        var result = _redisDb.Execute(command, args, flags);
+        var result = _redisCache.Execute(command, args, flags);
         return result == null ? string.Empty : result.ToString();
     }
 
-    public async Task<string> Execute(string command, ICollection<object> args, CommandFlags flags = CommandFlags.None)
+    public async Task<string> ExecuteAsync(string command, ICollection<object> args, CommandFlags flags = CommandFlags.None)
     {
-        var result = await _redisDb.ExecuteAsync(command, args, flags);
+        var result = await _redisCache.ExecuteAsync(command, args, flags);
         return result == null ? string.Empty : result.ToString();
     }
 
 
     public bool Set(string key, string value, TimeSpan? expiry = null, bool keepTTL = false)
-        => _redisDb.StringSet(key, value, expiry, keepTTL);
+        => _redisCache.StringSet(key, value, expiry, keepTTL);
 
     public bool Set(string key, object value, TimeSpan? expiry = null, bool keepTTl = false)
-       => _redisDb.StringSet(key, value.SerializeToJson(), expiry, keepTTl);
+       => _redisCache.StringSet(key, value.SerializeToJson(), expiry, keepTTl);
 
     public bool Set(KeyValuePair<string, string>[] values)
     {
         var list = new KeyValuePair<RedisKey, RedisValue>[values.Length];
         values.CopyTo(list, 0);
-        return _redisDb.StringSet(list);
+        return _redisCache.StringSet(list);
     }
 
     public bool Set(KeyValuePair<string, object>[] values, CommandFlags flags = CommandFlags.None)
@@ -127,20 +127,20 @@ public class RedisCacheProvider : IRedisCacheProvider
         var list = values.Select(x => new
             KeyValuePair<RedisKey, RedisValue>(x.Key, x.Value.SerializeToJson()))
             .ToArray();
-        return _redisDb.StringSet(list);
+        return _redisCache.StringSet(list);
     }
 
     public async Task<bool> SetAsync(string key, string value, TimeSpan? expiry = null, bool keepTTL = false)
-        => await _redisDb.StringSetAsync(key, value, expiry, keepTTL);
+        => await _redisCache.StringSetAsync(key, value, expiry, keepTTL);
 
     public async Task<bool> SetAsync(string key, object value, TimeSpan? expiry = null, bool keepTtl = false)
-        => await _redisDb.StringSetAsync(key, value.SerializeToJson(), expiry, keepTtl);
+        => await _redisCache.StringSetAsync(key, value.SerializeToJson(), expiry, keepTtl);
 
     public async Task<bool> SetAsync(KeyValuePair<string, string>[] values)
     {
         var list = new KeyValuePair<RedisKey, RedisValue>[values.Length];
         values.CopyTo(list, 0);
-        return await _redisDb.StringSetAsync(list);
+        return await _redisCache.StringSetAsync(list);
     }
 
     public async Task<bool> SetAsync(KeyValuePair<string, object>[] values)
@@ -148,50 +148,50 @@ public class RedisCacheProvider : IRedisCacheProvider
         var list = values.Select(x => new
             KeyValuePair<RedisKey, RedisValue>(x.Key, x.Value.SerializeToJson()))
             .ToArray();
-        return await _redisDb.StringSetAsync(list);
+        return await _redisCache.StringSetAsync(list);
     }
 
 
     public string SetAndGet(string key, string value, TimeSpan? expiry = null, bool keepTTl = false)
-       => _redisDb.StringSetAndGet(key, value, expiry, keepTTl);
+       => _redisCache.StringSetAndGet(key, value, expiry, keepTTl);
 
     public string SetAndGet(string key, object value, TimeSpan? expiry = null, bool keepTTl = false)
-       => _redisDb.StringSetAndGet(key, value.SerializeToJson(), expiry, keepTTl);
+       => _redisCache.StringSetAndGet(key, value.SerializeToJson(), expiry, keepTTl);
 
     public async Task<string> SetAndGetAsync(string key, string value, TimeSpan? expiry = null, bool keepTTl = false)
-       => await _redisDb.StringSetAndGetAsync(key, value, expiry, keepTTl);
+       => await _redisCache.StringSetAndGetAsync(key, value, expiry, keepTTl);
 
     public async Task<string> SetAndGetAsync(string key, object value, TimeSpan? expiry = null, bool keepTTl = false)
-       => await _redisDb.StringSetAndGetAsync(key, value.SerializeToJson(), expiry, keepTTl);
+       => await _redisCache.StringSetAndGetAsync(key, value.SerializeToJson(), expiry, keepTTl);
 
     public TValue SetAndGet<TValue>(string key, string value, TimeSpan? expiry = null, bool keepTTl = false) where TValue : class
     {
-        var result = _redisDb.StringSetAndGet(key, value, expiry, keepTTl);
+        var result = _redisCache.StringSetAndGet(key, value, expiry, keepTTl);
         return result.ToString().DeSerializeJson<TValue>();
     }
 
     public TValue SetAndGet<TValue>(string key, object value, TimeSpan? expiry = null, bool keepTTl = false) where TValue : class
     {
-        var result = _redisDb.StringSetAndGet(key, value.SerializeToJson(), expiry, keepTTl);
+        var result = _redisCache.StringSetAndGet(key, value.SerializeToJson(), expiry, keepTTl);
         return result.ToString().DeSerializeJson<TValue>();
     }
 
     public async Task<TValue> SetAndGetAsync<TValue>(string key, string value, TimeSpan? expiry = null, bool keepTTl = false) where TValue : class
     {
-        var result = await _redisDb.StringSetAndGetAsync(key, value, expiry, keepTTl);
+        var result = await _redisCache.StringSetAndGetAsync(key, value, expiry, keepTTl);
         return result.ToString().DeSerializeJson<TValue>();
     }
 
     public async Task<TValue> SetAndGetAsync<TValue>(string key, object value, TimeSpan? expiry = null, bool keepTTl = false) where TValue : class
     {
-        var result = await _redisDb.StringSetAndGetAsync(key, value.SerializeToJson(), expiry, keepTTl);
+        var result = await _redisCache.StringSetAndGetAsync(key, value.SerializeToJson(), expiry, keepTTl);
         return result.ToString().DeSerializeJson<TValue>();
     }
 
 
     public T Get<T>(string key) where T : class
     {
-        var value = _redisDb.StringGet(key);
+        var value = _redisCache.StringGet(key);
         if (value.IsNullOrEmpty)
             return default;
 
@@ -200,7 +200,7 @@ public class RedisCacheProvider : IRedisCacheProvider
 
     public async Task<T> GetAsync<T>(string key)
     {
-        var value = await _redisDb.StringGetAsync(key);
+        var value = await _redisCache.StringGetAsync(key);
         if (value.IsNullOrEmpty)
             return default;
 
@@ -208,116 +208,116 @@ public class RedisCacheProvider : IRedisCacheProvider
     }
 
     public string Get(string key)
-        => _redisDb.StringGet(key);
+        => _redisCache.StringGet(key);
 
     public string[] Get(string[] keys)
     {
         var list = new RedisKey[keys.Length];
         keys.CopyTo(list, 0);
-        return _redisDb.StringGet(list).ToStringArray();
+        return _redisCache.StringGet(list).ToStringArray();
     }
 
     public async Task<string> GetAsync(string key)
-        => await _redisDb.StringGetAsync(key);
+        => await _redisCache.StringGetAsync(key);
 
     public async Task<string[]> GetAsync(string[] keys)
     {
         var list = new RedisKey[keys.Length];
         keys.CopyTo(list, 0);
-        var result = await _redisDb.StringGetAsync(list);
+        var result = await _redisCache.StringGetAsync(list);
         return result.ToStringArray();
     }
 
 
     public string GetAndSet(string key, string value)
-        => _redisDb.StringGetSet(key, value);
+        => _redisCache.StringGetSet(key, value);
 
     public string GetAndSet(string key, object value)
-        => _redisDb.StringGetSet(key, value.SerializeToJson());
+        => _redisCache.StringGetSet(key, value.SerializeToJson());
 
     public async Task<string> GetAndSetAsync(string key, string value)
-        => await _redisDb.StringGetSetAsync(key, value);
+        => await _redisCache.StringGetSetAsync(key, value);
 
     public async Task<string> GetAndSetAsync(string key, object value)
-        => await _redisDb.StringGetSetAsync(key, value.SerializeToJson());
+        => await _redisCache.StringGetSetAsync(key, value.SerializeToJson());
 
     public TValue GetAndSet<TValue>(string key, string value) where TValue : class
     {
-        var result = _redisDb.StringGetSet(key, value);
+        var result = _redisCache.StringGetSet(key, value);
         return result.ToString().DeSerializeJson<TValue>();
     }
 
     public TValue GetAndSet<TValue>(string key, object value) where TValue : class
     {
-        var result = _redisDb.StringGetSet(key, value.SerializeToJson());
+        var result = _redisCache.StringGetSet(key, value.SerializeToJson());
         return result.ToString().DeSerializeJson<TValue>();
     }
 
     public async Task<TValue> GetAndSetAsync<TValue>(string key, string value) where TValue : class
     {
-        var result = await _redisDb.StringGetSetAsync(key, value);
+        var result = await _redisCache.StringGetSetAsync(key, value);
         return result.ToString().DeSerializeJson<TValue>();
     }
 
     public async Task<TValue> GetAndSetAsync<TValue>(string key, object value) where TValue : class
     {
-        var result = await _redisDb.StringGetSetAsync(key, value.SerializeToJson());
+        var result = await _redisCache.StringGetSetAsync(key, value.SerializeToJson());
         return result.ToString().DeSerializeJson<TValue>();
     }
 
 
     public bool Delete(string key)
-        => _redisDb.KeyDelete(key);
+        => _redisCache.KeyDelete(key);
 
     public async Task<bool> DeleteAsync(string key)
-        => await _redisDb.KeyDeleteAsync(key);
+        => await _redisCache.KeyDeleteAsync(key);
 
     public void Rename(string oldKey, string newKey)
-        => _redisDb.KeyRename(oldKey, newKey);
+        => _redisCache.KeyRename(oldKey, newKey);
 
     public async Task RenameAsync(string oldKey, string newKey)
-        => await _redisDb.KeyRenameAsync(oldKey, newKey);
+        => await _redisCache.KeyRenameAsync(oldKey, newKey);
 
     public bool Exists(string Key)
-        => _redisDb.KeyExists(Key);
+        => _redisCache.KeyExists(Key);
 
     public async Task<bool> ExistsAsync(string Key)
-        => await _redisDb.KeyExistsAsync(Key);
+        => await _redisCache.KeyExistsAsync(Key);
 
     public long Length(string Key)
-        => _redisDb.StringLength(Key);
+        => _redisCache.StringLength(Key);
 
     public async Task<long> LengthAsync(string Key)
-        => await _redisDb.StringLengthAsync(Key);
+        => await _redisCache.StringLengthAsync(Key);
 
     public bool Expire(string Key, TimeSpan? expiry = null)
-        => _redisDb.KeyExpire(Key, expiry);
+        => _redisCache.KeyExpire(Key, expiry);
 
     public async Task<bool> ExpireAsync(string Key, TimeSpan? expiry = null)
-        => await _redisDb.KeyExpireAsync(Key, expiry);
+        => await _redisCache.KeyExpireAsync(Key, expiry);
 
 
     public bool Persist(string Key) =>
-        _redisDb.KeyPersist(Key);
+        _redisCache.KeyPersist(Key);
 
     public async Task<bool> PersistAsync(string Key)
-        => await _redisDb.KeyPersistAsync(Key);
+        => await _redisCache.KeyPersistAsync(Key);
 
     public TimeSpan? Idle(string Key)
-        => _redisDb.KeyIdleTime(Key);
+        => _redisCache.KeyIdleTime(Key);
 
     public async Task<TimeSpan?> IdleAsync(string Key)
-        => await _redisDb.KeyIdleTimeAsync(Key);
+        => await _redisCache.KeyIdleTimeAsync(Key);
 
     public long Increment(string Key)
-        => _redisDb.StringIncrement(Key);
+        => _redisCache.StringIncrement(Key);
 
     public async Task<long> IncrementAsync(string Key)
-        => await _redisDb.StringIncrementAsync(Key);
+        => await _redisCache.StringIncrementAsync(Key);
 
     public long Decrement(string Key)
-        => _redisDb.StringDecrement(Key);
+        => _redisCache.StringDecrement(Key);
 
     public async Task<long> DecrementAsync(string Key)
-        => await _redisDb.StringDecrementAsync(Key);
+        => await _redisCache.StringDecrementAsync(Key);
 }

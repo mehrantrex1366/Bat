@@ -2,7 +2,7 @@
 
 public interface IRedisCacheProvider : ISingletonInjection
 {
-    public IDatabase _redisDb { get; set; }
+    public IDatabase _redisCache { get; set; }
     public ConnectionMultiplexer _redisServer { get; set; }
 
     IServer GetServer(string host = null, int port = 0);
