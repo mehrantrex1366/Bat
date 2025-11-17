@@ -44,10 +44,6 @@ Mail : mehrannoruzi@gmail.com		</PackageReleaseNotes>
 		  <Pack>True</Pack>
 		  <PackagePath>\</PackagePath>
 		</None>
-		<None Include="C:\Users\Mehran\Downloads\Bat.png">
-			<Pack>True</Pack>
-			<PackagePath></PackagePath>
-		</None>
 	</ItemGroup>
 
 	<ItemGroup>
@@ -55,6 +51,10 @@ Mail : mehrannoruzi@gmail.com		</PackageReleaseNotes>
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Update="Bat.png">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
 	  <None Update="readme.md">
 	    <Pack>True</Pack>
 	    <PackagePath>\</PackagePath>

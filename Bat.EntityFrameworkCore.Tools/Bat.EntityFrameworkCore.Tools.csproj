@@ -33,13 +33,6 @@ Mail : mehrannoruzi@gmail.com
 	</PropertyGroup>
 
 	<ItemGroup>
-		<None Include="C:\Users\Mehran\Downloads\Bat.png">
-			<Pack>True</Pack>
-			<PackagePath></PackagePath>
-		</None>
-	</ItemGroup>
-
-	<ItemGroup>
 	  <PackageReference Include="EFCore.BulkExtensions.SqlServer" Version="9.0.2" />
 	</ItemGroup>
 
@@ -48,6 +41,10 @@ Mail : mehrannoruzi@gmail.com
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Update="Bat.png">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
 	  <None Update="readme.md">
 	    <Pack>True</Pack>
 	    <PackagePath>\</PackagePath>
