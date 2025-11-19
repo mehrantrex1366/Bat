@@ -37,31 +37,37 @@
 
 ## 🏗️ معماری
 
-فریمورک Bat در پنج لایه اصلی سازماندهی شده است:
+فریمورک Bat در شش لایه اصلی سازماندهی شده است:
 
 ```
 Bat/
 ├── src/
-│   ├── Core/                    # هسته اصلی فریمورک
-│   │   ├── Bat.Core/           # ابزارهای پایه و Extension Methods
-│   │   └── Bat.Tools/          # ابزارهای کمکی اضافی
+│   ├── Core/                           # هسته اصلی فریمورک
+│   │   ├── Bat.Core/                  # ابزارهای پایه و Extension Methods
+│   │   └── Bat.Tools/                 # ابزارهای کمکی اضافی (Excel و...)
 │   │
-│   ├── AspNetCore/             # لایه وب و API
-│   │   ├── Bat.AspNetCore/    # کامپوننت‌های ASP.NET Core
-│   │   ├── Bat.Http/          # ابزارهای HTTP
-│   │   └── Bat.Di/            # Dependency Injection
+│   ├── AspNetCore/                    # لایه وب و API
+│   │   ├── Bat.AspNetCore/           # کامپوننت‌های ASP.NET Core
+│   │   ├── Bat.Http/                 # ابزارهای HTTP و Client Detection
+│   │   └── Bat.Di/                   # Dependency Injection Utilities
 │   │
-│   ├── DataAccess/            # لایه دسترسی به داده
+│   ├── DataAccess/                   # لایه دسترسی به داده
 │   │   ├── Bat.EntityFrameworkCore/       # Repository Pattern با EF Core
 │   │   ├── Bat.EntityFrameworkCore.Tools/ # ابزارهای پیشرفته EF Core
 │   │   └── Bat.Dapper/                    # Dapper Integration
 │   │
-│   ├── Cache/                 # مدیریت کش
-│   │   ├── Bat.Cache/        # Interface‌های کش
-│   │   └── Bat.Cache.Redis/  # پیاده‌سازی Redis و Hybrid Cache
+│   ├── Cache/                        # مدیریت کش
+│   │   ├── Bat.Cache/               # Interface‌های کش
+│   │   └── Bat.Cache.Redis/         # پیاده‌سازی Redis و Hybrid Cache
 │   │
-│   └── Queue/                 # مدیریت صف
-│       └── Bat.Queue/        # Queue Management
+│   ├── Queue/                        # مدیریت صف‌های پیام
+│   │   └── Bat.Queue/               # MSMQ و RabbitMQ Integration
+│   │
+│   ├── Test/                         # ابزارهای تست
+│   │   └── Bat.Test/                # Test Utilities و Mock Builders
+│   │
+│   └── Sql/                          # SQL Server CLR
+│       └── Bat.SqlClrAssembly/      # SQL CLR Functions و Stored Procedures
 ```
 
 ---
@@ -162,8 +168,61 @@ Interface‌های Cache مستقل از پیاده‌سازی
 
 ### 🔷 Queue Layer
 
-#### **Bat.Queue**
-مدیریت صف‌های پیام
+#### **Bat.Queue** ![NuGet](https://img.shields.io/badge/v10.0.0-green)
+مدیریت صف‌های پیام و Message Queue:
+
+**MSMQ Integration:**
+- ✅ Microsoft Message Queue Support
+- ✅ Send/Receive Messages
+- ✅ Queue Management
+
+**RabbitMQ Integration:**
+- ✅ RabbitMQ Producer
+- ✅ RabbitMQ Consumer
+- ✅ Exchange Types (Direct، Fanout، Topic، Headers)
+- ✅ Queue Configuration
+- ✅ Connection Management
+- ✅ Publish/Subscribe Pattern
+
+---
+
+### 🔷 Test Layer
+
+#### **Bat.Test**
+ابزارهای جامع برای تست یونیت و Integration:
+
+**Mock Builders:**
+- ✅ `MockBuilder`: ساخت Mock با Moq
+- ✅ `NSubstituteBuilder`: ساخت Mock با NSubstitute
+- ✅ `MockRepoBuilder`: Mock کردن Repository
+- ✅ `MockUowBuilder`: Mock کردن UnitOfWork
+- ✅ `MockDbContextBuilder`: Mock کردن DbContext
+
+**Data Faker:**
+- ✅ `BogusBuilder<T>`: ساخت داده‌های تصادفی با AutoBogus
+- ✅ پشتیبانی از Nested Objects
+- ✅ قابلیت Set کردن مقادیر خاص
+- ✅ ساخت لیست‌های تصادفی
+
+**Service Mocking:**
+- ✅ `EasyServiceMocker`: Mock سریع سرویس‌ها
+- ✅ `ServiceBuilder`: ساخت سرویس با Dependency‌های Mock شده
+
+**Test Tools:**
+- ✅ Extension Methods برای تست
+- ✅ Static Values Builder
+- ✅ Integration با MockQueryable
+
+---
+
+### 🔷 SQL Layer
+
+#### **Bat.SqlClrAssembly**
+SQL Server CLR Integration:
+- ✅ Custom SQL CLR Functions
+- ✅ SQL CLR Stored Procedures
+- ✅ توابع سفارشی برای SQL Server
+- ✅ Integration با .NET 10
 
 ---
 
@@ -183,6 +242,9 @@ Install-Package Bat.AspNetCore -Version 10.0.0
 
 # Redis Cache
 Install-Package Bat.Cache.Redis -Version 10.0.0
+
+# Queue Management
+Install-Package Bat.Queue -Version 10.0.0
 ```
 
 ### نصب از طریق .NET CLI:
@@ -192,6 +254,7 @@ dotnet add package Bat.Core --version 10.0.0
 dotnet add package Bat.EntityFrameworkCore --version 10.0.0
 dotnet add package Bat.AspNetCore --version 10.0.0
 dotnet add package Bat.Cache.Redis --version 10.0.0
+dotnet add package Bat.Queue --version 10.0.0
 ```
 
 ---
@@ -386,6 +449,105 @@ public class ProductService
 }
 ```
 
+### 🔹 استفاده از Bat.Queue (RabbitMQ)
+
+```csharp
+// appsettings.json
+{
+  "RabbitConfiguration": {
+    "HostName": "localhost",
+    "Port": 5672,
+    "UserName": "guest",
+    "Password": "guest",
+    "VirtualHost": "/"
+  }
+}
+
+// Program.cs
+builder.Services.Configure<RabbitConfiguration>(
+    builder.Configuration.GetSection("RabbitConfiguration"));
+builder.Services.AddSingleton<IRabbitProducer, RabbitProducer>();
+builder.Services.AddSingleton<IRabbitConsumer, RabbitConsumer>();
+
+// Producer
+public class OrderService
+{
+    private readonly IRabbitProducer _producer;
+    
+    public OrderService(IRabbitProducer producer) => _producer = producer;
+    
+    public void CreateOrder(Order order)
+    {
+        // Send message to queue
+        _producer.Publish("orders_queue", order.SerializeToJson());
+    }
+}
+
+// Consumer
+public class OrderProcessor
+{
+    private readonly IRabbitConsumer _consumer;
+    
+    public OrderProcessor(IRabbitConsumer consumer) => _consumer = consumer;
+    
+    public void StartProcessing()
+    {
+        _consumer.Subscribe("orders_queue", message =>
+        {
+            var order = message.DeSerializeJson<Order>();
+            // Process order...
+        });
+    }
+}
+```
+
+### 🔹 استفاده از Bat.Test (BogusBuilder)
+
+```csharp
+using Bat.Test;
+
+public class UserServiceTests
+{
+    [Fact]
+    public void CreateUser_ShouldReturnSuccess()
+    {
+        // Arrange
+        var fakeUser = new BogusBuilder<User>()
+            .WithNaturalInt()
+            .Set(x => x.Email, "test@example.com")
+            .Set(x => x.Age, f => f.Random.Int(18, 65))
+            .SetString(x => x.FirstName, 5, 10)
+            .Generate();
+        
+        // Act & Assert
+        Assert.NotNull(fakeUser);
+        Assert.Equal("test@example.com", fakeUser.Email);
+    }
+    
+    [Fact]
+    public void GetUsers_WithMockedRepository()
+    {
+        // Arrange
+        var fakeUsers = new BogusBuilder<User>()
+            .WithNaturalInt()
+            .Generate(10);
+        
+        var mockRepo = new MockBuilder()
+            .MockRepo<User>()
+            .SetupGetAsync(fakeUsers)
+            .Build();
+        
+        var service = new UserService(mockRepo.Object);
+        
+        // Act
+        var result = await service.GetAllUsers();
+        
+        // Assert
+        Assert.Equal(10, result.Count);
+    }
+}
+```
+
 ---
 
 ## ⚡ ویژگی‌های کلیدی
@@ -432,6 +594,26 @@ public class ProductService
 | 🔄 Retry Logic | تلاش مجدد خودکار |
 | 🎯 Sentinel | پشتیبانی از Redis Sentinel |
 
+### 📨 Bat.Queue
+
+| ویژگی | توضیحات |
+|-------|---------|
+| 📮 MSMQ | Microsoft Message Queue Integration |
+| 🐰 RabbitMQ | RabbitMQ Producer/Consumer |
+| 🔀 Exchange Types | Direct, Fanout, Topic, Headers |
+| 📡 Pub/Sub | Publish/Subscribe Pattern |
+| ⚙️ Configuration | Queue و Connection Management |
+
+### 🧪 Bat.Test
+
+| ویژگی | توضیحات |
+|-------|---------|
+| 🎭 Mock Builders | Moq و NSubstitute Support |
+| 🎲 Data Faker | BogusBuilder با AutoBogus |
+| 🗂️ Repository Mock | Mock کردن Repository و UnitOfWork |
+| 🔧 Service Mocker | Mock سریع Dependencies |
+| 📊 Test Extensions | Extension Methods برای تست |
+
 ---
 
 ## 🛠️ تکنولوژی‌ها
@@ -440,7 +622,11 @@ public class ProductService
 - **Entity Framework Core**
 - **ASP.NET Core**
 - **Redis (StackExchange.Redis)**
+- **RabbitMQ (RabbitMQ.Client)**
+- **MSMQ (Experimental.System.Messaging)**
 - **Dapper**
+- **Moq & NSubstitute**
+- **AutoBogus & AutoFixture**
 - **System.Text.Json**
 - **JWT (System.IdentityModel.Tokens.Jwt)**
 
@@ -488,6 +674,6 @@ public class ProductService
 
 <div align="center">
 
-**ساخته شده با ❤️ توسط Mehran Norouzi**
+**ساخته شده با ❤️ توسط Mehrان Norouzi**
 
 </div>
