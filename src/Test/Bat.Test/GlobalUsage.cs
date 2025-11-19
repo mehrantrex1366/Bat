@@ -1,0 +1,11 @@
+﻿global using Moq;
+global using Bat.Core;
+global using AutoFixture;
+global using NSubstitute;
+global using AutoFixture.AutoMoq;
+global using MockQueryable.Moq;
+global using System.Linq.Expressions;
+global using Bat.EntityFrameworkCore;
+global using Microsoft.EntityFrameworkCore;
+global using Microsoft.EntityFrameworkCore.Storage;
+global using Microsoft.EntityFrameworkCore.Infrastructure;
