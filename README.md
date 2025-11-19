@@ -770,8 +770,7 @@ public class UserServiceTests
 
 ## 📄 مجوز
 
-© تمامی حقوق محفوظ است - Mehrان Norouزی
-
+© تمامی حقوق محفوظ است - Mehran Norouzi
 ---
 
 ## 🌟 ستاره‌دهی
@@ -784,6 +783,6 @@ public class UserServiceTests
 
 <div align="center">
 
-**ساخته شده با ❤️ توسط Mehrان Norوزی**
+**ساخته شده با ❤️ توسط Mehran Norouzi**
 
 </div>
