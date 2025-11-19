@@ -1,6 +1,10 @@
 ﻿# 🦇 Bat Framework
 
+<div dir="rtl">
+
 > یک فریمورک شخصی و قدرتمند برای توسعه سریع اپلیکیشن‌های .NET
+
+</div>
 
 [![.NET Version](https://img.shields.io/badge/.NET-10.0-512BD4)](https://dotnet.microsoft.com/)
 [![License](https://img.shields.io/badge/License-All%20Rights%20Reserved-red)](LICENSE)
@@ -21,6 +25,8 @@
 
 ---
 
+<div dir="rtl">
+
 ## 🎯 درباره پروژه
 
 **Bat Framework** یک مجموعه کامل از کتابخانه‌های .NET است که طی چندین سال توسعه و بهبود یافته و برای تسریع و تسهیل توسعه اپلیکیشن‌های enterprise-grade طراحی شده است. این فریمورک شامل ابزارهای کاربردی، الگوهای طراحی استاندارد و قابلیت‌های مورد نیاز برای پروژه‌های واقعی است.
@@ -38,6 +44,8 @@
 ## 🏗️ معماری
 
 فریمورک Bat در شش لایه اصلی سازماندهی شده است:
+
+</div>
 
 ```
 Bat/
@@ -70,6 +78,8 @@ Bat/
 │       └── Bat.SqlClrAssembly/      # SQL CLR Functions و Stored Procedures
 ```
 
+<div dir="rtl">
+
 ---
 
 ## 📦 پکیج‌ها
@@ -77,7 +87,9 @@ Bat/
 ### 🔷 Core Layer
 
 #### **Bat.Core** ![NuGet](https://img.shields.io/badge/v10.0.0-green)
+
 هسته اصلی فریمورک شامل:
+
 - **Extensions**: String، DateTime، Enum، Number، Object و...
 - **Security**: AES، RSA، Hash Generation، Encryption
 - **Validation**: Attributes سفارشی (Email، Mobile، NationalCode، IP، URL و...)
@@ -89,7 +101,9 @@ Bat/
 - **Math**: Randomizer و توابع ریاضی
 
 #### **Bat.Tools**
+
 ابزارهای کمکی اضافی:
+
 - Excel Operations
 - Public Extensions
 
@@ -98,7 +112,9 @@ Bat/
 ### 🔷 AspNetCore Layer
 
 #### **Bat.AspNetCore** ![NuGet](https://img.shields.io/badge/v10.0.0-green)
+
 کامپوننت‌های ASP.NET Core:
+
 - **Authentication**: JWT Service و پیکربندی
 - **Middleware**: 
   - `BatJwtParserMiddleware`
@@ -113,13 +129,16 @@ Bat/
 - **Extensions**: Swagger، CORS، MVC Extensions
 
 #### **Bat.Http**
+
 ابزارهای HTTP:
+
 - Client Info Detection
 - Request Details
 - Device Logging
 - HTTP Extensions
 
 #### **Bat.Di**
+
 Dependency Injection Utilities
 
 ---
@@ -127,9 +146,11 @@ Dependency Injection Utilities
 ### 🔷 DataAccess Layer
 
 #### **Bat.EntityFrameworkCore** ![NuGet](https://img.shields.io/badge/v10.0.0-green)
+
 پیاده‌سازی کامل Repository و UnitOfWork Pattern:
 
 **Features:**
+
 - ✅ Generic Repository با قابلیت‌های پیشرفته
 - ✅ UnitOfWork Pattern
 - ✅ Automatic Tracking Changes
@@ -143,9 +164,11 @@ Dependency Injection Utilities
 - ✅ Stored Procedure Execution
 
 #### **Bat.EntityFrameworkCore.Tools**
+
 ابزارهای پیشرفته EF Core
 
 #### **Bat.Dapper**
+
 Dapper Integration & Extensions
 
 ---
@@ -153,10 +176,13 @@ Dapper Integration & Extensions
 ### 🔷 Cache Layer
 
 #### **Bat.Cache**
+
 Interface‌های Cache مستقل از پیاده‌سازی
 
 #### **Bat.Cache.Redis** ![NuGet](https://img.shields.io/badge/v10.0.0-green)
+
 پیاده‌سازی Cache با Redis:
+
 - ✅ Redis Cache Provider
 - ✅ Hybrid Cache (Memory + Redis)
 - ✅ Sentinel Support
@@ -169,14 +195,17 @@ Interface‌های Cache مستقل از پیاده‌سازی
 ### 🔷 Queue Layer
 
 #### **Bat.Queue** ![NuGet](https://img.shields.io/badge/v10.0.0-green)
+
 مدیریت صف‌های پیام و Message Queue:
 
 **MSMQ Integration:**
+
 - ✅ Microsoft Message Queue Support
 - ✅ Send/Receive Messages
 - ✅ Queue Management
 
 **RabbitMQ Integration:**
+
 - ✅ RabbitMQ Producer
 - ✅ RabbitMQ Consumer
 - ✅ Exchange Types (Direct، Fanout، Topic، Headers)
@@ -189,9 +218,11 @@ Interface‌های Cache مستقل از پیاده‌سازی
 ### 🔷 Test Layer
 
 #### **Bat.Test**
+
 ابزارهای جامع برای تست یونیت و Integration:
 
 **Mock Builders:**
+
 - ✅ `MockBuilder`: ساخت Mock با Moq
 - ✅ `NSubstituteBuilder`: ساخت Mock با NSubstitute
 - ✅ `MockRepoBuilder`: Mock کردن Repository
@@ -199,16 +230,19 @@ Interface‌های Cache مستقل از پیاده‌سازی
 - ✅ `MockDbContextBuilder`: Mock کردن DbContext
 
 **Data Faker:**
+
 - ✅ `BogusBuilder<T>`: ساخت داده‌های تصادفی با AutoBogus
 - ✅ پشتیبانی از Nested Objects
 - ✅ قابلیت Set کردن مقادیر خاص
 - ✅ ساخت لیست‌های تصادفی
 
 **Service Mocking:**
+
 - ✅ `EasyServiceMocker`: Mock سریع سرویس‌ها
 - ✅ `ServiceBuilder`: ساخت سرویس با Dependency‌های Mock شده
 
 **Test Tools:**
+
 - ✅ Extension Methods برای تست
 - ✅ Static Values Builder
 - ✅ Integration با MockQueryable
@@ -218,7 +252,9 @@ Interface‌های Cache مستقل از پیاده‌سازی
 ### 🔷 SQL Layer
 
 #### **Bat.SqlClrAssembly**
+
 SQL Server CLR Integration:
+
 - ✅ Custom SQL CLR Functions
 - ✅ SQL CLR Stored Procedures
 - ✅ توابع سفارشی برای SQL Server
@@ -229,6 +265,8 @@ SQL Server CLR Integration:
 ## 🚀 نصب و راه‌اندازی
 
 ### نصب از طریق NuGet Package Manager:
+
+</div>
 
 ```powershell
 # Core Package
@@ -247,7 +285,11 @@ Install-Package Bat.Cache.Redis -Version 10.0.0
 Install-Package Bat.Queue -Version 10.0.0
 ```
 
+<div dir="rtl">
+
 ### نصب از طریق .NET CLI:
+
+</div>
 
 ```bash
 dotnet add package Bat.Core --version 10.0.0
@@ -257,22 +299,30 @@ dotnet add package Bat.Cache.Redis --version 10.0.0
 dotnet add package Bat.Queue --version 10.0.0
 ```
 
+<div dir="rtl">
+
 ---
 
 ## 📚 مستندات
 
 هر پکیج دارای فایل `readme.md` مجزا با توضیحات کامل و مثال‌های کاربردی است:
 
+</div>
+
 - [📖 Bat.Core Documentation](src/Core/Bat.Core/readme.md)
 - [📖 Bat.EntityFrameworkCore Documentation](src/DataAccess/Bat.EntityFrameworkCore/readme.md)
 - [📖 Bat.AspNetCore Documentation](src/AspNetCore/Bat.AspNetCore/readme.md)
 - [📖 Bat.Cache.Redis Documentation](src/Cache/Bat.Cache.Redis/readme.md)
+
+<div dir="rtl">
 
 ---
 
 ## 💡 نمونه استفاده
 
 ### 🔹 استفاده از Bat.Core
+
+</div>
 
 ```csharp
 using Bat.Core;
@@ -303,7 +353,11 @@ public class UserService
 }
 ```
 
+<div dir="rtl">
+
 ### 🔹 استفاده از Bat.EntityFrameworkCore
+
+</div>
 
 ```csharp
 // 1. Define DbContext
@@ -328,10 +382,10 @@ public class AppUnitOfWork : IBatUnitOfWork
     }
     
     public IEFGenericRepo<User> UserRepo => 
-        _serviceProvider.GetRequiredService<IEFGenericRepo<User>>();
+        _serviceProvider.GetRequiredService<IEFGenericRepo<User>>>();
     
     public IEFGenericRepo<Product> ProductRepo => 
-        _serviceProvider.GetRequiredService<IEFGenericRepo<Product>>();
+        _serviceProvider.GetRequiredService<IEFGenericRepo<Product>>>();
     
     public Task<SaveChangeResult> SaveAsync() => 
         _context.BatSaveChangesAsync();
@@ -341,8 +395,8 @@ public class AppUnitOfWork : IBatUnitOfWork
 builder.Services.AddDbContext<AppDbContext>(options => 
     options.UseSqlServer(connectionString));
 
-builder.Services.AddScoped<IEFGenericRepo<User>, EFGenericRepo<User>>();
-builder.Services.AddScoped<IEFGenericRepo<Product>, EFGenericRepo<Product>>();
+builder.Services.AddScoped<IEFGenericRepo<User>, EFGenericRepo<User>>>();
+builder.Services.AddScoped<IEFGenericRepo<Product>, EFGenericRepo<Product>>>();
 builder.Services.AddScoped<AppUnitOfWork>();
 
 // 4. Use in Service
@@ -377,7 +431,11 @@ public class UserService
 }
 ```
 
+<div dir="rtl">
+
 ### 🔹 استفاده از Bat.AspNetCore
+
+</div>
 
 ```csharp
 // Program.cs
@@ -403,7 +461,11 @@ app.UseBatJwtConfiguration();
 app.Run();
 ```
 
+<div dir="rtl">
+
 ### 🔹 استفاده از Bat.Cache.Redis
+
+</div>
 
 ```csharp
 // appsettings.json
@@ -449,7 +511,11 @@ public class ProductService
 }
 ```
 
+<div dir="rtl">
+
 ### 🔹 استفاده از Bat.Queue (RabbitMQ)
+
+</div>
 
 ```csharp
 // appsettings.json
@@ -501,7 +567,11 @@ public class OrderProcessor
 }
 ```
 
+<div dir="rtl">
+
 ### 🔹 استفاده از Bat.Test (BogusBuilder)
+
+</div>
 
 ```csharp
 using Bat.Test;
@@ -548,11 +618,15 @@ public class UserServiceTests
 }
 ```
 
+<div dir="rtl">
+
 ---
 
 ## ⚡ ویژگی‌های کلیدی
 
 ### 🎨 Bat.Core
+
+</div>
 
 | ویژگی | توضیحات |
 |-------|---------|
@@ -563,7 +637,11 @@ public class UserServiceTests
 | 📝 Logging | File-based Logger |
 | 🎲 Randomizer | تولید کد و کلید یکتا |
 
+<div dir="rtl">
+
 ### 💾 Bat.EntityFrameworkCore
+
+</div>
 
 | ویژگی | توضیحات |
 |-------|---------|
@@ -574,7 +652,11 @@ public class UserServiceTests
 | 🛡️ Exception Handling | مدیریت کامل خطاها |
 | 📑 Pagination | صفحه‌بندی با عملکرد بالا |
 
+<div dir="rtl">
+
 ### 🌐 Bat.AspNetCore
+
+</div>
 
 | ویژگی | توضیحات |
 |-------|---------|
@@ -584,7 +666,11 @@ public class UserServiceTests
 | 📤 File Upload | آپلود فایل‌های کوچک و بزرگ |
 | 📖 Swagger | پیکربندی Swagger با Authentication |
 
+<div dir="rtl">
+
 ### 💨 Bat.Cache.Redis
+
+</div>
 
 | ویژگی | توضیحات |
 |-------|---------|
@@ -594,7 +680,11 @@ public class UserServiceTests
 | 🔄 Retry Logic | تلاش مجدد خودکار |
 | 🎯 Sentinel | پشتیبانی از Redis Sentinel |
 
+<div dir="rtl">
+
 ### 📨 Bat.Queue
+
+</div>
 
 | ویژگی | توضیحات |
 |-------|---------|
@@ -604,7 +694,11 @@ public class UserServiceTests
 | 📡 Pub/Sub | Publish/Subscribe Pattern |
 | ⚙️ Configuration | Queue و Connection Management |
 
+<div dir="rtl">
+
 ### 🧪 Bat.Test
+
+</div>
 
 | ویژگی | توضیحات |
 |-------|---------|
@@ -614,9 +708,13 @@ public class UserServiceTests
 | 🔧 Service Mocker | Mock سریع Dependencies |
 | 📊 Test Extensions | Extension Methods برای تست |
 
+<div dir="rtl">
+
 ---
 
 ## 🛠️ تکنولوژی‌ها
+
+</div>
 
 - **.NET 10.0**
 - **Entity Framework Core**
@@ -630,16 +728,22 @@ public class UserServiceTests
 - **System.Text.Json**
 - **JWT (System.IdentityModel.Tokens.Jwt)**
 
+<div dir="rtl">
+
 ---
 
 ## 📊 وضعیت پروژه
 
 این فریمورک به‌طور فعال توسعه می‌یابد و به‌روزرسانی‌های منظم دریافت می‌کند:
 
+</div>
+
 - ✅ **Stable**: تمام پکیج‌های Core
 - 🔄 **Active Development**: به‌روزرسانی مستمر
 - 📦 **Versioning**: Semantic Versioning (10.0.0)
 - 🎯 **.NET Support**: .NET 10
+
+<div dir="rtl">
 
 ---
 
@@ -653,16 +757,20 @@ public class UserServiceTests
 
 برای سوالات، پیشنهادات یا گزارش مشکلات:
 
+</div>
+
 📧 **Email**: mehrannoruzi@gmail.com  
 📱 **Tel**: +989301919109  
 🐙 **GitHub**: [@mehrannoruzi](https://github.com/mehrannoruzi)  
 🔗 **Repository**: [https://github.com/mehrannoruzi/Bat](https://github.com/mehrannoruzi/Bat)
 
+<div dir="rtl">
+
 ---
 
 ## 📄 مجوز
 
-© تمامی حقوق محفوظ است - Mehran Norouzi
+© تمامی حقوق محفوظ است - Mehrان Norouزی
 
 ---
 
@@ -670,10 +778,12 @@ public class UserServiceTests
 
 اگر از این فریمورک استفاده می‌کنید و برای شما مفید بود، لطفاً با دادن ستاره به این پروژه از آن حمایت کنید! ⭐
 
+</div>
+
 ---
 
 <div align="center">
 
-**ساخته شده با ❤️ توسط Mehrان Norouzi**
+**ساخته شده با ❤️ توسط Mehrان Norوزی**
 
 </div>
