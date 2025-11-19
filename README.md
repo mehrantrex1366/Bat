@@ -1,6 +1,6 @@
-# ?? Bat Framework
+ï»¿# ğŸ¦‡ Bat Framework
 
-> ?˜ İÑ?ãæÑ˜ ÔÎÕ? æ ŞÏÑÊãäÏ ÈÑÇ? ÊæÓÚå ÓÑ?Ú Çá?˜?ÔäåÇ? .NET
+> ÛŒÚ© ÙØ±ÛŒÙ…ÙˆØ±Ú© Ø´Ø®ØµÛŒ Ùˆ Ù‚Ø¯Ø±ØªÙ…Ù†Ø¯ Ø¨Ø±Ø§ÛŒ ØªÙˆØ³Ø¹Ù‡ Ø³Ø±ÛŒØ¹ Ø§Ù¾Ù„ÛŒÚ©ÛŒØ´Ù†â€ŒÙ‡Ø§ÛŒ .NET
 
 [![.NET Version](https://img.shields.io/badge/.NET-10.0-512BD4)](https://dotnet.microsoft.com/)
 [![License](https://img.shields.io/badge/License-All%20Rights%20Reserved-red)](LICENSE)
@@ -8,92 +8,92 @@
 
 ---
 
-## ?? İåÑÓÊ ãØÇáÈ
+## ğŸ“‹ ÙÙ‡Ø±Ø³Øª Ù…Ø·Ø§Ù„Ø¨
 
-- [ÏÑÈÇÑå Ñæå](#-ÏÑÈÇÑå-Ñæå)
-- [ãÚãÇÑ?](#-ãÚãÇÑ?)
-- [˜?ÌåÇ](#-˜?ÌåÇ)
-- [äÕÈ æ ÑÇåÇäÏÇÒ?](#-äÕÈ-æ-ÑÇåÇäÏÇÒ?)
-- [ãÓÊäÏÇÊ](#-ãÓÊäÏÇÊ)
-- [äãæäå ÇÓÊİÇÏå](#-äãæäå-ÇÓÊİÇÏå)
-- [æ??åÇ? ˜á?Ï?](#-æ??åÇ?-˜á?Ï?)
-- [ÔÊ?ÈÇä?](#-ÔÊ?ÈÇä?)
-
----
-
-## ?? ÏÑÈÇÑå Ñæå
-
-**Bat Framework** ?˜ ãÌãæÚå ˜Çãá ÇÒ ˜ÊÇÈÎÇäååÇ? .NET ÇÓÊ ˜å Ø? äÏ?ä ÓÇá ÊæÓÚå æ ÈåÈæÏ ?ÇİÊå æ ÈÑÇ? ÊÓÑ?Ú æ ÊÓå?á ÊæÓÚå Çá?˜?ÔäåÇ? enterprise-grade ØÑÇÍ? ÔÏå ÇÓÊ. Ç?ä İÑ?ãæÑ˜ ÔÇãá ÇÈÒÇÑåÇ? ˜ÇÑÈÑÏ?¡ ÇáæåÇ? ØÑÇÍ? ÇÓÊÇäÏÇÑÏ æ ŞÇÈá?ÊåÇ? ãæÑÏ ä?ÇÒ ÈÑÇ? ÑæååÇ? æÇŞÚ? ÇÓÊ.
-
-### ÑÇ Bat Framework¿
-
-? **ÊæÓÚå ÓÑ?Ú**: ˜ÇåÔ ÒãÇä ÊæÓÚå ÈÇ ÇÈÒÇÑåÇ? ÇÒ ?Ô ÂãÇÏå  
-? **Best Practices**: ?ÇÏåÓÇÒ? ÇáæåÇ? ÇÓÊÇäÏÇÑÏ ãÇääÏ Repository¡ UnitOfWork  
-? **ãÓÊäÏÓÇÒ? ˜Çãá**: åÑ ˜?Ì ÏÇÑÇ? ãÓÊäÏÇÊ æ ãËÇáåÇ? Úãá?  
-? **ÈåÑæÒ**: ÔÊ?ÈÇä? ÇÒ .NET 10 æ ÂÎÑ?ä ÇÓÊÇäÏÇÑÏåÇ  
-? **Êæá?Ï ÔÎÕ?**: ÈÇ ÊÌÑÈå æÇŞÚ? æ ä?ÇÒåÇ? Úãá? ÊæÓÚå ?ÇİÊå  
+- [Ø¯Ø±Ø¨Ø§Ø±Ù‡ Ù¾Ø±ÙˆÚ˜Ù‡](#-Ø¯Ø±Ø¨Ø§Ø±Ù‡-Ù¾Ø±ÙˆÚ˜Ù‡)
+- [Ù…Ø¹Ù…Ø§Ø±ÛŒ](#-Ù…Ø¹Ù…Ø§Ø±ÛŒ)
+- [Ù¾Ú©ÛŒØ¬â€ŒÙ‡Ø§](#-Ù¾Ú©ÛŒØ¬Ù‡Ø§)
+- [Ù†ØµØ¨ Ùˆ Ø±Ø§Ù‡â€ŒØ§Ù†Ø¯Ø§Ø²ÛŒ](#-Ù†ØµØ¨-Ùˆ-Ø±Ø§Ù‡Ø§Ù†Ø¯Ø§Ø²ÛŒ)
+- [Ù…Ø³ØªÙ†Ø¯Ø§Øª](#-Ù…Ø³ØªÙ†Ø¯Ø§Øª)
+- [Ù†Ù…ÙˆÙ†Ù‡ Ø§Ø³ØªÙØ§Ø¯Ù‡](#-Ù†Ù…ÙˆÙ†Ù‡-Ø§Ø³ØªÙØ§Ø¯Ù‡)
+- [ÙˆÛŒÚ˜Ú¯ÛŒâ€ŒÙ‡Ø§ÛŒ Ú©Ù„ÛŒØ¯ÛŒ](#-ÙˆÛŒÚ˜Ú¯ÛŒÙ‡Ø§ÛŒ-Ú©Ù„ÛŒØ¯ÛŒ)
+- [Ù¾Ø´ØªÛŒØ¨Ø§Ù†ÛŒ](#-Ù¾Ø´ØªÛŒØ¨Ø§Ù†ÛŒ)
 
 ---
 
-## ??? ãÚãÇÑ?
+## ğŸ¯ Ø¯Ø±Ø¨Ø§Ø±Ù‡ Ù¾Ø±ÙˆÚ˜Ù‡
 
-İÑ?ãæÑ˜ Bat ÏÑ åÇÑ áÇ?å ÇÕá? ÓÇÒãÇäÏå? ÔÏå ÇÓÊ:
+**Bat Framework** ÛŒÚ© Ù…Ø¬Ù…ÙˆØ¹Ù‡ Ú©Ø§Ù…Ù„ Ø§Ø² Ú©ØªØ§Ø¨Ø®Ø§Ù†Ù‡â€ŒÙ‡Ø§ÛŒ .NET Ø§Ø³Øª Ú©Ù‡ Ø·ÛŒ Ú†Ù†Ø¯ÛŒÙ† Ø³Ø§Ù„ ØªÙˆØ³Ø¹Ù‡ Ùˆ Ø¨Ù‡Ø¨ÙˆØ¯ ÛŒØ§ÙØªÙ‡ Ùˆ Ø¨Ø±Ø§ÛŒ ØªØ³Ø±ÛŒØ¹ Ùˆ ØªØ³Ù‡ÛŒÙ„ ØªÙˆØ³Ø¹Ù‡ Ø§Ù¾Ù„ÛŒÚ©ÛŒØ´Ù†â€ŒÙ‡Ø§ÛŒ enterprise-grade Ø·Ø±Ø§Ø­ÛŒ Ø´Ø¯Ù‡ Ø§Ø³Øª. Ø§ÛŒÙ† ÙØ±ÛŒÙ…ÙˆØ±Ú© Ø´Ø§Ù…Ù„ Ø§Ø¨Ø²Ø§Ø±Ù‡Ø§ÛŒ Ú©Ø§Ø±Ø¨Ø±Ø¯ÛŒØŒ Ø§Ù„Ú¯ÙˆÙ‡Ø§ÛŒ Ø·Ø±Ø§Ø­ÛŒ Ø§Ø³ØªØ§Ù†Ø¯Ø§Ø±Ø¯ Ùˆ Ù‚Ø§Ø¨Ù„ÛŒØªâ€ŒÙ‡Ø§ÛŒ Ù…ÙˆØ±Ø¯ Ù†ÛŒØ§Ø² Ø¨Ø±Ø§ÛŒ Ù¾Ø±ÙˆÚ˜Ù‡â€ŒÙ‡Ø§ÛŒ ÙˆØ§Ù‚Ø¹ÛŒ Ø§Ø³Øª.
+
+### Ú†Ø±Ø§ Bat FrameworkØŸ
+
+âœ… **ØªÙˆØ³Ø¹Ù‡ Ø³Ø±ÛŒØ¹**: Ú©Ø§Ù‡Ø´ Ø²Ù…Ø§Ù† ØªÙˆØ³Ø¹Ù‡ Ø¨Ø§ Ø§Ø¨Ø²Ø§Ø±Ù‡Ø§ÛŒ Ø§Ø² Ù¾ÛŒØ´ Ø¢Ù…Ø§Ø¯Ù‡  
+âœ… **Best Practices**: Ù¾ÛŒØ§Ø¯Ù‡â€ŒØ³Ø§Ø²ÛŒ Ø§Ù„Ú¯ÙˆÙ‡Ø§ÛŒ Ø§Ø³ØªØ§Ù†Ø¯Ø§Ø±Ø¯ Ù…Ø§Ù†Ù†Ø¯ RepositoryØŒ UnitOfWork  
+âœ… **Ù…Ø³ØªÙ†Ø¯Ø³Ø§Ø²ÛŒ Ú©Ø§Ù…Ù„**: Ù‡Ø± Ù¾Ú©ÛŒØ¬ Ø¯Ø§Ø±Ø§ÛŒ Ù…Ø³ØªÙ†Ø¯Ø§Øª Ùˆ Ù…Ø«Ø§Ù„â€ŒÙ‡Ø§ÛŒ Ø¹Ù…Ù„ÛŒ  
+âœ… **Ø¨Ù‡â€ŒØ±ÙˆØ²**: Ù¾Ø´ØªÛŒØ¨Ø§Ù†ÛŒ Ø§Ø² .NET 10 Ùˆ Ø¢Ø®Ø±ÛŒÙ† Ø§Ø³ØªØ§Ù†Ø¯Ø§Ø±Ø¯Ù‡Ø§  
+âœ… **ØªÙˆÙ„ÛŒØ¯ Ø´Ø®ØµÛŒ**: Ø¨Ø§ ØªØ¬Ø±Ø¨Ù‡ ÙˆØ§Ù‚Ø¹ÛŒ Ùˆ Ù†ÛŒØ§Ø²Ù‡Ø§ÛŒ Ø¹Ù…Ù„ÛŒ ØªÙˆØ³Ø¹Ù‡ ÛŒØ§ÙØªÙ‡  
+
+---
+
+## ğŸ—ï¸ Ù…Ø¹Ù…Ø§Ø±ÛŒ
+
+ÙØ±ÛŒÙ…ÙˆØ±Ú© Bat Ø¯Ø± Ú†Ù‡Ø§Ø± Ù„Ø§ÛŒÙ‡ Ø§ØµÙ„ÛŒ Ø³Ø§Ø²Ù…Ø§Ù†Ø¯Ù‡ÛŒ Ø´Ø¯Ù‡ Ø§Ø³Øª:
 
 ```
 Bat/
-??? src/
-?   ??? Core/                    # åÓÊå ÇÕá? İÑ?ãæÑ˜
-?   ?   ??? Bat.Core/           # ÇÈÒÇÑåÇ? Ç?å æ Extension Methods
-?   ?   ??? Bat.Tools/          # ÇÈÒÇÑåÇ? ˜ã˜? ÇÖÇİ?
-?   ?
-?   ??? AspNetCore/             # áÇ?å æÈ æ API
-?   ?   ??? Bat.AspNetCore/    # ˜ÇãæääÊåÇ? ASP.NET Core
-?   ?   ??? Bat.Http/          # ÇÈÒÇÑåÇ? HTTP
-?   ?   ??? Bat.Di/            # Dependency Injection
-?   ?
-?   ??? DataAccess/            # áÇ?å ÏÓÊÑÓ? Èå ÏÇÏå
-?   ?   ??? Bat.EntityFrameworkCore/       # Repository Pattern ÈÇ EF Core
-?   ?   ??? Bat.EntityFrameworkCore.Tools/ # ÇÈÒÇÑåÇ? ?ÔÑİÊå EF Core
-?   ?   ??? Bat.Dapper/                    # Dapper Integration
-?   ?
-?   ??? Cache/                 # ãÏ?Ñ?Ê ˜Ô
-?   ?   ??? Bat.Cache/        # InterfaceåÇ? ˜Ô
-?   ?   ??? Bat.Cache.Redis/  # ?ÇÏåÓÇÒ? Redis æ Hybrid Cache
-?   ?
-?   ??? Queue/                 # ãÏ?Ñ?Ê Õİ
-?       ??? Bat.Queue/        # Queue Management
+â”œâ”€â”€ src/
+â”‚   â”œâ”€â”€ Core/                    # Ù‡Ø³ØªÙ‡ Ø§ØµÙ„ÛŒ ÙØ±ÛŒÙ…ÙˆØ±Ú©
+â”‚   â”‚   â”œâ”€â”€ Bat.Core/           # Ø§Ø¨Ø²Ø§Ø±Ù‡Ø§ÛŒ Ù¾Ø§ÛŒÙ‡ Ùˆ Extension Methods
+â”‚   â”‚   â””â”€â”€ Bat.Tools/          # Ø§Ø¨Ø²Ø§Ø±Ù‡Ø§ÛŒ Ú©Ù…Ú©ÛŒ Ø§Ø¶Ø§ÙÛŒ
+â”‚   â”‚
+â”‚   â”œâ”€â”€ AspNetCore/             # Ù„Ø§ÛŒÙ‡ ÙˆØ¨ Ùˆ API
+â”‚   â”‚   â”œâ”€â”€ Bat.AspNetCore/    # Ú©Ø§Ù…Ù¾ÙˆÙ†Ù†Øªâ€ŒÙ‡Ø§ÛŒ ASP.NET Core
+â”‚   â”‚   â”œâ”€â”€ Bat.Http/          # Ø§Ø¨Ø²Ø§Ø±Ù‡Ø§ÛŒ HTTP
+â”‚   â”‚   â””â”€â”€ Bat.Di/            # Dependency Injection
+â”‚   â”‚
+â”‚   â”œâ”€â”€ DataAccess/            # Ù„Ø§ÛŒÙ‡ Ø¯Ø³ØªØ±Ø³ÛŒ Ø¨Ù‡ Ø¯Ø§Ø¯Ù‡
+â”‚   â”‚   â”œâ”€â”€ Bat.EntityFrameworkCore/       # Repository Pattern Ø¨Ø§ EF Core
+â”‚   â”‚   â”œâ”€â”€ Bat.EntityFrameworkCore.Tools/ # Ø§Ø¨Ø²Ø§Ø±Ù‡Ø§ÛŒ Ù¾ÛŒØ´Ø±ÙØªÙ‡ EF Core
+â”‚   â”‚   â””â”€â”€ Bat.Dapper/                    # Dapper Integration
+â”‚   â”‚
+â”‚   â”œâ”€â”€ Cache/                 # Ù…Ø¯ÛŒØ±ÛŒØª Ú©Ø´
+â”‚   â”‚   â”œâ”€â”€ Bat.Cache/        # Interfaceâ€ŒÙ‡Ø§ÛŒ Ú©Ø´
+â”‚   â”‚   â””â”€â”€ Bat.Cache.Redis/  # Ù¾ÛŒØ§Ø¯Ù‡â€ŒØ³Ø§Ø²ÛŒ Redis Ùˆ Hybrid Cache
+â”‚   â”‚
+â”‚   â””â”€â”€ Queue/                 # Ù…Ø¯ÛŒØ±ÛŒØª ØµÙ
+â”‚       â””â”€â”€ Bat.Queue/        # Queue Management
 ```
 
 ---
 
-## ?? ˜?ÌåÇ
+## ğŸ“¦ Ù¾Ú©ÛŒØ¬â€ŒÙ‡Ø§
 
-### ?? Core Layer
+### ğŸ”· Core Layer
 
 #### **Bat.Core** ![NuGet](https://img.shields.io/badge/v10.0.0-green)
-åÓÊå ÇÕá? İÑ?ãæÑ˜ ÔÇãá:
-- **Extensions**: String¡ DateTime¡ Enum¡ Number¡ Object æ...
-- **Security**: AES¡ RSA¡ Hash Generation¡ Encryption
-- **Validation**: Attributes ÓİÇÑÔ? (Email¡ Mobile¡ NationalCode¡ IP¡ URL æ...)
-- **DateTime**: PersianDateTime¡ ÊÈÏ?áÇÊ ÊÇÑ?Î
+Ù‡Ø³ØªÙ‡ Ø§ØµÙ„ÛŒ ÙØ±ÛŒÙ…ÙˆØ±Ú© Ø´Ø§Ù…Ù„:
+- **Extensions**: StringØŒ DateTimeØŒ EnumØŒ NumberØŒ Object Ùˆ...
+- **Security**: AESØŒ RSAØŒ Hash GenerationØŒ Encryption
+- **Validation**: Attributes Ø³ÙØ§Ø±Ø´ÛŒ (EmailØŒ MobileØŒ NationalCodeØŒ IPØŒ URL Ùˆ...)
+- **DateTime**: PersianDateTimeØŒ ØªØ¨Ø¯ÛŒÙ„Ø§Øª ØªØ§Ø±ÛŒØ®
 - **Serialization**: JSON Converters
-- **File Operations**: ãÏ?Ñ?Ê İÇ?á
+- **File Operations**: Ù…Ø¯ÛŒØ±ÛŒØª ÙØ§ÛŒÙ„
 - **Logging**: FileLogger
-- **Pagination**: ?ÇÏåÓÇÒ? Paging
-- **Math**: Randomizer æ ÊæÇÈÚ Ñ?ÇÖ?
+- **Pagination**: Ù¾ÛŒØ§Ø¯Ù‡â€ŒØ³Ø§Ø²ÛŒ Paging
+- **Math**: Randomizer Ùˆ ØªÙˆØ§Ø¨Ø¹ Ø±ÛŒØ§Ø¶ÛŒ
 
 #### **Bat.Tools**
-ÇÈÒÇÑåÇ? ˜ã˜? ÇÖÇİ?:
+Ø§Ø¨Ø²Ø§Ø±Ù‡Ø§ÛŒ Ú©Ù…Ú©ÛŒ Ø§Ø¶Ø§ÙÛŒ:
 - Excel Operations
 - Public Extensions
 
 ---
 
-### ?? AspNetCore Layer
+### ğŸ”· AspNetCore Layer
 
 #### **Bat.AspNetCore** ![NuGet](https://img.shields.io/badge/v10.0.0-green)
-˜ÇãæääÊåÇ? ASP.NET Core:
-- **Authentication**: JWT Service æ ?˜ÑÈäÏ?
+Ú©Ø§Ù…Ù¾ÙˆÙ†Ù†Øªâ€ŒÙ‡Ø§ÛŒ ASP.NET Core:
+- **Authentication**: JWT Service Ùˆ Ù¾ÛŒÚ©Ø±Ø¨Ù†Ø¯ÛŒ
 - **Middleware**: 
   - `BatJwtParserMiddleware`
   - `BatExceptionHandlingMiddleware`
@@ -102,12 +102,12 @@ Bat/
   - Exception Handling Filter
   - Model Validation Filter
   - Swagger Authorization Filters
-- **TagHelpers**: CustomInput¡ CustomSelect¡ FileUploader æ...
-- **File Upload**: ãÏ?Ñ?Ê ÂáæÏ İÇ?áåÇ? ˜æ˜ æ ÈÒÑ
-- **Extensions**: Swagger¡ CORS¡ MVC Extensions
+- **TagHelpers**: CustomInputØŒ CustomSelectØŒ FileUploader Ùˆ...
+- **File Upload**: Ù…Ø¯ÛŒØ±ÛŒØª Ø¢Ù¾Ù„ÙˆØ¯ ÙØ§ÛŒÙ„â€ŒÙ‡Ø§ÛŒ Ú©ÙˆÚ†Ú© Ùˆ Ø¨Ø²Ø±Ú¯
+- **Extensions**: SwaggerØŒ CORSØŒ MVC Extensions
 
 #### **Bat.Http**
-ÇÈÒÇÑåÇ? HTTP:
+Ø§Ø¨Ø²Ø§Ø±Ù‡Ø§ÛŒ HTTP:
 - Client Info Detection
 - Request Details
 - Device Logging
@@ -118,58 +118,58 @@ Dependency Injection Utilities
 
 ---
 
-### ?? DataAccess Layer
+### ğŸ”· DataAccess Layer
 
 #### **Bat.EntityFrameworkCore** ![NuGet](https://img.shields.io/badge/v10.0.0-green)
-?ÇÏåÓÇÒ? ˜Çãá Repository æ UnitOfWork Pattern:
+Ù¾ÛŒØ§Ø¯Ù‡â€ŒØ³Ø§Ø²ÛŒ Ú©Ø§Ù…Ù„ Repository Ùˆ UnitOfWork Pattern:
 
 **Features:**
-- ? Generic Repository ÈÇ ŞÇÈá?ÊåÇ? ?ÔÑİÊå
-- ? UnitOfWork Pattern
-- ? Automatic Tracking Changes
-- ? Persian/English Character Normalization
-- ? Validation Handling
-- ? Exception Handling ÈÇ SaveChangeResult
-- ? Soft Delete Support
-- ? Audit Log Properties
-- ? Pagination Extensions
-- ? Dynamic OrderBy
-- ? Stored Procedure Execution
+- âœ… Generic Repository Ø¨Ø§ Ù‚Ø§Ø¨Ù„ÛŒØªâ€ŒÙ‡Ø§ÛŒ Ù¾ÛŒØ´Ø±ÙØªÙ‡
+- âœ… UnitOfWork Pattern
+- âœ… Automatic Tracking Changes
+- âœ… Persian/English Character Normalization
+- âœ… Validation Handling
+- âœ… Exception Handling Ø¨Ø§ SaveChangeResult
+- âœ… Soft Delete Support
+- âœ… Audit Log Properties
+- âœ… Pagination Extensions
+- âœ… Dynamic OrderBy
+- âœ… Stored Procedure Execution
 
 #### **Bat.EntityFrameworkCore.Tools**
-ÇÈÒÇÑåÇ? ?ÔÑİÊå EF Core
+Ø§Ø¨Ø²Ø§Ø±Ù‡Ø§ÛŒ Ù¾ÛŒØ´Ø±ÙØªÙ‡ EF Core
 
 #### **Bat.Dapper**
 Dapper Integration & Extensions
 
 ---
 
-### ?? Cache Layer
+### ğŸ”· Cache Layer
 
 #### **Bat.Cache**
-InterfaceåÇ? Cache ãÓÊŞá ÇÒ ?ÇÏåÓÇÒ?
+Interfaceâ€ŒÙ‡Ø§ÛŒ Cache Ù…Ø³ØªÙ‚Ù„ Ø§Ø² Ù¾ÛŒØ§Ø¯Ù‡â€ŒØ³Ø§Ø²ÛŒ
 
 #### **Bat.Cache.Redis** ![NuGet](https://img.shields.io/badge/v10.0.0-green)
-?ÇÏåÓÇÒ? Cache ÈÇ Redis:
-- ? Redis Cache Provider
-- ? Hybrid Cache (Memory + Redis)
-- ? Sentinel Support
-- ? SSL Support
-- ? Connection Retry Logic
-- ? Distributed Cache
+Ù¾ÛŒØ§Ø¯Ù‡â€ŒØ³Ø§Ø²ÛŒ Cache Ø¨Ø§ Redis:
+- âœ… Redis Cache Provider
+- âœ… Hybrid Cache (Memory + Redis)
+- âœ… Sentinel Support
+- âœ… SSL Support
+- âœ… Connection Retry Logic
+- âœ… Distributed Cache
 
 ---
 
-### ?? Queue Layer
+### ğŸ”· Queue Layer
 
 #### **Bat.Queue**
-ãÏ?Ñ?Ê ÕİåÇ? ?Çã
+Ù…Ø¯ÛŒØ±ÛŒØª ØµÙâ€ŒÙ‡Ø§ÛŒ Ù¾ÛŒØ§Ù…
 
 ---
 
-## ?? äÕÈ æ ÑÇåÇäÏÇÒ?
+## ğŸš€ Ù†ØµØ¨ Ùˆ Ø±Ø§Ù‡â€ŒØ§Ù†Ø¯Ø§Ø²ÛŒ
 
-### äÕÈ ÇÒ ØÑ?Ş NuGet Package Manager:
+### Ù†ØµØ¨ Ø§Ø² Ø·Ø±ÛŒÙ‚ NuGet Package Manager:
 
 ```powershell
 # Core Package
@@ -185,7 +185,7 @@ Install-Package Bat.AspNetCore -Version 10.0.0
 Install-Package Bat.Cache.Redis -Version 10.0.0
 ```
 
-### äÕÈ ÇÒ ØÑ?Ş .NET CLI:
+### Ù†ØµØ¨ Ø§Ø² Ø·Ø±ÛŒÙ‚ .NET CLI:
 
 ```bash
 dotnet add package Bat.Core --version 10.0.0
@@ -196,20 +196,20 @@ dotnet add package Bat.Cache.Redis --version 10.0.0
 
 ---
 
-## ?? ãÓÊäÏÇÊ
+## ğŸ“š Ù…Ø³ØªÙ†Ø¯Ø§Øª
 
-åÑ ˜?Ì ÏÇÑÇ? İÇ?á `readme.md` ãÌÒÇ ÈÇ ÊæÖ?ÍÇÊ ˜Çãá æ ãËÇáåÇ? ˜ÇÑÈÑÏ? ÇÓÊ:
+Ù‡Ø± Ù¾Ú©ÛŒØ¬ Ø¯Ø§Ø±Ø§ÛŒ ÙØ§ÛŒÙ„ `readme.md` Ù…Ø¬Ø²Ø§ Ø¨Ø§ ØªÙˆØ¶ÛŒØ­Ø§Øª Ú©Ø§Ù…Ù„ Ùˆ Ù…Ø«Ø§Ù„â€ŒÙ‡Ø§ÛŒ Ú©Ø§Ø±Ø¨Ø±Ø¯ÛŒ Ø§Ø³Øª:
 
-- [?? Bat.Core Documentation](src/Core/Bat.Core/readme.md)
-- [?? Bat.EntityFrameworkCore Documentation](src/DataAccess/Bat.EntityFrameworkCore/readme.md)
-- [?? Bat.AspNetCore Documentation](src/AspNetCore/Bat.AspNetCore/readme.md)
-- [?? Bat.Cache.Redis Documentation](src/Cache/Bat.Cache.Redis/readme.md)
+- [ğŸ“– Bat.Core Documentation](src/Core/Bat.Core/readme.md)
+- [ğŸ“– Bat.EntityFrameworkCore Documentation](src/DataAccess/Bat.EntityFrameworkCore/readme.md)
+- [ğŸ“– Bat.AspNetCore Documentation](src/AspNetCore/Bat.AspNetCore/readme.md)
+- [ğŸ“– Bat.Cache.Redis Documentation](src/Cache/Bat.Cache.Redis/readme.md)
 
 ---
 
-## ?? äãæäå ÇÓÊİÇÏå
+## ğŸ’¡ Ù†Ù…ÙˆÙ†Ù‡ Ø§Ø³ØªÙØ§Ø¯Ù‡
 
-### ?? ÇÓÊİÇÏå ÇÒ Bat.Core
+### ğŸ”¹ Ø§Ø³ØªÙØ§Ø¯Ù‡ Ø§Ø² Bat.Core
 
 ```csharp
 using Bat.Core;
@@ -240,7 +240,7 @@ public class UserService
 }
 ```
 
-### ?? ÇÓÊİÇÏå ÇÒ Bat.EntityFrameworkCore
+### ğŸ”¹ Ø§Ø³ØªÙØ§Ø¯Ù‡ Ø§Ø² Bat.EntityFrameworkCore
 
 ```csharp
 // 1. Define DbContext
@@ -314,7 +314,7 @@ public class UserService
 }
 ```
 
-### ?? ÇÓÊİÇÏå ÇÒ Bat.AspNetCore
+### ğŸ”¹ Ø§Ø³ØªÙØ§Ø¯Ù‡ Ø§Ø² Bat.AspNetCore
 
 ```csharp
 // Program.cs
@@ -340,7 +340,7 @@ app.UseBatJwtConfiguration();
 app.Run();
 ```
 
-### ?? ÇÓÊİÇÏå ÇÒ Bat.Cache.Redis
+### ğŸ”¹ Ø§Ø³ØªÙØ§Ø¯Ù‡ Ø§Ø² Bat.Cache.Redis
 
 ```csharp
 // appsettings.json
@@ -388,53 +388,53 @@ public class ProductService
 
 ---
 
-## ? æ??åÇ? ˜á?Ï?
+## âš¡ ÙˆÛŒÚ˜Ú¯ÛŒâ€ŒÙ‡Ø§ÛŒ Ú©Ù„ÛŒØ¯ÛŒ
 
-### ?? Bat.Core
+### ğŸ¨ Bat.Core
 
-| æ?? | ÊæÖ?ÍÇÊ |
+| ÙˆÛŒÚ˜Ú¯ÛŒ | ØªÙˆØ¶ÛŒØ­Ø§Øª |
 |-------|---------|
-| ?? Persian DateTime | ÊÈÏ?áÇÊ ˜Çãá ÊÇÑ?Î ÔãÓ? æ ã?áÇÏ? |
-| ?? Security | AES, RSA, Hash Generation |
-| ? Validation | 15+ Validation Attribute |
-| ?? Pagination | ?ÇÏåÓÇÒ? ˜Çãá ÕİÍåÈäÏ? |
-| ?? Logging | File-based Logger |
-| ?? Randomizer | Êæá?Ï ˜Ï æ ˜á?Ï ?˜ÊÇ |
+| ğŸ“… Persian DateTime | ØªØ¨Ø¯ÛŒÙ„Ø§Øª Ú©Ø§Ù…Ù„ ØªØ§Ø±ÛŒØ® Ø´Ù…Ø³ÛŒ Ùˆ Ù…ÛŒÙ„Ø§Ø¯ÛŒ |
+| ğŸ” Security | AES, RSA, Hash Generation |
+| âœ… Validation | 15+ Validation Attribute |
+| ğŸ“„ Pagination | Ù¾ÛŒØ§Ø¯Ù‡â€ŒØ³Ø§Ø²ÛŒ Ú©Ø§Ù…Ù„ ØµÙØ­Ù‡â€ŒØ¨Ù†Ø¯ÛŒ |
+| ğŸ“ Logging | File-based Logger |
+| ğŸ² Randomizer | ØªÙˆÙ„ÛŒØ¯ Ú©Ø¯ Ùˆ Ú©Ù„ÛŒØ¯ ÛŒÚ©ØªØ§ |
 
-### ?? Bat.EntityFrameworkCore
+### ğŸ’¾ Bat.EntityFrameworkCore
 
-| æ?? | ÊæÖ?ÍÇÊ |
+| ÙˆÛŒÚ˜Ú¯ÛŒ | ØªÙˆØ¶ÛŒØ­Ø§Øª |
 |-------|---------|
-| ??? Repository Pattern | ?ÇÏåÓÇÒ? ˜Çãá Generic Repository |
-| ?? UnitOfWork | ãÏ?Ñ?Ê ÊÑÇ˜äÔåÇ |
-| ? Auto Tracking | ËÈÊ ÎæÏ˜ÇÑ ÊÇÑ?Î Ç?ÌÇÏ/æ?ÑÇ?Ô |
-| ?? Normalization | äÑãÇáÓÇÒ? ˜ÇÑÇ˜ÊÑåÇ? İÇÑÓ? |
-| ??? Exception Handling | ãÏ?Ñ?Ê ˜Çãá ÎØÇåÇ |
-| ?? Pagination | ÕİÍåÈäÏ? ÈÇ Úãá˜ÑÏ ÈÇáÇ |
+| ğŸ—‚ï¸ Repository Pattern | Ù¾ÛŒØ§Ø¯Ù‡â€ŒØ³Ø§Ø²ÛŒ Ú©Ø§Ù…Ù„ Generic Repository |
+| ğŸ”„ UnitOfWork | Ù…Ø¯ÛŒØ±ÛŒØª ØªØ±Ø§Ú©Ù†Ø´â€ŒÙ‡Ø§ |
+| âœ¨ Auto Tracking | Ø«Ø¨Øª Ø®ÙˆØ¯Ú©Ø§Ø± ØªØ§Ø±ÛŒØ® Ø§ÛŒØ¬Ø§Ø¯/ÙˆÛŒØ±Ø§ÛŒØ´ |
+| ğŸŒ Normalization | Ù†Ø±Ù…Ø§Ù„â€ŒØ³Ø§Ø²ÛŒ Ú©Ø§Ø±Ø§Ú©ØªØ±Ù‡Ø§ÛŒ ÙØ§Ø±Ø³ÛŒ |
+| ğŸ›¡ï¸ Exception Handling | Ù…Ø¯ÛŒØ±ÛŒØª Ú©Ø§Ù…Ù„ Ø®Ø·Ø§Ù‡Ø§ |
+| ğŸ“‘ Pagination | ØµÙØ­Ù‡â€ŒØ¨Ù†Ø¯ÛŒ Ø¨Ø§ Ø¹Ù…Ù„Ú©Ø±Ø¯ Ø¨Ø§Ù„Ø§ |
 
-### ?? Bat.AspNetCore
+### ğŸŒ Bat.AspNetCore
 
-| æ?? | ÊæÖ?ÍÇÊ |
+| ÙˆÛŒÚ˜Ú¯ÛŒ | ØªÙˆØ¶ÛŒØ­Ø§Øª |
 |-------|---------|
-| ?? JWT | ?ÇÏåÓÇÒ? ˜Çãá Authentication |
-| ??? Middleware | Exception Handling, Request Buffering |
-| ?? Filters | Validation, Authorization |
-| ?? File Upload | ÂáæÏ İÇ?áåÇ? ˜æ˜ æ ÈÒÑ |
-| ?? Swagger | ?˜ÑÈäÏ? Swagger ÈÇ Authentication |
+| ğŸ”‘ JWT | Ù¾ÛŒØ§Ø¯Ù‡â€ŒØ³Ø§Ø²ÛŒ Ú©Ø§Ù…Ù„ Authentication |
+| ğŸ›¡ï¸ Middleware | Exception Handling, Request Buffering |
+| ğŸ“‹ Filters | Validation, Authorization |
+| ğŸ“¤ File Upload | Ø¢Ù¾Ù„ÙˆØ¯ ÙØ§ÛŒÙ„â€ŒÙ‡Ø§ÛŒ Ú©ÙˆÚ†Ú© Ùˆ Ø¨Ø²Ø±Ú¯ |
+| ğŸ“– Swagger | Ù¾ÛŒÚ©Ø±Ø¨Ù†Ø¯ÛŒ Swagger Ø¨Ø§ Authentication |
 
-### ?? Bat.Cache.Redis
+### ğŸ’¨ Bat.Cache.Redis
 
-| æ?? | ÊæÖ?ÍÇÊ |
+| ÙˆÛŒÚ˜Ú¯ÛŒ | ØªÙˆØ¶ÛŒØ­Ø§Øª |
 |-------|---------|
-| ? Redis Cache | ˜Ô ÊæÒ?ÚÔÏå ÈÇ Redis |
-| ?? Hybrid Cache | ÊÑ˜?È Memory + Redis |
-| ?? SSL Support | ÇÑÊÈÇØ Çãä |
-| ?? Retry Logic | ÊáÇÔ ãÌÏÏ ÎæÏ˜ÇÑ |
-| ?? Sentinel | ÔÊ?ÈÇä? ÇÒ Redis Sentinel |
+| âš¡ Redis Cache | Ú©Ø´ ØªÙˆØ²ÛŒØ¹â€ŒØ´Ø¯Ù‡ Ø¨Ø§ Redis |
+| ğŸ”€ Hybrid Cache | ØªØ±Ú©ÛŒØ¨ Memory + Redis |
+| ğŸ” SSL Support | Ø§Ø±ØªØ¨Ø§Ø· Ø§Ù…Ù† |
+| ğŸ”„ Retry Logic | ØªÙ„Ø§Ø´ Ù…Ø¬Ø¯Ø¯ Ø®ÙˆØ¯Ú©Ø§Ø± |
+| ğŸ¯ Sentinel | Ù¾Ø´ØªÛŒØ¨Ø§Ù†ÛŒ Ø§Ø² Redis Sentinel |
 
 ---
 
-## ??? Ê˜äæáæ?åÇ
+## ğŸ› ï¸ ØªÚ©Ù†ÙˆÙ„ÙˆÚ˜ÛŒâ€ŒÙ‡Ø§
 
 - **.NET 10.0**
 - **Entity Framework Core**
@@ -446,48 +446,48 @@ public class ProductService
 
 ---
 
-## ?? æÖÚ?Ê Ñæå
+## ğŸ“Š ÙˆØ¶Ø¹ÛŒØª Ù¾Ø±ÙˆÚ˜Ù‡
 
-Ç?ä İÑ?ãæÑ˜ ÈåØæÑ İÚÇá ÊæÓÚå ã??ÇÈÏ æ ÈåÑæÒÑÓÇä?åÇ? ãäÙã ÏÑ?ÇİÊ ã?˜äÏ:
+Ø§ÛŒÙ† ÙØ±ÛŒÙ…ÙˆØ±Ú© Ø¨Ù‡â€ŒØ·ÙˆØ± ÙØ¹Ø§Ù„ ØªÙˆØ³Ø¹Ù‡ Ù…ÛŒâ€ŒÛŒØ§Ø¨Ø¯ Ùˆ Ø¨Ù‡â€ŒØ±ÙˆØ²Ø±Ø³Ø§Ù†ÛŒâ€ŒÙ‡Ø§ÛŒ Ù…Ù†Ø¸Ù… Ø¯Ø±ÛŒØ§ÙØª Ù…ÛŒâ€ŒÚ©Ù†Ø¯:
 
-- ? **Stable**: ÊãÇã ˜?ÌåÇ? Core
-- ?? **Active Development**: ÈåÑæÒÑÓÇä? ãÓÊãÑ
-- ?? **Versioning**: Semantic Versioning (10.0.0)
-- ?? **.NET Support**: .NET 10
-
----
-
-## ?? ãÔÇÑ˜Ê
-
-Ç?ä Ñæå ?˜ İÑ?ãæÑ˜ ÔÎÕ? ÇÓÊ æ ÏÑ ÍÇá ÍÇÖÑ ÈÑÇ? ãÔÇÑ˜Ê Úãæã? ÈÇÒ ä?ÓÊ¡ ÇãÇ ?ÔäåÇÏÇÊ æ ÈÇÒÎæÑÏåÇ åã?Ôå ÎæÔÂãÏ åÓÊäÏ.
+- âœ… **Stable**: ØªÙ…Ø§Ù… Ù¾Ú©ÛŒØ¬â€ŒÙ‡Ø§ÛŒ Core
+- ğŸ”„ **Active Development**: Ø¨Ù‡â€ŒØ±ÙˆØ²Ø±Ø³Ø§Ù†ÛŒ Ù…Ø³ØªÙ…Ø±
+- ğŸ“¦ **Versioning**: Semantic Versioning (10.0.0)
+- ğŸ¯ **.NET Support**: .NET 10
 
 ---
 
-## ?? ÔÊ?ÈÇä?
+## ğŸ¤ Ù…Ø´Ø§Ø±Ú©Øª
 
-ÈÑÇ? ÓæÇáÇÊ¡ ?ÔäåÇÏÇÊ ?Ç ÒÇÑÔ ãÔ˜áÇÊ:
-
-?? **Email**: mehrannoruzi@gmail.com  
-?? **Tel**: +989301919109  
-?? **GitHub**: [@mehrannoruzi](https://github.com/mehrannoruzi)  
-?? **Repository**: [https://github.com/mehrannoruzi/Bat](https://github.com/mehrannoruzi/Bat)
+Ø§ÛŒÙ† Ù¾Ø±ÙˆÚ˜Ù‡ ÛŒÚ© ÙØ±ÛŒÙ…ÙˆØ±Ú© Ø´Ø®ØµÛŒ Ø§Ø³Øª Ùˆ Ø¯Ø± Ø­Ø§Ù„ Ø­Ø§Ø¶Ø± Ø¨Ø±Ø§ÛŒ Ù…Ø´Ø§Ø±Ú©Øª Ø¹Ù…ÙˆÙ…ÛŒ Ø¨Ø§Ø² Ù†ÛŒØ³ØªØŒ Ø§Ù…Ø§ Ù¾ÛŒØ´Ù†Ù‡Ø§Ø¯Ø§Øª Ùˆ Ø¨Ø§Ø²Ø®ÙˆØ±Ø¯Ù‡Ø§ Ù‡Ù…ÛŒØ´Ù‡ Ø®ÙˆØ´â€ŒØ¢Ù…Ø¯ Ù‡Ø³ØªÙ†Ø¯.
 
 ---
 
-## ?? ãÌæÒ
+## ğŸ“ Ù¾Ø´ØªÛŒØ¨Ø§Ù†ÛŒ
 
-© ÊãÇã? ÍŞæŞ ãÍİæÙ ÇÓÊ - Mehran Norouzi
+Ø¨Ø±Ø§ÛŒ Ø³ÙˆØ§Ù„Ø§ØªØŒ Ù¾ÛŒØ´Ù†Ù‡Ø§Ø¯Ø§Øª ÛŒØ§ Ú¯Ø²Ø§Ø±Ø´ Ù…Ø´Ú©Ù„Ø§Øª:
+
+ğŸ“§ **Email**: mehrannoruzi@gmail.com  
+ğŸ“± **Tel**: +989301919109  
+ğŸ™ **GitHub**: [@mehrannoruzi](https://github.com/mehrannoruzi)  
+ğŸ”— **Repository**: [https://github.com/mehrannoruzi/Bat](https://github.com/mehrannoruzi/Bat)
 
 ---
 
-## ?? ÓÊÇÑåÏå?
+## ğŸ“„ Ù…Ø¬ÙˆØ²
 
-ÇÑ ÇÒ Ç?ä İÑ?ãæÑ˜ ÇÓÊİÇÏå ã?˜ä?Ï æ ÈÑÇ? ÔãÇ ãİ?Ï ÈæÏ¡ áØİÇğ ÈÇ ÏÇÏä ÓÊÇÑå Èå Ç?ä Ñæå ÇÒ Âä ÍãÇ?Ê ˜ä?Ï! ?
+Â© ØªÙ…Ø§Ù…ÛŒ Ø­Ù‚ÙˆÙ‚ Ù…Ø­ÙÙˆØ¸ Ø§Ø³Øª - Mehran Norouzi
+
+---
+
+## ğŸŒŸ Ø³ØªØ§Ø±Ù‡â€ŒØ¯Ù‡ÛŒ
+
+Ø§Ú¯Ø± Ø§Ø² Ø§ÛŒÙ† ÙØ±ÛŒÙ…ÙˆØ±Ú© Ø§Ø³ØªÙØ§Ø¯Ù‡ Ù…ÛŒâ€ŒÚ©Ù†ÛŒØ¯ Ùˆ Ø¨Ø±Ø§ÛŒ Ø´Ù…Ø§ Ù…ÙÛŒØ¯ Ø¨ÙˆØ¯ØŒ Ù„Ø·ÙØ§Ù‹ Ø¨Ø§ Ø¯Ø§Ø¯Ù† Ø³ØªØ§Ø±Ù‡ Ø¨Ù‡ Ø§ÛŒÙ† Ù¾Ø±ÙˆÚ˜Ù‡ Ø§Ø² Ø¢Ù† Ø­Ù…Ø§ÛŒØª Ú©Ù†ÛŒØ¯! â­
 
 ---
 
 <div align="center">
 
-**ÓÇÎÊå ÔÏå ÈÇ ?? ÊæÓØ Mehran Norouzi**
+**Ø³Ø§Ø®ØªÙ‡ Ø´Ø¯Ù‡ Ø¨Ø§ â¤ï¸ ØªÙˆØ³Ø· Mehran Norouzi**
 
 </div>
