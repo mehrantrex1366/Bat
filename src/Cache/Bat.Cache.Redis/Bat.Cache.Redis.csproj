@@ -48,7 +48,7 @@ Mail : mehrannoruzi@gmail.com</PackageReleaseNotes>
 		<PackageReference Include="Microsoft.Extensions.Caching.Hybrid" Version="10.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.0" />
-		<PackageReference Include="StackExchange.Redis" Version="2.9.32" />
+		<PackageReference Include="StackExchange.Redis" Version="2.10.1" />
 	</ItemGroup>
 
 	<ItemGroup>
