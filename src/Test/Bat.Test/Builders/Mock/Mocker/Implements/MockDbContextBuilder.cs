@@ -2,9 +2,9 @@
 
 public class MockDbContextBuilder<TDbContext> where TDbContext : class, IBatDbContext
 {
-    private Mock<TDbContext> _dbMock;
     private readonly Mock<TDbContext> _mock;
-    private Mock<IDbContextTransaction> _transactionMock;
+    private readonly Mock<TDbContext> _dbMock;
+    private readonly Mock<IDbContextTransaction> _transactionMock;
 
     public MockDbContextBuilder()
     {

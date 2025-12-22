@@ -242,7 +242,7 @@ public class BogusBuilder<T> where T : class
     }
 
     public BogusBuilder<T> WithMany<TChild>(Expression<Func<T, IEnumerable<TChild>>> property,
-        Func<BogusBuilder<TChild>, BogusBuilder<TChild>>? childBuilder = null, int count = 1)
+        Func<BogusBuilder<TChild>, BogusBuilder<TChild>> childBuilder = null, int count = 1)
         where TChild : class
     {
         var builder = new BogusBuilder<TChild>();
