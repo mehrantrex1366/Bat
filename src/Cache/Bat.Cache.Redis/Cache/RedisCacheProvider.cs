@@ -10,8 +10,8 @@ public class RedisCacheProvider : IRedisCacheProvider
     {
         _redisSettings = redisSettings.Value;
         if (_redisSettings.Server1.IsNullOrWhiteSpace() ||
-            _redisSettings.Server1.IsNullOrWhiteSpace() ||
-            _redisSettings.Server1.IsNullOrWhiteSpace())
+            _redisSettings.Server2.IsNullOrWhiteSpace() ||
+            _redisSettings.Server3.IsNullOrWhiteSpace())
             throw new Exception("redisSettings not configured properly in appSettings !");
 
         ConfigurationOptions config = new();

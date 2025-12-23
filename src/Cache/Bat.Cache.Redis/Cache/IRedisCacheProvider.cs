@@ -9,6 +9,9 @@ public interface IRedisCacheProvider : ISingletonInjection
     IEnumerable<string> GetAllKey(RedisValue[] command, CommandFlags flags = CommandFlags.None);
     IEnumerable<string> GetAllKey(PagingParameter pagingParameter, string pattern = null, CommandFlags flags = CommandFlags.None);
 
+    string Execute(string command, ICollection<object> args, CommandFlags flags = CommandFlags.None);
+    Task<string> ExecuteAsync(string command, ICollection<object> args, CommandFlags flags = CommandFlags.None);
+
     bool Set(string key, string value, TimeSpan? expiry = null, bool keepTTL = false);
     bool Set(string key, object value, TimeSpan? expiry = null, bool keepTTl = false);
     bool Set(KeyValuePair<string, string>[] values);
