@@ -2,6 +2,63 @@ namespace Bat.Http;
 
 public static class HttpRequestTools
 {
+    private static string BuildQueryString(Dictionary<string, string> parameters)
+    {
+        if (parameters is null || parameters.Count == 0)
+            return string.Empty;
+
+        var queryParams = parameters.Select(x =>
+            $"{Uri.EscapeDataString(x.Key)}={Uri.EscapeDataString(x.Value ?? string.Empty)}");
+
+        return string.Join("&", queryParams);
+    }
+
+    private static string BuildQueryString(object parameter, Type objectType)
+    {
+        if (parameter is null)
+            return string.Empty;
+
+        var fields = parameter.GetClassFields(objectType);
+        if (fields is null || fields.Any() is false)
+            return string.Empty;
+
+        var queryParams = fields.Select(field =>
+            $"{Uri.EscapeDataString(field.Name)}={Uri.EscapeDataString(field.Value?.ToString() ?? string.Empty)}");
+
+        return string.Join("&", queryParams);
+    }
+
+    private static string BuildCompleteUrl(string baseUrl, string queryString)
+    {
+        if (string.IsNullOrWhiteSpace(queryString))
+            return baseUrl;
+
+        return $"{baseUrl}?{queryString}";
+    }
+
+    private static void AddHeaders(HttpRequestMessage request, Dictionary<string, string> headers)
+    {
+        if (headers is null || headers.Count == 0)
+            return;
+
+        foreach (var header in headers)
+        {
+            // TryAddWithoutValidation is better than Add because it doesn't throw exceptions
+            // for headers that might need to be added to Content.Headers instead
+            request.Headers.TryAddWithoutValidation(header.Key, header.Value);
+        }
+    }
+
+    private static void ConfigureCertificateValidation(HttpClientHandler handler, bool bypassCertificate)
+    {
+        if (bypassCertificate is false)
+            return;
+
+        handler.ClientCertificateOptions = ClientCertificateOption.Manual;
+        handler.ServerCertificateCustomValidationCallback = (httpRequestMessage, cert, certChain, policyErrors) => true;
+    }
+
+
     public static bool IsAjaxRequest(this HttpRequest request)
     {
         if (request.Headers != null) return request.Headers["X-Requested-With"] == "XMLHttpRequest";
