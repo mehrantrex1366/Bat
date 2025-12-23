@@ -99,11 +99,8 @@ public static class HttpRequestTools
 
     public static async Task<T> GetAsync<T>(string url, object parameter, Type objectType, CancellationToken cancellationToken = default)
     {
-        var param = string.Empty;
-        if (parameter is not null)
-            foreach (var item in parameter.GetClassFields(objectType))
-                param += $"{item.Name}={item.Value}&";
-        var completeUrl = string.IsNullOrWhiteSpace(param) ? url : $"{url}?{param[..^1]}";
+        var queryString = BuildQueryString(parameter, objectType);
+        var completeUrl = BuildCompleteUrl(url, queryString);
 
         using var httpClient = new HttpClient();
         var request = new HttpRequestMessage(HttpMethod.Get, new Uri(completeUrl));
@@ -114,11 +111,8 @@ public static class HttpRequestTools
 
     public static async Task<(HttpStatusCode httpStatusCode, string response)> GetAsync(string url, object parameter, Type objectType, CancellationToken cancellationToken = default)
     {
-        var param = string.Empty;
-        if (parameter is not null)
-            foreach (var item in parameter.GetClassFields(objectType))
-                param += $"{item.Name}={item.Value}&";
-        var completeUrl = string.IsNullOrWhiteSpace(param) ? url : $"{url}?{param[..^1]}";
+        var queryString = BuildQueryString(parameter, objectType);
+        var completeUrl = BuildCompleteUrl(url, queryString);
 
         using var httpClient = new HttpClient();
         var request = new HttpRequestMessage(HttpMethod.Get, new Uri(completeUrl));
@@ -128,11 +122,8 @@ public static class HttpRequestTools
 
     public static async Task<T> GetAsync<T>(string url, Dictionary<string, string> parameter, CancellationToken cancellationToken = default)
     {
-        var param = string.Empty;
-        if (parameter is not null)
-            foreach (var item in parameter)
-                param += Uri.EscapeDataString($"{item.Key}={item.Value}&");
-        var completeUrl = string.IsNullOrWhiteSpace(param) ? url : $"{url}?{param[..^1]}";
+        var queryString = BuildQueryString(parameter);
+        var completeUrl = BuildCompleteUrl(url, queryString);
 
         using var httpClient = new HttpClient();
         var request = new HttpRequestMessage(HttpMethod.Get, new Uri(completeUrl));
@@ -143,11 +134,8 @@ public static class HttpRequestTools
 
     public static async Task<(HttpStatusCode httpStatusCode, string response)> GetAsync(string url, Dictionary<string, string> parameter, CancellationToken cancellationToken = default)
     {
-        var param = string.Empty;
-        if (parameter is not null)
-            foreach (var item in parameter)
-                param += Uri.EscapeDataString($"{item.Key}={item.Value}&");
-        var completeUrl = string.IsNullOrWhiteSpace(param) ? url : $"{url}?{param[..^1]}";
+        var queryString = BuildQueryString(parameter);
+        var completeUrl = BuildCompleteUrl(url, queryString);
 
         using var httpClient = new HttpClient();
         var request = new HttpRequestMessage(HttpMethod.Get, new Uri(completeUrl));
@@ -157,15 +145,11 @@ public static class HttpRequestTools
 
     public static async Task<T> GetAsync<T>(string url, Dictionary<string, string> parameter, Dictionary<string, string> header, CancellationToken cancellationToken = default) where T : class
     {
-        var param = string.Empty;
-        if (parameter is not null)
-            foreach (var item in parameter)
-                param += Uri.EscapeDataString($"{item.Key}={item.Value}&");
-        var completeUrl = string.IsNullOrWhiteSpace(param) ? url : $"{url}?{param[..^1]}";
+        var queryString = BuildQueryString(parameter);
+        var completeUrl = BuildCompleteUrl(url, queryString);
 
         var request = new HttpRequestMessage(HttpMethod.Get, new Uri(completeUrl));
-        foreach (var item in header)
-            request.Headers.Add(item.Key, item.Value);
+        AddHeaders(request, header);
 
         using var httpClient = new HttpClient();
         var response = await httpClient.SendAsync(request, cancellationToken);
@@ -175,15 +159,11 @@ public static class HttpRequestTools
 
     public static async Task<(HttpStatusCode httpStatusCode, string response)> GetAsync(string url, Dictionary<string, string> parameter, Dictionary<string, string> header, CancellationToken cancellationToken = default)
     {
-        var param = string.Empty;
-        if (parameter is not null)
-            foreach (var item in parameter)
-                param += Uri.EscapeDataString($"{item.Key}={item.Value}&");
-        var completeUrl = string.IsNullOrWhiteSpace(param) ? url : $"{url}?{param[..^1]}";
+        var queryString = BuildQueryString(parameter);
+        var completeUrl = BuildCompleteUrl(url, queryString);
 
         var request = new HttpRequestMessage(HttpMethod.Get, new Uri(completeUrl));
-        foreach (var item in header)
-            request.Headers.Add(item.Key, item.Value);
+        AddHeaders(request, header);
 
         using var httpClient = new HttpClient();
         var response = await httpClient.SendAsync(request, cancellationToken);
@@ -192,22 +172,14 @@ public static class HttpRequestTools
 
     public static async Task<T> GetAsync<T>(string url, Dictionary<string, string> parameter, Dictionary<string, string> header, bool byPassServerSertificate, int timeOutSecond, CancellationToken cancellationToken = default) where T : class
     {
-        var param = string.Empty;
-        if (parameter is not null)
-            foreach (var item in parameter)
-                param += Uri.EscapeDataString($"{item.Key}={item.Value}&");
-        var completeUrl = string.IsNullOrWhiteSpace(param) ? url : $"{url}?{param[..^1]}";
+        var queryString = BuildQueryString(parameter);
+        var completeUrl = BuildCompleteUrl(url, queryString);
 
         var request = new HttpRequestMessage(HttpMethod.Get, new Uri(completeUrl));
-        foreach (var item in header)
-            request.Headers.Add(item.Key, item.Value);
+        AddHeaders(request, header);
 
         using var handler = new HttpClientHandler();
-        if (byPassServerSertificate)
-        {
-            handler.ClientCertificateOptions = ClientCertificateOption.Manual;
-            handler.ServerCertificateCustomValidationCallback = (httpRequestMessage, cert, certChain, policyErrors) => { return true; };
-        }
+        ConfigureCertificateValidation(handler, byPassServerSertificate);
         using var httpClient = new HttpClient(handler);
         httpClient.Timeout = TimeSpan.FromSeconds(timeOutSecond);
         var response = await httpClient.SendAsync(request, cancellationToken);
@@ -217,22 +189,14 @@ public static class HttpRequestTools
 
     public static async Task<(HttpStatusCode httpStatusCode, string response)> GetAsync(string url, Dictionary<string, string> parameter, Dictionary<string, string> header, bool byPassServerSertificate, int timeOutSecond, CancellationToken cancellationToken = default)
     {
-        var param = string.Empty;
-        if (parameter is not null)
-            foreach (var item in parameter)
-                param += Uri.EscapeDataString($"{item.Key}={item.Value}&");
-        var completeUrl = string.IsNullOrWhiteSpace(param) ? url : $"{url}?{param[..^1]}";
+        var queryString = BuildQueryString(parameter);
+        var completeUrl = BuildCompleteUrl(url, queryString);
 
         var request = new HttpRequestMessage(HttpMethod.Get, new Uri(completeUrl));
-        foreach (var item in header)
-            request.Headers.Add(item.Key, item.Value);
+        AddHeaders(request, header);
 
         using var handler = new HttpClientHandler();
-        if (byPassServerSertificate)
-        {
-            handler.ClientCertificateOptions = ClientCertificateOption.Manual;
-            handler.ServerCertificateCustomValidationCallback = (httpRequestMessage, cert, certChain, policyErrors) => { return true; };
-        }
+        ConfigureCertificateValidation(handler, byPassServerSertificate);
         using var httpClient = new HttpClient(handler);
         httpClient.Timeout = TimeSpan.FromSeconds(timeOutSecond);
         var response = await httpClient.SendAsync(request, cancellationToken);
@@ -249,11 +213,8 @@ public static class HttpRequestTools
 
     public static async Task<T> GetAsync<T>(HttpClient httpClient, string url, Dictionary<string, string> parameter, CancellationToken cancellationToken = default)
     {
-        var param = string.Empty;
-        if (parameter is not null)
-            foreach (var item in parameter)
-                param += Uri.EscapeDataString($"{item.Key}={item.Value}&");
-        var completeUrl = string.IsNullOrWhiteSpace(param) ? url : $"{url}?{param[..^1]}";
+        var queryString = BuildQueryString(parameter);
+        var completeUrl = BuildCompleteUrl(url, queryString);
 
         var response = await httpClient.GetAsync(completeUrl, cancellationToken);
         var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
@@ -262,11 +223,8 @@ public static class HttpRequestTools
 
     public static async Task<(HttpStatusCode httpStatusCode, string response)> GetAsync(HttpClient httpClient, string url, Dictionary<string, string> parameter, CancellationToken cancellationToken = default)
     {
-        var param = string.Empty;
-        if (parameter is not null)
-            foreach (var item in parameter)
-                param += Uri.EscapeDataString($"{item.Key}={item.Value}&");
-        var completeUrl = string.IsNullOrWhiteSpace(param) ? url : $"{url}?{param[..^1]}";
+        var queryString = BuildQueryString(parameter);
+        var completeUrl = BuildCompleteUrl(url, queryString);
 
         var response = await httpClient.GetAsync(completeUrl, cancellationToken);
         return (response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
@@ -274,11 +232,8 @@ public static class HttpRequestTools
 
     public static async Task<T> GetAsync<T>(HttpClient httpClient, string url, object parameter, Type objectType, CancellationToken cancellationToken = default)
     {
-        var param = string.Empty;
-        if (parameter is not null)
-            foreach (var item in parameter.GetClassFields(objectType))
-                param += $"{item.Name}={item.Value}&";
-        var completeUrl = string.IsNullOrWhiteSpace(param) ? url : $"{url}?{param[..^1]}";
+        var queryString = BuildQueryString(parameter, objectType);
+        var completeUrl = BuildCompleteUrl(url, queryString);
 
         var response = await httpClient.GetAsync(completeUrl, cancellationToken);
         var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
@@ -287,15 +242,11 @@ public static class HttpRequestTools
 
     public static async Task<T> GetAsync<T>(HttpClient httpClient, string url, Dictionary<string, string> parameter, Dictionary<string, string> header, CancellationToken cancellationToken = default) where T : class
     {
-        var param = string.Empty;
-        if (parameter is not null)
-            foreach (var item in parameter)
-                param += Uri.EscapeDataString($"{item.Key}={item.Value}&");
-        var completeUrl = string.IsNullOrWhiteSpace(param) ? url : $"{url}?{param[..^1]}";
+        var queryString = BuildQueryString(parameter);
+        var completeUrl = BuildCompleteUrl(url, queryString);
 
         var request = new HttpRequestMessage(HttpMethod.Get, new Uri(completeUrl));
-        foreach (var item in header)
-            request.Headers.Add(item.Key, item.Value);
+        AddHeaders(request, header);
 
         var response = await httpClient.SendAsync(request, cancellationToken);
         var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
@@ -304,15 +255,11 @@ public static class HttpRequestTools
 
     public static async Task<(HttpStatusCode httpStatusCode, string response)> GetAsync(HttpClient httpClient, string url, Dictionary<string, string> parameter, Dictionary<string, string> header, CancellationToken cancellationToken = default)
     {
-        var param = string.Empty;
-        if (parameter is not null)
-            foreach (var item in parameter)
-                param += Uri.EscapeDataString($"{item.Key}={item.Value}&");
-        var completeUrl = string.IsNullOrWhiteSpace(param) ? url : $"{url}?{param[..^1]}";
+        var queryString = BuildQueryString(parameter);
+        var completeUrl = BuildCompleteUrl(url, queryString);
 
         var request = new HttpRequestMessage(HttpMethod.Get, new Uri(completeUrl));
-        foreach (var item in header)
-            request.Headers.Add(item.Key, item.Value);
+        AddHeaders(request, header);
 
         var response = await httpClient.SendAsync(request, cancellationToken);
         return (response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
@@ -320,15 +267,11 @@ public static class HttpRequestTools
 
     public static async Task<T> GetAsync<T>(HttpClient httpClient, string url, Dictionary<string, string> parameter, Dictionary<string, string> header, int timeOutSecond, CancellationToken cancellationToken = default) where T : class
     {
-        var param = string.Empty;
-        if (parameter is not null)
-            foreach (var item in parameter)
-                param += Uri.EscapeDataString($"{item.Key}={item.Value}&");
-        var completeUrl = string.IsNullOrWhiteSpace(param) ? url : $"{url}?{param[..^1]}";
+        var queryString = BuildQueryString(parameter);
+        var completeUrl = BuildCompleteUrl(url, queryString);
 
         var request = new HttpRequestMessage(HttpMethod.Get, new Uri(completeUrl));
-        foreach (var item in header)
-            request.Headers.Add(item.Key, item.Value);
+        AddHeaders(request, header);
 
         httpClient.Timeout = TimeSpan.FromSeconds(timeOutSecond);
         var response = await httpClient.SendAsync(request, cancellationToken);
@@ -338,15 +281,11 @@ public static class HttpRequestTools
 
     public static async Task<(HttpStatusCode httpStatusCode, string response)> GetAsync(HttpClient httpClient, string url, Dictionary<string, string> parameter, Dictionary<string, string> header, int timeOutSecond, CancellationToken cancellationToken = default)
     {
-        var param = string.Empty;
-        if (parameter is not null)
-            foreach (var item in parameter)
-                param += Uri.EscapeDataString($"{item.Key}={item.Value}&");
-        var completeUrl = string.IsNullOrWhiteSpace(param) ? url : $"{url}?{param[..^1]}";
+        var queryString = BuildQueryString(parameter);
+        var completeUrl = BuildCompleteUrl(url, queryString);
 
         var request = new HttpRequestMessage(HttpMethod.Get, new Uri(completeUrl));
-        foreach (var item in header)
-            request.Headers.Add(item.Key, item.Value);
+        AddHeaders(request, header);
 
         httpClient.Timeout = TimeSpan.FromSeconds(timeOutSecond);
         var response = await httpClient.SendAsync(request, cancellationToken);
@@ -362,9 +301,7 @@ public static class HttpRequestTools
         {
             Content = new StringContent(contentValues.SerializeToJson(), resultEncoding ?? Encoding.UTF8, "application/json")
         };
-        if (header is not null)
-            foreach (var item in header)
-                request.Headers.Add(item.Key, item.Value);
+        AddHeaders(request, header);
 
         using var httpClient = new HttpClient();
         var response = await httpClient.SendAsync(request, cancellationToken);
@@ -378,9 +315,7 @@ public static class HttpRequestTools
         {
             Content = new StringContent(contentValues.SerializeToJson(), resultEncoding ?? Encoding.UTF8, "application/json")
         };
-        if (header is not null)
-            foreach (var item in header)
-                request.Headers.Add(item.Key, item.Value);
+        AddHeaders(request, header);
 
         using var httpClient = new HttpClient();
         var response = await httpClient.SendAsync(request, cancellationToken);
@@ -393,9 +328,7 @@ public static class HttpRequestTools
         {
             Content = new StringContent(contentJsonString, resultEncoding ?? Encoding.UTF8, "application/json")
         };
-        if (header is not null)
-            foreach (var item in header)
-                request.Headers.Add(item.Key, item.Value);
+        AddHeaders(request, header);
 
         using var httpClient = new HttpClient();
         var response = await httpClient.SendAsync(request, cancellationToken);
@@ -409,9 +342,7 @@ public static class HttpRequestTools
         {
             Content = new StringContent(contentJsonString, resultEncoding ?? Encoding.UTF8, "application/json")
         };
-        if (header is not null)
-            foreach (var item in header)
-                request.Headers.Add(item.Key, item.Value);
+        AddHeaders(request, header);
 
         using var httpClient = new HttpClient();
         var response = await httpClient.SendAsync(request, cancellationToken);
@@ -424,16 +355,10 @@ public static class HttpRequestTools
         {
             Content = new StringContent(contentJsonString, resultEncoding ?? Encoding.UTF8, "application/json")
         };
-        if (header is not null)
-            foreach (var item in header)
-                request.Headers.Add(item.Key, item.Value);
+        AddHeaders(request, header);
 
         using var handler = new HttpClientHandler();
-        if (byPassServerSertificate)
-        {
-            handler.ClientCertificateOptions = ClientCertificateOption.Manual;
-            handler.ServerCertificateCustomValidationCallback = (httpRequestMessage, cert, certChain, policyErrors) => { return true; };
-        }
+        ConfigureCertificateValidation(handler, byPassServerSertificate);
         using var httpClient = new HttpClient(handler);
         httpClient.Timeout = TimeSpan.FromSeconds(timeOutSecond);
         var response = await httpClient.SendAsync(request, cancellationToken);
@@ -447,16 +372,10 @@ public static class HttpRequestTools
         {
             Content = new StringContent(contentJsonString, resultEncoding ?? Encoding.UTF8, "application/json")
         };
-        if (header is not null)
-            foreach (var item in header)
-                request.Headers.Add(item.Key, item.Value);
+        AddHeaders(request, header);
 
         using var handler = new HttpClientHandler();
-        if (byPassServerSertificate)
-        {
-            handler.ClientCertificateOptions = ClientCertificateOption.Manual;
-            handler.ServerCertificateCustomValidationCallback = (httpRequestMessage, cert, certChain, policyErrors) => { return true; };
-        }
+        ConfigureCertificateValidation(handler, byPassServerSertificate);
         using var httpClient = new HttpClient(handler);
         httpClient.Timeout = TimeSpan.FromSeconds(timeOutSecond);
         var response = await httpClient.SendAsync(request, cancellationToken);
@@ -474,9 +393,7 @@ public static class HttpRequestTools
         {
             Content = formData
         };
-        if (header is not null)
-            foreach (var item in header)
-                request.Headers.Add(item.Key, item.Value);
+        AddHeaders(request, header);
 
         using var httpClient = new HttpClient();
         var response = await httpClient.SendAsync(request, cancellationToken);
@@ -495,9 +412,7 @@ public static class HttpRequestTools
         {
             Content = formData
         };
-        if (header is not null)
-            foreach (var item in header)
-                request.Headers.Add(item.Key, item.Value);
+        AddHeaders(request, header);
 
         using var httpClient = new HttpClient();
         var response = await httpClient.SendAsync(request, cancellationToken);
@@ -515,16 +430,10 @@ public static class HttpRequestTools
         {
             Content = formData
         };
-        if (header is not null)
-            foreach (var item in header)
-                request.Headers.Add(item.Key, item.Value);
+        AddHeaders(request, header);
 
         using var handler = new HttpClientHandler();
-        if (byPassServerCertificate)
-        {
-            handler.ClientCertificateOptions = ClientCertificateOption.Manual;
-            handler.ServerCertificateCustomValidationCallback = (httpRequestMessage, cert, certChain, policyErrors) => { return true; };
-        }
+        ConfigureCertificateValidation(handler, byPassServerCertificate);
         using var httpClient = new HttpClient(handler);
         var response = await httpClient.SendAsync(request, cancellationToken);
         return (response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
@@ -541,16 +450,10 @@ public static class HttpRequestTools
         {
             Content = formData
         };
-        if (header is not null)
-            foreach (var item in header)
-                request.Headers.Add(item.Key, item.Value);
+        AddHeaders(request, header);
 
         using var handler = new HttpClientHandler();
-        if (byPassServerCertificate)
-        {
-            handler.ClientCertificateOptions = ClientCertificateOption.Manual;
-            handler.ServerCertificateCustomValidationCallback = (httpRequestMessage, cert, certChain, policyErrors) => { return true; };
-        }
+        ConfigureCertificateValidation(handler, byPassServerCertificate);
         using var httpClient = new HttpClient(handler);
         var response = await httpClient.SendAsync(request, cancellationToken);
         return (response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
@@ -567,16 +470,10 @@ public static class HttpRequestTools
         {
             Content = formData
         };
-        if (header is not null)
-            foreach (var item in header)
-                request.Headers.Add(item.Key, item.Value);
+        AddHeaders(request, header);
 
         using var handler = new HttpClientHandler();
-        if (byPassServerSertificate)
-        {
-            handler.ClientCertificateOptions = ClientCertificateOption.Manual;
-            handler.ServerCertificateCustomValidationCallback = (httpRequestMessage, cert, certChain, policyErrors) => { return true; };
-        }
+        ConfigureCertificateValidation(handler, byPassServerSertificate);
         using var httpClient = new HttpClient(handler);
         httpClient.Timeout = TimeSpan.FromSeconds(timeOutSecond);
         var response = await httpClient.SendAsync(request, cancellationToken);
@@ -595,16 +492,10 @@ public static class HttpRequestTools
         {
             Content = formData
         };
-        if (header is not null)
-            foreach (var item in header)
-                request.Headers.Add(item.Key, item.Value);
+        AddHeaders(request, header);
 
         using var handler = new HttpClientHandler();
-        if (byPassServerSertificate)
-        {
-            handler.ClientCertificateOptions = ClientCertificateOption.Manual;
-            handler.ServerCertificateCustomValidationCallback = (httpRequestMessage, cert, certChain, policyErrors) => { return true; };
-        }
+        ConfigureCertificateValidation(handler, byPassServerSertificate);
         using var httpClient = new HttpClient(handler);
         httpClient.Timeout = TimeSpan.FromSeconds(timeOutSecond);
         var response = await httpClient.SendAsync(request, cancellationToken);
@@ -618,9 +509,7 @@ public static class HttpRequestTools
         {
             Content = new StringContent(contentJsonString, resultEncoding ?? Encoding.UTF8, "application/json")
         };
-        if (header is not null)
-            foreach (var item in header)
-                request.Headers.Add(item.Key, item.Value);
+        AddHeaders(request, header);
 
         var response = await httpClient.SendAsync(request, cancellationToken);
         var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
@@ -633,9 +522,7 @@ public static class HttpRequestTools
         {
             Content = new StringContent(contentJsonString, resultEncoding ?? Encoding.UTF8, "application/json")
         };
-        if (header is not null)
-            foreach (var item in header)
-                request.Headers.Add(item.Key, item.Value);
+        AddHeaders(request, header);
 
         var response = await httpClient.SendAsync(request, cancellationToken);
         return (response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
@@ -647,9 +534,7 @@ public static class HttpRequestTools
         {
             Content = new StringContent(contentJsonString, resultEncoding ?? Encoding.UTF8, "application/json")
         };
-        if (header is not null)
-            foreach (var item in header)
-                request.Headers.Add(item.Key, item.Value);
+        AddHeaders(request, header);
 
         httpClient.Timeout = TimeSpan.FromSeconds(timeOutSecond);
         var response = await httpClient.SendAsync(request, cancellationToken);
@@ -663,9 +548,7 @@ public static class HttpRequestTools
         {
             Content = new StringContent(contentJsonString, resultEncoding ?? Encoding.UTF8, "application/json")
         };
-        if (header is not null)
-            foreach (var item in header)
-                request.Headers.Add(item.Key, item.Value);
+        AddHeaders(request, header);
 
         httpClient.Timeout = TimeSpan.FromSeconds(timeOutSecond);
         var response = await httpClient.SendAsync(request, cancellationToken);
@@ -683,9 +566,7 @@ public static class HttpRequestTools
         {
             Content = formData
         };
-        if (header is not null)
-            foreach (var item in header)
-                request.Headers.Add(item.Key, item.Value);
+        AddHeaders(request, header);
 
         httpClient.Timeout = TimeSpan.FromSeconds(timeOutSecond);
         var response = await httpClient.SendAsync(request, cancellationToken);
@@ -703,9 +584,7 @@ public static class HttpRequestTools
         {
             Content = formData
         };
-        if (header is not null)
-            foreach (var item in header)
-                request.Headers.Add(item.Key, item.Value);
+        AddHeaders(request, header);
 
         var response = await httpClient.SendAsync(request, cancellationToken);
         return (response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
@@ -722,9 +601,7 @@ public static class HttpRequestTools
         {
             Content = formData
         };
-        if (header is not null)
-            foreach (var item in header)
-                request.Headers.Add(item.Key, item.Value);
+        AddHeaders(request, header);
 
         var response = await httpClient.SendAsync(request, cancellationToken);
         return (response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
@@ -739,9 +616,7 @@ public static class HttpRequestTools
         {
             Content = new StringContent(contentValues.SerializeToJson(), resultEncoding ?? Encoding.UTF8, "application/json")
         };
-        if (header is not null)
-            foreach (var item in header)
-                request.Headers.Add(item.Key, item.Value);
+        AddHeaders(request, header);
 
         using var httpClient = new HttpClient();
         var response = await httpClient.SendAsync(request, cancellationToken);
@@ -755,9 +630,7 @@ public static class HttpRequestTools
         {
             Content = new StringContent(contentValues.SerializeToJson(), resultEncoding ?? Encoding.UTF8, "application/json")
         };
-        if (header is not null)
-            foreach (var item in header)
-                request.Headers.Add(item.Key, item.Value);
+        AddHeaders(request, header);
 
         using var httpClient = new HttpClient();
         var response = await httpClient.SendAsync(request, cancellationToken);
@@ -770,9 +643,7 @@ public static class HttpRequestTools
         {
             Content = new StringContent(contentJsonString, resultEncoding ?? Encoding.UTF8, "application/json")
         };
-        if (header is not null)
-            foreach (var item in header)
-                request.Headers.Add(item.Key, item.Value);
+        AddHeaders(request, header);
 
         using var httpClient = new HttpClient();
         var response = await httpClient.SendAsync(request, cancellationToken);
@@ -786,9 +657,7 @@ public static class HttpRequestTools
         {
             Content = new StringContent(contentJsonString, resultEncoding ?? Encoding.UTF8, "application/json")
         };
-        if (header is not null)
-            foreach (var item in header)
-                request.Headers.Add(item.Key, item.Value);
+        AddHeaders(request, header);
 
         using var httpClient = new HttpClient();
         var response = await httpClient.SendAsync(request, cancellationToken);
@@ -801,16 +670,10 @@ public static class HttpRequestTools
         {
             Content = new StringContent(contentJsonString, resultEncoding ?? Encoding.UTF8, "application/json")
         };
-        if (header is not null)
-            foreach (var item in header)
-                request.Headers.Add(item.Key, item.Value);
+        AddHeaders(request, header);
 
         using var handler = new HttpClientHandler();
-        if (byPassServerSertificate)
-        {
-            handler.ClientCertificateOptions = ClientCertificateOption.Manual;
-            handler.ServerCertificateCustomValidationCallback = (httpRequestMessage, cert, certChain, policyErrors) => { return true; };
-        }
+        ConfigureCertificateValidation(handler, byPassServerSertificate);
         using var httpClient = new HttpClient(handler);
         httpClient.Timeout = TimeSpan.FromSeconds(timeOutSecond);
         var response = await httpClient.SendAsync(request, cancellationToken);
@@ -824,16 +687,10 @@ public static class HttpRequestTools
         {
             Content = new StringContent(contentJsonString, resultEncoding ?? Encoding.UTF8, "application/json")
         };
-        if (header is not null)
-            foreach (var item in header)
-                request.Headers.Add(item.Key, item.Value);
+        AddHeaders(request, header);
 
         using var handler = new HttpClientHandler();
-        if (byPassServerSertificate)
-        {
-            handler.ClientCertificateOptions = ClientCertificateOption.Manual;
-            handler.ServerCertificateCustomValidationCallback = (httpRequestMessage, cert, certChain, policyErrors) => { return true; };
-        }
+        ConfigureCertificateValidation(handler, byPassServerSertificate);
         using var httpClient = new HttpClient(handler);
         httpClient.Timeout = TimeSpan.FromSeconds(timeOutSecond);
         var response = await httpClient.SendAsync(request, cancellationToken);
@@ -843,9 +700,7 @@ public static class HttpRequestTools
     public static async Task<(HttpStatusCode httpStatusCode, string response)> PutFormAsync(string url, Dictionary<string, string> formBody, Dictionary<string, string> header = null, bool byPassServerSertificate = true, CancellationToken cancellationToken = default)
     {
         var request = new HttpRequestMessage(HttpMethod.Put, new Uri(url));
-        if (header is not null)
-            foreach (var item in header)
-                request.Headers.Add(item.Key, item.Value);
+        AddHeaders(request, header);
 
         var formData = new MultipartFormDataContent();
         if (formBody is not null)
@@ -853,11 +708,7 @@ public static class HttpRequestTools
                 formData.Add(new StringContent(item.Value, Encoding.UTF8), item.Key);
 
         using var handler = new HttpClientHandler();
-        if (byPassServerSertificate)
-        {
-            handler.ClientCertificateOptions = ClientCertificateOption.Manual;
-            handler.ServerCertificateCustomValidationCallback = (httpRequestMessage, cert, certChain, policyErrors) => { return true; };
-        }
+        ConfigureCertificateValidation(handler, byPassServerSertificate);
         using var httpClient = new HttpClient(handler);
         var response = await httpClient.PutAsync(url, formData, cancellationToken);
         return (response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
@@ -870,9 +721,7 @@ public static class HttpRequestTools
         {
             Content = new StringContent(contentJsonString, resultEncoding ?? Encoding.UTF8, "application/json")
         };
-        if (header is not null)
-            foreach (var item in header)
-                request.Headers.Add(item.Key, item.Value);
+        AddHeaders(request, header);
 
         var response = await httpClient.SendAsync(request, cancellationToken);
         var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
@@ -885,9 +734,7 @@ public static class HttpRequestTools
         {
             Content = new StringContent(contentJsonString, resultEncoding ?? Encoding.UTF8, "application/json")
         };
-        if (header is not null)
-            foreach (var item in header)
-                request.Headers.Add(item.Key, item.Value);
+        AddHeaders(request, header);
 
         var response = await httpClient.SendAsync(request, cancellationToken);
         return (response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
@@ -899,9 +746,7 @@ public static class HttpRequestTools
         {
             Content = new StringContent(contentJsonString, resultEncoding ?? Encoding.UTF8, "application/json")
         };
-        if (header is not null)
-            foreach (var item in header)
-                request.Headers.Add(item.Key, item.Value);
+        AddHeaders(request, header);
 
         httpClient.Timeout = TimeSpan.FromSeconds(timeOutSecond);
         var response = await httpClient.SendAsync(request, cancellationToken);
@@ -915,9 +760,7 @@ public static class HttpRequestTools
         {
             Content = new StringContent(contentJsonString, resultEncoding ?? Encoding.UTF8, "application/json")
         };
-        if (header is not null)
-            foreach (var item in header)
-                request.Headers.Add(item.Key, item.Value);
+        AddHeaders(request, header);
 
         httpClient.Timeout = TimeSpan.FromSeconds(timeOutSecond);
         var response = await httpClient.SendAsync(request, cancellationToken);
@@ -927,9 +770,7 @@ public static class HttpRequestTools
     public static async Task<(HttpStatusCode httpStatusCode, string response)> PutFormAsync(HttpClient httpClient, string url, Dictionary<string, string> formBody, Dictionary<string, string> header = null, bool byPassServerSertificate = true, CancellationToken cancellationToken = default)
     {
         var request = new HttpRequestMessage(HttpMethod.Put, new Uri(url));
-        if (header is not null)
-            foreach (var item in header)
-                request.Headers.Add(item.Key, item.Value);
+        AddHeaders(request, header);
 
         var formData = new MultipartFormDataContent();
         if (formBody is not null)
@@ -947,9 +788,7 @@ public static class HttpRequestTools
     {
         var request = new HttpRequestMessage(HttpMethod.Delete, new Uri(url));
         if (contentValues is not null) request.Content = new StringContent(contentValues.SerializeToJson(), resultEncoding ?? Encoding.UTF8, "application/json");
-        if (header is not null)
-            foreach (var item in header)
-                request.Headers.Add(item.Key, item.Value);
+        AddHeaders(request, header);
 
         using var httpClient = new HttpClient();
         var response = await httpClient.SendAsync(request, cancellationToken);
@@ -961,9 +800,7 @@ public static class HttpRequestTools
     {
         var request = new HttpRequestMessage(HttpMethod.Delete, new Uri(url));
         if (contentValues is not null) request.Content = new StringContent(contentValues.SerializeToJson(), resultEncoding ?? Encoding.UTF8, "application/json");
-        if (header is not null)
-            foreach (var item in header)
-                request.Headers.Add(item.Key, item.Value);
+        AddHeaders(request, header);
 
         using var httpClient = new HttpClient();
         var response = await httpClient.SendAsync(request, cancellationToken);
@@ -974,9 +811,7 @@ public static class HttpRequestTools
     {
         var request = new HttpRequestMessage(HttpMethod.Delete, new Uri(url));
         if (contentJsonString is not null) request.Content = new StringContent(contentJsonString, resultEncoding ?? Encoding.UTF8, "application/json");
-        if (header is not null)
-            foreach (var item in header)
-                request.Headers.Add(item.Key, item.Value);
+        AddHeaders(request, header);
 
         using var httpClient = new HttpClient();
         var response = await httpClient.SendAsync(request, cancellationToken);
@@ -988,9 +823,7 @@ public static class HttpRequestTools
     {
         var request = new HttpRequestMessage(HttpMethod.Delete, new Uri(url));
         if (contentJsonString is not null) request.Content = new StringContent(contentJsonString, resultEncoding ?? Encoding.UTF8, "application/json");
-        if (header is not null)
-            foreach (var item in header)
-                request.Headers.Add(item.Key, item.Value);
+        AddHeaders(request, header);
 
         using var httpClient = new HttpClient();
         var response = await httpClient.SendAsync(request, cancellationToken);
@@ -1001,16 +834,10 @@ public static class HttpRequestTools
     {
         var request = new HttpRequestMessage(HttpMethod.Delete, new Uri(url));
         if (contentJsonString is not null) request.Content = new StringContent(contentJsonString, resultEncoding ?? Encoding.UTF8, "application/json");
-        if (header is not null)
-            foreach (var item in header)
-                request.Headers.Add(item.Key, item.Value);
+        AddHeaders(request, header);
 
         using var handler = new HttpClientHandler();
-        if (byPassServerSertificate)
-        {
-            handler.ClientCertificateOptions = ClientCertificateOption.Manual;
-            handler.ServerCertificateCustomValidationCallback = (httpRequestMessage, cert, certChain, policyErrors) => { return true; };
-        }
+        ConfigureCertificateValidation(handler, byPassServerSertificate);
         using var httpClient = new HttpClient(handler);
         httpClient.Timeout = TimeSpan.FromSeconds(timeOutSecond);
         var response = await httpClient.SendAsync(request, cancellationToken);
@@ -1022,16 +849,10 @@ public static class HttpRequestTools
     {
         var request = new HttpRequestMessage(HttpMethod.Delete, new Uri(url));
         if (contentJsonString is not null) request.Content = new StringContent(contentJsonString, resultEncoding ?? Encoding.UTF8, "application/json");
-        if (header is not null)
-            foreach (var item in header)
-                request.Headers.Add(item.Key, item.Value);
+        AddHeaders(request, header);
 
         using var handler = new HttpClientHandler();
-        if (byPassServerSertificate)
-        {
-            handler.ClientCertificateOptions = ClientCertificateOption.Manual;
-            handler.ServerCertificateCustomValidationCallback = (httpRequestMessage, cert, certChain, policyErrors) => { return true; };
-        }
+        ConfigureCertificateValidation(handler, byPassServerSertificate);
         using var httpClient = new HttpClient(handler);
         httpClient.Timeout = TimeSpan.FromSeconds(timeOutSecond);
         var response = await httpClient.SendAsync(request, cancellationToken);
@@ -1043,9 +864,7 @@ public static class HttpRequestTools
     {
         var request = new HttpRequestMessage(HttpMethod.Delete, new Uri(url));
         if (contentJsonString is not null) request.Content = new StringContent(contentJsonString, resultEncoding ?? Encoding.UTF8, "application/json");
-        if (header is not null)
-            foreach (var item in header)
-                request.Headers.Add(item.Key, item.Value);
+        AddHeaders(request, header);
 
         var response = await httpClient.SendAsync(request, cancellationToken);
         var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
@@ -1056,9 +875,7 @@ public static class HttpRequestTools
     {
         var request = new HttpRequestMessage(HttpMethod.Delete, new Uri(url));
         if (contentJsonString is not null) request.Content = new StringContent(contentJsonString, resultEncoding ?? Encoding.UTF8, "application/json");
-        if (header is not null)
-            foreach (var item in header)
-                request.Headers.Add(item.Key, item.Value);
+        AddHeaders(request, header);
 
         var response = await httpClient.SendAsync(request, cancellationToken);
         return (response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
@@ -1068,9 +885,7 @@ public static class HttpRequestTools
     {
         var request = new HttpRequestMessage(HttpMethod.Delete, new Uri(url));
         if (contentJsonString is not null) request.Content = new StringContent(contentJsonString, resultEncoding ?? Encoding.UTF8, "application/json");
-        if (header is not null)
-            foreach (var item in header)
-                request.Headers.Add(item.Key, item.Value);
+        AddHeaders(request, header);
 
         httpClient.Timeout = TimeSpan.FromSeconds(timeOutSecond);
         var response = await httpClient.SendAsync(request, cancellationToken);
@@ -1082,9 +897,7 @@ public static class HttpRequestTools
     {
         var request = new HttpRequestMessage(HttpMethod.Delete, new Uri(url));
         if (contentJsonString is not null) request.Content = new StringContent(contentJsonString, resultEncoding ?? Encoding.UTF8, "application/json");
-        if (header is not null)
-            foreach (var item in header)
-                request.Headers.Add(item.Key, item.Value);
+        AddHeaders(request, header);
 
         httpClient.Timeout = TimeSpan.FromSeconds(timeOutSecond);
         var response = await httpClient.SendAsync(request, cancellationToken);
@@ -1100,9 +913,7 @@ public static class HttpRequestTools
         {
             Content = new StringContent(contentXmlString, resultEncoding ?? Encoding.UTF8, "text/xml; charset=utf-8")
         };
-        if (header is not null)
-            foreach (var item in header)
-                request.Headers.Add(item.Key, item.Value);
+        AddHeaders(request, header);
 
         using var httpClient = new HttpClient();
         var response = await httpClient.SendAsync(request, cancellationToken);
@@ -1115,9 +926,7 @@ public static class HttpRequestTools
         {
             Content = new StringContent(contentXmlString, resultEncoding ?? Encoding.UTF8, "text/xml; charset=utf-8")
         };
-        if (header is not null)
-            foreach (var item in header)
-                request.Headers.Add(item.Key, item.Value);
+        AddHeaders(request, header);
 
         using var httpClient = new HttpClient();
         var response = await httpClient.SendAsync(request, cancellationToken);
