@@ -13,14 +13,15 @@ public class DataBase<TDbContext> : IInitialDbBuilder<TDbContext>, IBehaviorDbBu
         return this;
     }
 
-    public IBehaviorDbBuilder<TDbContext> MockWithDbSet<TEntity>(Expression<Func<TDbContext, DbSet<TEntity>>> expression, List<TEntity> entities)
+    public IBehaviorDbBuilder<TDbContext> MockWithDbSet<TEntity>(
+        Expression<Func<TDbContext, DbSet<TEntity>>> expression, List<TEntity> entities)
         where TEntity : class, IBaseEntity
     {
         Mock();
 
         _dbMock
             .Setup(expression)
-            .Returns(entities.AsQueryable().BuildMockDbSet().Object);
+            .Returns(entities.BuildMockDbSet().Object);
 
         return this;
     }
@@ -34,5 +35,11 @@ public class DataBase<TDbContext> : IInitialDbBuilder<TDbContext>, IBehaviorDbBu
         return this;
     }
 
-    public TDbContext Build() => _dbMock.Object;
+    public TDbContext Build()
+    {
+        if (_dbMock == null)
+            throw new InvalidOperationException("Call Mock() OR MockWithDbSet() before Build().");
+
+        return _dbMock.Object;
+    }
 }

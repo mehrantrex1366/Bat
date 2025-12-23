@@ -1,10 +1,11 @@
-﻿namespace Bat.Test;
+﻿using MockQueryable;
+
+namespace Bat.Test;
 
 public class MockDbContextBuilder<TDbContext> where TDbContext : class, IBatDbContext
 {
     private readonly Mock<TDbContext> _mock;
-    private readonly Mock<TDbContext> _dbMock;
-    private readonly Mock<IDbContextTransaction> _transactionMock;
+    private Mock<IDbContextTransaction> _transactionMock;
 
     public MockDbContextBuilder()
     {
@@ -21,7 +22,7 @@ public class MockDbContextBuilder<TDbContext> where TDbContext : class, IBatDbCo
         where TEntity : class, IBaseEntity
     {
         _mock.Setup(dbSetExpression)
-            .Returns(entities.AsQueryable().BuildMockDbSet().Object);
+            .Returns(entities.BuildMockDbSet().Object);
 
         return this;
 
@@ -59,10 +60,10 @@ public class MockDbContextBuilder<TDbContext> where TDbContext : class, IBatDbCo
          where TEntity : class, IBaseEntity
         => Setup(dbSetExpression, new List<TEntity>());
 
-    public MockDbContextBuilder<TDbContext> SetTransaction()
+    public MockDbContextBuilder<TDbContext> SetTransactionWithVerify()
     {
         var dbFacadeMock = new Mock<DatabaseFacade>(_mock.Object);
-        var dbTransactionMock = new Mock<IDbContextTransaction>();
+        _transactionMock = new Mock<IDbContextTransaction>();
 
         var dbTransaction = new MockBuilder<IDbContextTransaction>()
             .SetVerifiable(x => x.Commit())
@@ -77,6 +78,33 @@ public class MockDbContextBuilder<TDbContext> where TDbContext : class, IBatDbCo
             .Build();
 
         //_mock.Setup(x => x.Database).Returns(dbFacade);
+
+        return this;
+    }
+
+    public MockDbContextBuilder<TDbContext> SetTransaction()
+    {
+        _transactionMock = new Mock<IDbContextTransaction>();
+
+        _transactionMock.Setup(x => x.Commit());
+        _transactionMock.Setup(x => x.Rollback());
+        _transactionMock.Setup(x => x.CommitAsync(It.IsAny<CancellationToken>()))
+                        .Returns(Task.CompletedTask);
+        _transactionMock.Setup(x => x.RollbackAsync(It.IsAny<CancellationToken>()))
+                        .Returns(Task.CompletedTask);
+
+        var databaseFacadeMock = new Mock<DatabaseFacade>(_mock.Object);
+
+        databaseFacadeMock
+            .Setup(x => x.BeginTransaction())
+            .Returns(_transactionMock.Object);
+
+        databaseFacadeMock
+            .Setup(x => x.BeginTransactionAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(_transactionMock.Object);
+
+        _mock.Setup(x => x.Database)
+             .Returns(databaseFacadeMock.Object);
 
         return this;
     }

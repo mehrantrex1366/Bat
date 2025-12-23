@@ -28,7 +28,7 @@ public class MockUowBuilder<TUow, TDbContext> : IInitialUowBuilder<TUow, TDbCont
         _dbMock = new Mock<TDbContext>();
         _dbMock
             .Setup(expression)
-            .Returns(entities.AsQueryable().BuildMockDbSet().Object);
+            .Returns(entities.BuildMockDbSet().Object);
 
         _uowMock = new Mock<TUow>(_dbMock.Object, new Mock<IServiceProvider>().Object);
 
@@ -42,7 +42,7 @@ public class MockUowBuilder<TUow, TDbContext> : IInitialUowBuilder<TUow, TDbCont
         _dbMock = new Mock<TDbContext>();
         _dbMock
             .Setup(x => x.Set<TEntity>())
-            .Returns(entities.AsQueryable().BuildMockDbSet().Object);
+            .Returns(entities.BuildMockDbSet().Object);
 
         var repoMockBuilder = new MockRepoBuilder<TDbContext, TEntity>().MockWithDataBase(_dbMock);
         AddRepo(repoMockBuilder.AsMock());
@@ -60,7 +60,7 @@ public class MockUowBuilder<TUow, TDbContext> : IInitialUowBuilder<TUow, TDbCont
     {
         _dbMock = new Mock<TDbContext>();
         _dbMock.Setup(x => x.Set<TEntity>())
-           .Returns(new List<TEntity>().AsQueryable().BuildMockDbSet().Object);
+           .Returns(new List<TEntity>().BuildMockDbSet().Object);
 
         var repoMock = new Mock<EFGenericRepo<TEntity>>(_dbMock.Object);
         _uowMock = new Mock<TUow>(_dbMock.Object, new Mock<IServiceProvider>().Object);
@@ -77,7 +77,7 @@ public class MockUowBuilder<TUow, TDbContext> : IInitialUowBuilder<TUow, TDbCont
         _dbMock = new Mock<TDbContext>();
         _dbMock
             .Setup(x => x.Set<TEntity>())
-            .Returns(entities.AsQueryable().BuildMockDbSet().Object);
+            .Returns(entities.BuildMockDbSet().Object);
 
         var repoMock = new Mock<EFGenericRepo<TEntity>>(_dbMock.Object);
 
@@ -94,7 +94,7 @@ public class MockUowBuilder<TUow, TDbContext> : IInitialUowBuilder<TUow, TDbCont
     {
         _dbMock = new Mock<TDbContext>();
         _dbMock.Setup(x => x.Set<TEntity>())
-           .Returns(new List<TEntity>().AsQueryable().BuildMockDbSet().Object);
+           .Returns(new List<TEntity>().BuildMockDbSet().Object);
 
         var repoMock = new Mock<EFGenericRepo<TEntity>>(_dbMock.Object);
         _uowMock = new Mock<TUow>(_dbMock.Object, new Mock<IServiceProvider>().Object);
@@ -109,7 +109,7 @@ public class MockUowBuilder<TUow, TDbContext> : IInitialUowBuilder<TUow, TDbCont
         where TEntity : class, IBaseEntity
     {
         _dbMock.Setup(x => x.Set<TEntity>())
-            .Returns(entities.AsQueryable().BuildMockDbSet().Object);
+            .Returns(entities.BuildMockDbSet().Object);
 
         var repoMockBuilder = new MockRepoBuilder<TDbContext, TEntity>().MockWithDataBase(_dbMock);
         AddRepo(repoMockBuilder.AsMock());
@@ -126,7 +126,7 @@ public class MockUowBuilder<TUow, TDbContext> : IInitialUowBuilder<TUow, TDbCont
       where TEntity : class, IBaseEntity
     {
         _dbMock.Setup(x => x.Set<TEntity>())
-            .Returns(new List<TEntity>().AsQueryable().BuildMockDbSet().Object);
+            .Returns(new List<TEntity>().BuildMockDbSet().Object);
 
         var repoMockBuilder = new MockRepoBuilder<TDbContext, TEntity>().MockWithDataBase(_dbMock);
         AddRepo(repoMockBuilder.AsMock());
@@ -256,12 +256,24 @@ public class MockUowBuilder<TUow, TDbContext> : IInitialUowBuilder<TUow, TDbCont
         return this;
     }
 
-    public TUow Build() => _uowMock.Object;
+    public TUow Build()
+    {
+        if (_uowMock == null)
+            throw new InvalidOperationException("Call Mock() before Build().");
 
-    public Lazy<TUow> BuildLazy() => new(() => _uowMock.Object);
+        return _uowMock.Object;
+    }
+
+    public Lazy<TUow> BuildLazy()
+    {
+        if (_uowMock == null)
+            throw new InvalidOperationException("Call Mock() before Build().");
+
+        return new(() => _uowMock.Object);
+    }
 
     public Mock<TUow> AsMock() => _uowMock;
 
     public MockRepoBuilder<TDbContext, TEntity> Repo<TEntity>() where TEntity : class, IBaseEntity
-      => new MockRepoBuilder<TDbContext, TEntity>(_repos.OfType<Mock<EFGenericRepo<TEntity>>>().FirstOrDefault(), _dbMock); 
+      => new MockRepoBuilder<TDbContext, TEntity>(_repos.OfType<Mock<EFGenericRepo<TEntity>>>().FirstOrDefault(), _dbMock);
 }

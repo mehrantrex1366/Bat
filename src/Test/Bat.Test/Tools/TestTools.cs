@@ -29,6 +29,6 @@ public static class TestTools
     public static ServiceBuilder<TService> GetService<TService>() where TService : IScopedInjection
         => new();
 
-    public static BogusBuilder<T> ObjectFaker<T>() where T : class
+    public static GeneralBogusBuilder<T> ObjectFaker<T>() where T : class
         => new();
 }
