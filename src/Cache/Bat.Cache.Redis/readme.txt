@@ -78,3 +78,38 @@ for example :
             return _cacheProvider.Get<List<Region>>("Regions_Key");
         }
     }
+
+
+    
+
+    ## DistributedLock
+    services.AddBatDistributedLock(options =>
+    {
+        options.AcquireTimeout = 10;      // Maximum wait time for lock
+        options.LockExpiry = 30;          // Lock expiration time
+        options.RetryDelay = 100;         // Retry delay in milliseconds
+        options.AutoRenew = false;        // Enable auto-renewal
+        options.RenewalInterval = 10;     // Auto-renewal interval
+        options.LockKeyPrefix = "myapp";  // Custom prefix for lock keys
+    });
+
+    ```csharp
+    public async Task<decimal> CalculateBalanceAsync(int accountId)
+    {
+        var (success, balance) = await _distributedLock.ExecuteWithLockAsync(
+            key: $"account:{accountId}",
+            func: async () =>
+            {
+                var transactions = await GetTransactions(accountId);
+                return transactions.Sum(t => t.Amount);
+            }
+        );
+
+        if (!success)
+        {
+            throw new Exception("Could not acquire lock for balance calculation");
+        }
+
+        return balance;
+    }
+    ```

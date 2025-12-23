@@ -2,92 +2,56 @@
 
 public class AesEncryption
 {
+    private static string GetAlgorithmName(HashAlgorithmsTypes algorithm)
+    {
+        return algorithm switch
+        {
+            HashAlgorithmsTypes.MD5 => "MD5",
+            HashAlgorithmsTypes.SHA1 => "SHA1",
+            HashAlgorithmsTypes.SHA256 => "SHA256",
+            _ => "MD5",
+        };
+    }
+
+
     public static string Encrypt(string plainText)
     {
         return AesAlgorithm.Encrypt(plainText, "!@#$%^^%$#@!", "!@#$%^", "MD5", 1, "XYZxyzAZSawsTRCE", 128);
     }
 
-    public static string Encrypt(string plainText, HashAlgorithm algoritm = HashAlgorithm.MD5,
+    public static string Encrypt(string plainText, HashAlgorithmsTypes algorithm = HashAlgorithmsTypes.MD5,
         EncryptKeySize keySize = EncryptKeySize.KeySize128)
     {
-        string KeyAlgoritm = "MD5";
-        switch (algoritm)
-        {
-            case HashAlgorithm.MD5:
-                KeyAlgoritm = "MD5";
-                break;
-            case HashAlgorithm.SHA1:
-                KeyAlgoritm = "SHA1";
-                break;
-            case HashAlgorithm.SHA256:
-                KeyAlgoritm = "SHA256";
-                break;
-        }
+        var algorithmName = GetAlgorithmName(algorithm);
 
-        return AesAlgorithm.Encrypt(plainText, "!@#$%^^%$#@!", "!@#$%^", KeyAlgoritm, 1, "XYZxyzAZSawsTRCE", (int)keySize);
+        return AesAlgorithm.Encrypt(plainText, "!@#$%^^%$#@!", "!@#$%^", algorithmName, 1, "XYZxyzAZSawsTRCE", (int)keySize);
     }
 
     public static string Encrypt(string plainText, string encryptKey,
-        HashAlgorithm algoritm = HashAlgorithm.MD5,
+        HashAlgorithmsTypes algorithm = HashAlgorithmsTypes.MD5,
         EncryptKeySize keySize = EncryptKeySize.KeySize128)
     {
-        string KeyAlgoritm = "MD5";
-        switch (algoritm)
-        {
-            case HashAlgorithm.MD5:
-                KeyAlgoritm = "MD5";
-                break;
-            case HashAlgorithm.SHA1:
-                KeyAlgoritm = "SHA1";
-                break;
-            case HashAlgorithm.SHA256:
-                KeyAlgoritm = "SHA256";
-                break;
-        }
-
-        return AesAlgorithm.Encrypt(plainText, encryptKey, "!@#$%^", KeyAlgoritm, 1, "XYZxyzAZSawsTRCE", (int)keySize);
+        var algorithmName = GetAlgorithmName(algorithm);
+        
+        return AesAlgorithm.Encrypt(plainText, encryptKey, "!@#$%^", algorithmName, 1, "XYZxyzAZSawsTRCE", (int)keySize);
     }
 
     public static string Encrypt(string plainText, string encryptKey,
-        string salt, HashAlgorithm algoritm = HashAlgorithm.MD5,
+        string salt, HashAlgorithmsTypes algorithm = HashAlgorithmsTypes.MD5,
         EncryptKeySize keySize = EncryptKeySize.KeySize128)
     {
-        string KeyAlgoritm = "MD5";
-        switch (algoritm)
-        {
-            case HashAlgorithm.MD5:
-                KeyAlgoritm = "MD5";
-                break;
-            case HashAlgorithm.SHA1:
-                KeyAlgoritm = "SHA1";
-                break;
-            case HashAlgorithm.SHA256:
-                KeyAlgoritm = "SHA256";
-                break;
-        }
-
-        return AesAlgorithm.Encrypt(plainText, encryptKey, salt, KeyAlgoritm, 1, "XYZxyzAZSawsTRCE", (int)keySize);
+        var algorithmName = GetAlgorithmName(algorithm);
+        
+        return AesAlgorithm.Encrypt(plainText, encryptKey, salt, algorithmName, 1, "XYZxyzAZSawsTRCE", (int)keySize);
     }
 
     public static string Encrypt(string plainText, string encryptKey,
-        string salt, string initVector, HashAlgorithm algoritm = HashAlgorithm.MD5,
+        string salt, string initVector, HashAlgorithmsTypes algorithm = HashAlgorithmsTypes.MD5,
         EncryptKeySize keySize = EncryptKeySize.KeySize128)
     {
-        string KeyAlgoritm = "MD5";
-        switch (algoritm)
-        {
-            case HashAlgorithm.MD5:
-                KeyAlgoritm = "MD5";
-                break;
-            case HashAlgorithm.SHA1:
-                KeyAlgoritm = "SHA1";
-                break;
-            case HashAlgorithm.SHA256:
-                KeyAlgoritm = "SHA256";
-                break;
-        }
-
-        return AesAlgorithm.Encrypt(plainText, encryptKey, salt, KeyAlgoritm, 1, initVector, (int)keySize);
+        var algorithmName = GetAlgorithmName(algorithm);
+        
+        return AesAlgorithm.Encrypt(plainText, encryptKey, salt, algorithmName, 1, initVector, (int)keySize);
     }
 
 
@@ -97,86 +61,38 @@ public class AesEncryption
         return AesAlgorithm.Decrypt(cipherText.Replace(' ', '+'), "!@#$%^^%$#@!", "!@#$%^", "MD5", 1, "XYZxyzAZSawsTRCE", 128);
     }
 
-    public static string Decrypt(string cipherText, HashAlgorithm algoritm = HashAlgorithm.MD5,
+    public static string Decrypt(string cipherText, HashAlgorithmsTypes algorithm = HashAlgorithmsTypes.MD5,
         EncryptKeySize keySize = EncryptKeySize.KeySize128)
     {
-        string KeyAlgoritm = "MD5";
-        switch (algoritm)
-        {
-            case HashAlgorithm.MD5:
-                KeyAlgoritm = "MD5";
-                break;
-            case HashAlgorithm.SHA1:
-                KeyAlgoritm = "SHA1";
-                break;
-            case HashAlgorithm.SHA256:
-                KeyAlgoritm = "SHA256";
-                break;
-        }
-
-        return AesAlgorithm.Decrypt(cipherText.Replace(' ', '+'), "!@#$%^^%$#@!", "!@#$%^", KeyAlgoritm, 1, "XYZxyzAZSawsTRCE", (int)keySize);
+        var algorithmName = GetAlgorithmName(algorithm);
+        
+        return AesAlgorithm.Decrypt(cipherText.Replace(' ', '+'), "!@#$%^^%$#@!", "!@#$%^", algorithmName, 1, "XYZxyzAZSawsTRCE", (int)keySize);
     }
 
     public static string Decrypt(string cipherText, string encryptKey,
-        HashAlgorithm algoritm = HashAlgorithm.MD5,
+        HashAlgorithmsTypes algorithm = HashAlgorithmsTypes.MD5,
         EncryptKeySize keySize = EncryptKeySize.KeySize128)
     {
-        string KeyAlgoritm = "MD5";
-        switch (algoritm)
-        {
-            case HashAlgorithm.MD5:
-                KeyAlgoritm = "MD5";
-                break;
-            case HashAlgorithm.SHA1:
-                KeyAlgoritm = "SHA1";
-                break;
-            case HashAlgorithm.SHA256:
-                KeyAlgoritm = "SHA256";
-                break;
-        }
-
-        return AesAlgorithm.Decrypt(cipherText.Replace(' ', '+'), encryptKey, "!@#$%^", KeyAlgoritm, 1, "XYZxyzAZSawsTRCE", (int)keySize);
+        var algorithmName = GetAlgorithmName(algorithm);
+        
+        return AesAlgorithm.Decrypt(cipherText.Replace(' ', '+'), encryptKey, "!@#$%^", algorithmName, 1, "XYZxyzAZSawsTRCE", (int)keySize);
     }
 
     public static string Decrypt(string cipherText, string encryptKey,
-        string salt, HashAlgorithm algoritm = HashAlgorithm.MD5,
+        string salt, HashAlgorithmsTypes algorithm = HashAlgorithmsTypes.MD5,
         EncryptKeySize keySize = EncryptKeySize.KeySize128)
     {
-        string KeyAlgoritm = "MD5";
-        switch (algoritm)
-        {
-            case HashAlgorithm.MD5:
-                KeyAlgoritm = "MD5";
-                break;
-            case HashAlgorithm.SHA1:
-                KeyAlgoritm = "SHA1";
-                break;
-            case HashAlgorithm.SHA256:
-                KeyAlgoritm = "SHA256";
-                break;
-        }
-
-        return AesAlgorithm.Decrypt(cipherText.Replace(' ', '+'), encryptKey, salt, KeyAlgoritm, 1, "XYZxyzAZSawsTRCE", (int)keySize);
+        var algorithmName = GetAlgorithmName(algorithm);
+        
+        return AesAlgorithm.Decrypt(cipherText.Replace(' ', '+'), encryptKey, salt, algorithmName, 1, "XYZxyzAZSawsTRCE", (int)keySize);
     }
 
     public static string Decrypt(string cipherText, string encryptKey,
-        string salt, string initVector, HashAlgorithm algoritm = HashAlgorithm.MD5,
+        string salt, string initVector, HashAlgorithmsTypes algorithm = HashAlgorithmsTypes.MD5,
         EncryptKeySize keySize = EncryptKeySize.KeySize128)
     {
-        string KeyAlgoritm = "MD5";
-        switch (algoritm)
-        {
-           case HashAlgorithm.MD5:
-                KeyAlgoritm = "MD5";
-                break;
-            case HashAlgorithm.SHA1:
-                KeyAlgoritm = "SHA1";
-                break;
-            case HashAlgorithm.SHA256:
-                KeyAlgoritm = "SHA256";
-                break;
-        }
-
-        return AesAlgorithm.Decrypt(cipherText.Replace(' ', '+'), encryptKey, salt, KeyAlgoritm, 1, initVector, (int)keySize);
+        var algorithmName = GetAlgorithmName(algorithm);
+        
+        return AesAlgorithm.Decrypt(cipherText.Replace(' ', '+'), encryptKey, salt, algorithmName, 1, initVector, (int)keySize);
     }
 }

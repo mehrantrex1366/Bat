@@ -1,6 +1,6 @@
 ﻿namespace Bat.Queue;
 
-public class RabbitProducer(IRabbitService rabbitService) : IRabbitProducer, IDisposable
+public class RabbitProducer(IRabbitService rabbitService) : IRabbitProducer, IAsyncDisposable
 {
     private IChannel _channel;
     private IConnection _connection;
@@ -57,7 +57,8 @@ public class RabbitProducer(IRabbitService rabbitService) : IRabbitProducer, IDi
         return true;
     }
 
-    public async void Dispose()
+
+    public async ValueTask DisposeAsync()
     {
         if (_channel.IsOpen) await _channel.CloseAsync();
         _channel.Dispose();

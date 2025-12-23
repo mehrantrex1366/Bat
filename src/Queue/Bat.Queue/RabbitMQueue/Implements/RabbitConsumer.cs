@@ -1,6 +1,6 @@
 ﻿namespace Bat.Queue;
 
-public class RabbitConsumer(IRabbitService rabbitService) : IRabbitConsumer, IDisposable
+public class RabbitConsumer(IRabbitService rabbitService) : IRabbitConsumer, IAsyncDisposable
 {
     private IChannel _channel;
     private IConnection _connection;
@@ -84,7 +84,7 @@ public class RabbitConsumer(IRabbitService rabbitService) : IRabbitConsumer, IDi
         await Task.CompletedTask;
     }
 
-    public async void Dispose()
+    public async ValueTask DisposeAsync()
     {
         if (_channel.IsOpen) await _channel.CloseAsync();
         _channel.Dispose();

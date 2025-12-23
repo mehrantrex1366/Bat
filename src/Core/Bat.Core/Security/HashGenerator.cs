@@ -25,25 +25,25 @@ public class HashGenerator
 		return Convert.ToBase64String(System.Security.Cryptography.SHA256.HashData(dataBytes));
 	}
 
-    public static bool IsCorrectHash(string hashedKey, HashAlgorithm hashAlgorithm = HashAlgorithm.SHA256)
+    public static bool IsCorrectHash(string hashedKey, HashAlgorithmsTypes hashAlgorithm = HashAlgorithmsTypes.SHA256)
     {
 		return hashAlgorithm switch
 		{
-			HashAlgorithm.MD5 => (hashedKey.Length == 24 && hashedKey.Contains('=')),
-			HashAlgorithm.SHA1 => (hashedKey.Length == 28 && hashedKey.Contains('=')),
-			HashAlgorithm.SHA256 => (hashedKey.Length == 44 && hashedKey.Contains('=')),
+			HashAlgorithmsTypes.MD5 => (hashedKey.Length == 24 && hashedKey.Contains('=')),
+			HashAlgorithmsTypes.SHA1 => (hashedKey.Length == 28 && hashedKey.Contains('=')),
+			HashAlgorithmsTypes.SHA256 => (hashedKey.Length == 44 && hashedKey.Contains('=')),
 			_ => (hashedKey.Length == 44 && hashedKey.Contains('=')),
 		};
 	}
 
-	public static bool VerifyHash(string key, string hashedKey, HashAlgorithm hashAlgorithm = HashAlgorithm.SHA256)
+	public static bool VerifyHash(string key, string hashedKey, HashAlgorithmsTypes hashAlgorithm = HashAlgorithmsTypes.SHA256)
     {
         if (!IsCorrectHash(hashedKey, hashAlgorithm)) return false;
 
         return Hash(key) == hashedKey;
     }
 
-    public static bool VerifyHash(string key, string hashedKey, string salt, HashAlgorithm hashAlgorithm = HashAlgorithm.SHA256)
+    public static bool VerifyHash(string key, string hashedKey, string salt, HashAlgorithmsTypes hashAlgorithm = HashAlgorithmsTypes.SHA256)
     {
         if (!IsCorrectHash(hashedKey, hashAlgorithm)) return false;
 

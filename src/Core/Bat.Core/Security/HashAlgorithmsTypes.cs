@@ -1,6 +1,6 @@
 ﻿namespace Bat.Core;
 
-public enum HashAlgorithm
+public enum HashAlgorithmsTypes
 {
     MD5 = 1,
     SHA = 2,

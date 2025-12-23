@@ -26,19 +26,19 @@ public class Encryption
     /// <param name="algoritm">Set Key Hash Algoritm</param>
     /// <param name="keySize">Set Key Size Of Encryption</param>
     /// <returns></returns>
-    public static string Encrypt(string plainText, HashAlgorithm algoritm = HashAlgorithm.MD5,
+    public static string Encrypt(string plainText, HashAlgorithmsTypes algoritm = HashAlgorithmsTypes.MD5,
         EncryptKeySize keySize = EncryptKeySize.KeySize128)
     {
         string KeyAlgoritm = "MD5";
         switch (algoritm)
         {
-            case HashAlgorithm.MD5:
+            case HashAlgorithmsTypes.MD5:
                 KeyAlgoritm = "MD5";
                 break;
-            case HashAlgorithm.SHA1:
+            case HashAlgorithmsTypes.SHA1:
                 KeyAlgoritm = "SHA1";
                 break;
-            case HashAlgorithm.SHA256:
+            case HashAlgorithmsTypes.SHA256:
                 KeyAlgoritm = "SHA256";
                 break;
         }
@@ -56,19 +56,19 @@ public class Encryption
     /// <param name="keySize">Set Key Size Of Encryption</param>
     /// <returns>Encrypted Value Formatted As a Base 64-encoded String.</returns>
     public static string Encrypt(string plainText, string encryptKey,
-        HashAlgorithm algoritm = HashAlgorithm.MD5,
+        HashAlgorithmsTypes algoritm = HashAlgorithmsTypes.MD5,
         EncryptKeySize keySize = EncryptKeySize.KeySize128)
     {
         string KeyAlgoritm = "MD5";
         switch (algoritm)
         {
-            case HashAlgorithm.MD5:
+            case HashAlgorithmsTypes.MD5:
                 KeyAlgoritm = "MD5";
                 break;
-            case HashAlgorithm.SHA1:
+            case HashAlgorithmsTypes.SHA1:
                 KeyAlgoritm = "SHA1";
                 break;
-            case HashAlgorithm.SHA256:
+            case HashAlgorithmsTypes.SHA256:
                 KeyAlgoritm = "SHA256";
                 break;
         }
@@ -87,19 +87,19 @@ public class Encryption
     /// <param name="keySize">Set Key Size Of Encryption</param>
     /// <returns>Encrypted Value Formatted As a Base 64-encoded String.</returns>
     public static string Encrypt(string plainText, string encryptKey,
-        string Salt, HashAlgorithm algoritm = HashAlgorithm.MD5,
+        string Salt, HashAlgorithmsTypes algoritm = HashAlgorithmsTypes.MD5,
         EncryptKeySize keySize = EncryptKeySize.KeySize128)
     {
         string KeyAlgoritm = "MD5";
         switch (algoritm)
         {
-            case HashAlgorithm.MD5:
+            case HashAlgorithmsTypes.MD5:
                 KeyAlgoritm = "MD5";
                 break;
-            case HashAlgorithm.SHA1:
+            case HashAlgorithmsTypes.SHA1:
                 KeyAlgoritm = "SHA1";
                 break;
-            case HashAlgorithm.SHA256:
+            case HashAlgorithmsTypes.SHA256:
                 KeyAlgoritm = "SHA256";
                 break;
         }
@@ -119,19 +119,19 @@ public class Encryption
     /// <param name="keySize">Set Key Size Of Encryption</param>
     /// <returns>Encrypted Value Formatted As a Base 64-encoded String.</returns>
     public static string Encrypt(string plainText, string encryptKey,
-        string Salt, string InitVector, HashAlgorithm algoritm = HashAlgorithm.MD5,
+        string Salt, string InitVector, HashAlgorithmsTypes algoritm = HashAlgorithmsTypes.MD5,
         EncryptKeySize keySize = EncryptKeySize.KeySize128)
     {
         string KeyAlgoritm = "MD5";
         switch (algoritm)
         {
-            case HashAlgorithm.MD5:
+            case HashAlgorithmsTypes.MD5:
                 KeyAlgoritm = "MD5";
                 break;
-            case HashAlgorithm.SHA1:
+            case HashAlgorithmsTypes.SHA1:
                 KeyAlgoritm = "SHA1";
                 break;
-            case HashAlgorithm.SHA256:
+            case HashAlgorithmsTypes.SHA256:
                 KeyAlgoritm = "SHA256";
                 break;
         }
@@ -162,19 +162,19 @@ public class Encryption
     /// <param name="algoritm">Set Key Hash Algoritm</param>
     /// <param name="keySize">Set Key Size Of Encryption</param>
     /// <returns>Decrypted string Value.</returns>
-    public static string Decrypt(string cipherText, HashAlgorithm algoritm = HashAlgorithm.MD5,
+    public static string Decrypt(string cipherText, HashAlgorithmsTypes algoritm = HashAlgorithmsTypes.MD5,
         EncryptKeySize keySize = EncryptKeySize.KeySize128)
     {
         string KeyAlgoritm = "MD5";
         switch (algoritm)
         {
-            case HashAlgorithm.MD5:
+            case HashAlgorithmsTypes.MD5:
                 KeyAlgoritm = "MD5";
                 break;
-            case HashAlgorithm.SHA1:
+            case HashAlgorithmsTypes.SHA1:
                 KeyAlgoritm = "SHA1";
                 break;
-            case HashAlgorithm.SHA256:
+            case HashAlgorithmsTypes.SHA256:
                 KeyAlgoritm = "SHA256";
                 break;
         }
@@ -192,19 +192,19 @@ public class Encryption
     /// <param name="keySize">Set Key Size Of Encryption</param>
     /// <returns>Decrypted string Value.</returns>
     public static string Decrypt(string cipherText, string encryptKey,
-        HashAlgorithm algoritm = HashAlgorithm.MD5,
+        HashAlgorithmsTypes algoritm = HashAlgorithmsTypes.MD5,
         EncryptKeySize keySize = EncryptKeySize.KeySize128)
     {
         string KeyAlgoritm = "MD5";
         switch (algoritm)
         {
-            case HashAlgorithm.MD5:
+            case HashAlgorithmsTypes.MD5:
                 KeyAlgoritm = "MD5";
                 break;
-            case HashAlgorithm.SHA1:
+            case HashAlgorithmsTypes.SHA1:
                 KeyAlgoritm = "SHA1";
                 break;
-            case HashAlgorithm.SHA256:
+            case HashAlgorithmsTypes.SHA256:
                 KeyAlgoritm = "SHA256";
                 break;
         }
@@ -223,19 +223,19 @@ public class Encryption
     /// <param name="keySize">Set Key Size Of Encryption</param>
     /// <returns>Decrypted string Value.</returns>
     public static string Decrypt(string cipherText, string encryptKey,
-        string Salt, HashAlgorithm algoritm = HashAlgorithm.MD5,
+        string Salt, HashAlgorithmsTypes algoritm = HashAlgorithmsTypes.MD5,
         EncryptKeySize keySize = EncryptKeySize.KeySize128)
     {
         string KeyAlgoritm = "MD5";
         switch (algoritm)
         {
-            case HashAlgorithm.MD5:
+            case HashAlgorithmsTypes.MD5:
                 KeyAlgoritm = "MD5";
                 break;
-            case HashAlgorithm.SHA1:
+            case HashAlgorithmsTypes.SHA1:
                 KeyAlgoritm = "SHA1";
                 break;
-            case HashAlgorithm.SHA256:
+            case HashAlgorithmsTypes.SHA256:
                 KeyAlgoritm = "SHA256";
                 break;
         }
@@ -255,19 +255,19 @@ public class Encryption
     /// <param name="keySize">Set Key Size Of Encryption</param>
     /// <returns>Decrypted string Value.</returns>
     public static string Decrypt(string cipherText, string encryptKey,
-        string Salt, string InitVector, HashAlgorithm algoritm = HashAlgorithm.MD5,
+        string Salt, string InitVector, HashAlgorithmsTypes algoritm = HashAlgorithmsTypes.MD5,
         EncryptKeySize keySize = EncryptKeySize.KeySize128)
     {
         string KeyAlgoritm = "MD5";
         switch (algoritm)
         {
-            case HashAlgorithm.MD5:
+            case HashAlgorithmsTypes.MD5:
                 KeyAlgoritm = "MD5";
                 break;
-            case HashAlgorithm.SHA1:
+            case HashAlgorithmsTypes.SHA1:
                 KeyAlgoritm = "SHA1";
                 break;
-            case HashAlgorithm.SHA256:
+            case HashAlgorithmsTypes.SHA256:
                 KeyAlgoritm = "SHA256";
                 break;
         }
