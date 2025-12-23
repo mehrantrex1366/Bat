@@ -39,12 +39,12 @@ public class DistributedLock : IDistributedLock
         return !string.IsNullOrWhiteSpace(value);
     }
 
-    public async Task<LockResult> SetLock(string key, CancellationToken cancellationToken = default)
+    public async Task<DistributedLockResult> SetLock(string key, CancellationToken cancellationToken = default)
     {
         return await SetLock(key, _defaultOptions, cancellationToken);
     }
 
-    public async Task<LockResult> SetLock(string key, DistributedLockOptions options, CancellationToken cancellationToken = default)
+    public async Task<DistributedLockResult> SetLock(string key, DistributedLockOptions options, CancellationToken cancellationToken = default)
     {
         if (key.IsNullOrWhiteSpace())
             throw new ArgumentNullException(nameof(key));
@@ -62,7 +62,7 @@ public class DistributedLock : IDistributedLock
 
             if (acquired)
             {
-                return new LockResult(this, lockKey, lockValue, options.AutoRenew, options.RenewalInterval);
+                return new DistributedLockResult(this, lockKey, lockValue, options.AutoRenew, options.RenewalInterval);
             }
 
             await Task.Delay(options.RetryDelay, cancellationToken);
@@ -71,7 +71,7 @@ public class DistributedLock : IDistributedLock
         return null; // Lock could not be acquired within timeout
     }
 
-    public async Task<LockResult> TrySetLock(string key, int expirySeconds = 30, CancellationToken cancellationToken = default)
+    public async Task<DistributedLockResult> TrySetLock(string key, int expirySeconds = 30, CancellationToken cancellationToken = default)
     {
         if (key.IsNullOrWhiteSpace())
             throw new ArgumentNullException(nameof(key));
@@ -81,7 +81,7 @@ public class DistributedLock : IDistributedLock
 
         var acquired = await TrySetLock(lockKey, lockValue, expirySeconds);
 
-        return acquired ? new LockResult(this, lockKey, lockValue, false, 0) : null;
+        return acquired ? new DistributedLockResult(this, lockKey, lockValue, false, 0) : null;
     }
 
 

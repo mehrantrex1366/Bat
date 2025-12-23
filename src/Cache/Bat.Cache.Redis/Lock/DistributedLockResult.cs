@@ -1,6 +1,6 @@
 namespace Bat.Cache.Redis;
 
-public class LockResult : IDisposable, IAsyncDisposable
+public class DistributedLockResult : IDisposable, IAsyncDisposable
 {
     private bool _disposed;
     private readonly string _lockKey;
@@ -11,7 +11,7 @@ public class LockResult : IDisposable, IAsyncDisposable
 
     public bool IsAcquired { get; private set; }
 
-    public LockResult(IDistributedLock distributedLock, string lockKey, string lockValue,
+    public DistributedLockResult(IDistributedLock distributedLock, string lockKey, string lockValue,
         bool autoRenew, int renewalInterval)
     {
         IsAcquired = true;

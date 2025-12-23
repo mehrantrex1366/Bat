@@ -82,7 +82,11 @@ for example :
     }
 
 
- ## Distributed Lock
+ # Distributed Lock
+
+ ## Register Distributed Lock
+
+    ```csharp
     services.AddBatDistributedLock(options =>
     {
         options.AcquireTimeout = 10;      // Maximum wait time for lock
@@ -92,6 +96,10 @@ for example :
         options.RenewalInterval = 10;     // Auto-renewal interval
         options.LockKeyPrefix = "myapp";  // Custom prefix for lock keys
     });
+    ```
+
+
+## Use Distributed Lock
 
     ```csharp
     public async Task<decimal> CalculateBalanceAsync(int accountId)

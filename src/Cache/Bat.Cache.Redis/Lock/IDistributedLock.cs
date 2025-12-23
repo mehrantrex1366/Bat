@@ -8,7 +8,7 @@ public interface IDistributedLock
     /// <param name="key">Unique key for the lock</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>LockResult containing lock information, or null if lock couldn't be acquired</returns>
-    Task<LockResult> SetLock(string key, CancellationToken cancellationToken = default);
+    Task<DistributedLockResult> SetLock(string key, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Attempts to acquire a distributed lock with custom options
@@ -17,7 +17,7 @@ public interface IDistributedLock
     /// <param name="options">Lock configuration options</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>LockResult containing lock information, or null if lock couldn't be acquired</returns>
-    Task<LockResult> SetLock(string key, DistributedLockOptions options, CancellationToken cancellationToken = default);
+    Task<DistributedLockResult> SetLock(string key, DistributedLockOptions options, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Attempts to acquire a lock immediately without retrying
@@ -26,7 +26,7 @@ public interface IDistributedLock
     /// <param name="expirySeconds">Lock expiration in seconds</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>LockResult if acquired, null otherwise</returns>
-    Task<LockResult> TrySetLock(string key, int expirySeconds = 30, CancellationToken cancellationToken = default);
+    Task<DistributedLockResult> TrySetLock(string key, int expirySeconds = 30, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Releases a previously acquired lock
