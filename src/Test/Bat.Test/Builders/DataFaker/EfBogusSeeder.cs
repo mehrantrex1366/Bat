@@ -1,13 +1,10 @@
-﻿using System.Collections;
-using System.Reflection;
+﻿namespace Bat.Test;
 
-namespace Bat.Test;
-
-public class EfTestDataHelper
+public class EfBogusSeeder
 {
     private readonly DbContext _context;
 
-    public EfTestDataHelper(DbContext context) => _context = context;
+    public EfBogusSeeder(DbContext context) => _context = context;
 
     public TSeed SeedEntity<TSeed>(
         int count = 1,
