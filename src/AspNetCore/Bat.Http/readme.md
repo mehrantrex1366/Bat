@@ -1,10 +1,11 @@
-For use Bat.Http just do it :
+# For use Bat.Http just do it :
 
-1- Install Bat.Http on your project
+## 1- Install Bat.Http on your project
 
-2- Use it in bussiness logic
+## 2- Use it in bussiness logic
 for example :
 
+    ```
     public class BaseService : IBaseService
     {
         private readonly HttpClient _httpClient;
@@ -41,3 +42,4 @@ for example :
 
         }
     }
+    ```
