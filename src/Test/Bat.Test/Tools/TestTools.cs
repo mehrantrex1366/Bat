@@ -4,7 +4,7 @@ public static class TestTools
 {
     public static MockBuilder<T> GetMock<T>() where T : class
         => new();
-    
+
     public static MockDbContextBuilder<TDbContext> GetMockDbContext<TDbContext>() where TDbContext : BatDbContext
         => new();
 
