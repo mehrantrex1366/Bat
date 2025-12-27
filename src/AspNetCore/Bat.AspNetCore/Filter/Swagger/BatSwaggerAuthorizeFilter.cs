@@ -1,6 +1,6 @@
 ﻿using Microsoft.OpenApi;
-using Swashbuckle.AspNetCore.SwaggerGen;
 using Microsoft.AspNetCore.Authorization;
+using Swashbuckle.AspNetCore.SwaggerGen;
 using Microsoft.AspNetCore.Mvc.Controllers;
 
 namespace Bat.AspNetCore;
