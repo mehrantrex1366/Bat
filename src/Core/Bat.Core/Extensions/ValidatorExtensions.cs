@@ -51,7 +51,7 @@ public static class ValidatorExtensions
 
         string bank = iban.Substring(4, iban.Length - 4) + iban.Substring(0, 4);
         int asciiShift = 55;
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new();
         foreach (char c in bank)
         {
             int v;
@@ -204,14 +204,24 @@ public static class ValidatorExtensions
         return true;
     }
 
-    public static bool IsBankShaba(this string shaba)
+    public static bool IsBankSheba(this string sheba)
     {
-        if (string.IsNullOrWhiteSpace(shaba)) return false;
-        if (shaba.Length != 24) return false;
+        if (string.IsNullOrWhiteSpace(sheba)) return false;
+        if (sheba.Length != 24) return false;
 
         return true;
     }
 
+    public static bool IsCarPlate(this string CarPlate)
+    {
+        if (string.IsNullOrWhiteSpace(CarPlate)) return false;
+        if (CarPlate.Length != 24) return false;
+
+        var regex = new Regex(RegexPattern.CarPlate);
+        if (!regex.Match(CarPlate).Success) return false;
+
+        return true;
+    }
 
     public static bool IsComplexPassword(this string password, PasswordComplexityConfig config = default)
     {

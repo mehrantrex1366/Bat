@@ -26,4 +26,5 @@ public class RegexPattern
 
     public const string BankCardNumber = @"^\d{4,4}\-\d{4,4}\-\d{4,4}\-\d{4,4}$";
 
+    public const string CarPlate = @"^(\d{2})\s*([ابپتثجچحخدذرزژسشصضطظعغفقکگلمنوهی])\s*(\d{3})$"; 
 }
