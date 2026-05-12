@@ -34,7 +34,7 @@ Mail : mehrannoruzi@gmail.com</PackageReleaseNotes>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="System.Runtime.Caching" Version="10.0.1" />
+		<PackageReference Include="System.Runtime.Caching" Version="10.0.7" />
 	</ItemGroup>
 
 	<ItemGroup>
