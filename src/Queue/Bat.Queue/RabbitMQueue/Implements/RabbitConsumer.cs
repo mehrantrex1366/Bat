@@ -34,7 +34,7 @@ public class RabbitConsumer(IRabbitService rabbitService) : IRabbitConsumer, IAs
         var consumer = new AsyncEventingBasicConsumer(_channel);
         consumer.ReceivedAsync += async (model, eventArgs) =>
             {
-                await Task.Run(() => receiveEventAction.Invoke(Encoding.UTF8.GetString(eventArgs.Body.ToArray()), eventArgs));
+                await Task.Run(() => receiveEventAction.Invoke(Encoding.UTF8.GetString(eventArgs.Body.Span), eventArgs));
             };
 
         await _channel.BasicConsumeAsync(
@@ -72,7 +72,7 @@ public class RabbitConsumer(IRabbitService rabbitService) : IRabbitConsumer, IAs
         var consumer = new AsyncEventingBasicConsumer(_channel);
         consumer.ReceivedAsync += async (model, eventArgs) =>
         {
-            await Task.Run(() => receiveEventAction.Invoke(Encoding.UTF8.GetString(eventArgs.Body.ToArray()), eventArgs));
+            await Task.Run(() => receiveEventAction.Invoke(Encoding.UTF8.GetString(eventArgs.Body.Span), eventArgs));
         };
 
         await _channel.BasicConsumeAsync(
@@ -84,13 +84,20 @@ public class RabbitConsumer(IRabbitService rabbitService) : IRabbitConsumer, IAs
         await Task.CompletedTask;
     }
 
+    // Null-safe: DisposeAsync used to throw NullReferenceException if Subscribe was never called.
     public async ValueTask DisposeAsync()
     {
-        if (_channel.IsOpen) await _channel.CloseAsync();
-        _channel.Dispose();
+        if (_channel is not null)
+        {
+            if (_channel.IsOpen) await _channel.CloseAsync();
+            _channel.Dispose();
+        }
 
-        if (_connection.IsOpen) await _connection.CloseAsync();
-        _connection.Dispose();
+        if (_connection is not null)
+        {
+            if (_connection.IsOpen) await _connection.CloseAsync();
+            _connection.Dispose();
+        }
 
         GC.SuppressFinalize(this);
     }

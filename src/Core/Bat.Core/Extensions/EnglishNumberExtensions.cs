@@ -53,26 +53,21 @@ public static class EnglishNumberExtensions
     {
         //Persian Ascii 1776-1785
         //Arabic  Ascii 1632-1641
-        var myString = input.ToArray();
-        var result = new StringBuilder().Clear();
+        // Fast path: this runs for every string property of every changed entity on SaveChanges,
+        // and almost all strings contain no Persian/Arabic digits, so avoid allocating in that case.
+        var index = input.AsSpan().IndexOfAnyInRange('\u0660', '\u06F9');
+        if (index < 0) return input;
 
-        for (int i = 0; i < myString.Length; i++)
+        return string.Create(input.Length, input, static (span, source) =>
         {
-            if (myString[i] >= 1776 && myString[i] <= 1785)
+            for (int i = 0; i < source.Length; i++)
             {
-                result.Append((char)((myString[i] - 1776) + 48));
+                var c = source[i];
+                if (c >= 1776 && c <= 1785) span[i] = (char)((c - 1776) + 48);
+                else if (c >= 1632 && c <= 1641) span[i] = (char)((c - 1632) + 48);
+                else span[i] = c;
             }
-            else if (myString[i] >= 1632 && myString[i] <= 1641)
-            {
-                result.Append((char)((myString[i] - 1632) + 48));
-            }
-            else
-            {
-                result.Append(myString[i]);
-            }
-        }
-
-        return result.ToString();
+        });
     }
 
     public static string ToEnglishNumber2(this string input)

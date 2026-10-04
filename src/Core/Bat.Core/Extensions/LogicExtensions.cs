@@ -12,7 +12,8 @@ public static class LogicExtensions
 
     public static bool IsNull(this Guid? token) => token == null || token == Guid.Empty;
 
-    public static bool IsNotNull(this Guid token) => !IsNull(token);
+    // Fixed: this used to call IsNull(object) (boxing) and was therefore always true, even for Guid.Empty.
+    public static bool IsNotNull(this Guid token) => token != Guid.Empty;
 
     public static bool CanBeCastTo<T>(this string value)
     {
@@ -30,7 +31,9 @@ public static class LogicExtensions
         foreach (var item in items) action(item);
     }
 
-    public async static void ForEach<T>(this IAsyncEnumerable<T> items, Action<T> action)
+    // Was `async void`: callers could not await it and any exception crashed the process.
+    // Now returns a Task; existing call sites still compile (await it to observe completion/errors).
+    public async static Task ForEach<T>(this IAsyncEnumerable<T> items, Action<T> action)
     {
         await foreach (var item in items) action(item);
     }

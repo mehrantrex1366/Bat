@@ -64,9 +64,17 @@ public static class OrderByExtensions
     }
 
 
+    /// <summary>
+    /// Orders by a property name. Also accepts "Name desc, Address.City" style strings (comma separated,
+    /// optional asc/desc, nested paths, case-insensitive) — previously anything except a plain, exact property
+    /// name threw, although ToPagingListDetailsAsync(..., orderBy) passes such strings here.
+    /// </summary>
     public static IOrderedQueryable<T> OrderBy<T>(this IQueryable<T> source, string propertyName)
     {
-        return source.OrderBy(ToLambda<T>(propertyName));
+        if (string.IsNullOrWhiteSpace(propertyName) || propertyName.IndexOfAny([',', ' ', '.']) < 0)
+            return source.OrderBy(ToLambda<T>(propertyName));
+
+        return (IOrderedQueryable<T>)source.Provider.CreateQuery<T>(source.Expression.OrderBy(propertyName));
     }
 
     public static IOrderedQueryable<T> OrderByDescending<T>(this IQueryable<T> source, string propertyName)

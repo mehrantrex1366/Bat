@@ -6,18 +6,13 @@ public static class DryIocContainerExtensions
 {
     public static void AddBatDryIocDynamicTransient(this IRegistrator container, params Assembly[] assemblies)
     {
-        var allAssembly = new List<Assembly>();
-        var allAssemblyNames = AppDomain.CurrentDomain.GetAssemblies().ToList();
-
-        allAssemblyNames.ForEach(x => allAssembly.Add(Assembly.Load(x.FullName)));
-        var types = allAssembly.SelectMany(a => a.GetExportedTypes())
-            .Where(c => c.IsClass && !c.IsAbstract && c.IsPublic && typeof(ITransientInjection).IsAssignableFrom(c)).ToList();
+        var types = InjectableTypeScanner.GetTypes<ITransientInjection>();
 
         foreach (var type in types)
         {
             try
             {
-                var typeInterface = type.GetTypeInfo().ImplementedInterfaces.FirstOrDefault(x => x.Name.Contains(type.Name));
+                var typeInterface = InjectableTypeScanner.GetServiceInterface(type);
                 if (type.IsGenericType)
                 {
                     if (typeInterface == null) continue;
@@ -37,18 +32,13 @@ public static class DryIocContainerExtensions
 
     public static void AddBatDryIocDynamicScoped(this IRegistrator container, params Assembly[] assemblies)
     {
-        var allAssembly = new List<Assembly>();
-        var allAssemblyNames = AppDomain.CurrentDomain.GetAssemblies().ToList();
-
-        allAssemblyNames.ForEach(x => allAssembly.Add(Assembly.Load(x.FullName)));
-        var types = allAssembly.SelectMany(a => a.GetExportedTypes())
-            .Where(c => c.IsClass && !c.IsAbstract && c.IsPublic && typeof(IScopedInjection).IsAssignableFrom(c)).ToList();
+        var types = InjectableTypeScanner.GetTypes<IScopedInjection>();
 
         foreach (var type in types)
         {
             try
             {
-                var typeInterface = type.GetTypeInfo().ImplementedInterfaces.FirstOrDefault(x => x.Name.Contains(type.Name));
+                var typeInterface = InjectableTypeScanner.GetServiceInterface(type);
                 if (type.IsGenericType)
                 {
                     if (typeInterface == null) continue;
@@ -68,18 +58,13 @@ public static class DryIocContainerExtensions
 
     public static void AddBatDryIocDynamicSingleton(this IRegistrator container, params Assembly[] assemblies)
     {
-        var allAssembly = new List<Assembly>();
-        var allAssemblyNames = AppDomain.CurrentDomain.GetAssemblies().ToList();
-
-        allAssemblyNames.ForEach(x => allAssembly.Add(Assembly.Load(x.FullName)));
-        var types = allAssembly.SelectMany(a => a.GetExportedTypes())
-            .Where(c => c.IsClass && !c.IsAbstract && c.IsPublic && typeof(ISingletonInjection).IsAssignableFrom(c)).ToList();
+        var types = InjectableTypeScanner.GetTypes<ISingletonInjection>();
 
         foreach (var type in types)
         {
             try
             {
-                var typeInterface = type.GetTypeInfo().ImplementedInterfaces.FirstOrDefault(x => x.Name.Contains(type.Name));
+                var typeInterface = InjectableTypeScanner.GetServiceInterface(type);
                 if (type.IsGenericType)
                 {
                     if (typeInterface == null) continue;

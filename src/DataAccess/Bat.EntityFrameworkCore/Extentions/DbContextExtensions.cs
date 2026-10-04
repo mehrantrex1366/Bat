@@ -24,11 +24,12 @@ public static class DbContextExtensions
     public static IEnumerable<EntityEntry> GetAddOrUpdateEntity(this DbContext dbContext)
         => dbContext.ChangeTracker.Entries().Where(x => x.State == EntityState.Added || x.State == EntityState.Modified);
 
+    // Fixed: GetAddedEntity and GetUpdatedEntity both returned the Deleted entries.
     public static IEnumerable<EntityEntry> GetAddedEntity(this DbContext dbContext)
-        => dbContext.GetChangedEntity(EntityState.Deleted);
+        => dbContext.GetChangedEntity(EntityState.Added);
 
     public static IEnumerable<EntityEntry> GetUpdatedEntity(this DbContext dbContext)
-        => dbContext.GetChangedEntity(EntityState.Deleted);
+        => dbContext.GetChangedEntity(EntityState.Modified);
 
     public static IEnumerable<EntityEntry> GetDeletedEntity(this DbContext dbContext)
         => dbContext.GetChangedEntity(EntityState.Deleted);
@@ -42,6 +43,12 @@ public static class DbContextExtensions
 
     public static void BasePropertiesInitializer(this DbContext dbContext)
     {
+        // One timestamp per SaveChanges: all entities saved together get the same Insert/Modify time
+        // (DateTime.Now was read up to 8 times per entity before, and the Persian date was formatted per entity).
+        var now = DateTime.Now;
+        string persianNow = null;
+        string PersianNow() => persianNow ??= now.ToPersianDate();
+
         foreach (var entry in dbContext.ChangeTracker.Entries<IBaseProperties>())
         {
             switch (entry.State)
@@ -49,52 +56,52 @@ public static class DbContextExtensions
                 case EntityState.Added:
                     {
                         if (entry.Entity is IInsertDateOnlyProperty insertDateOnlyProperty)
-                            insertDateOnlyProperty.InsertDate = DateOnly.FromDateTime(DateTime.Now);
+                            insertDateOnlyProperty.InsertDate = DateOnly.FromDateTime(now);
 
                         if (entry.Entity is IInsertTimeOnlyProperty insertTimeOnlyProperty)
-                            insertTimeOnlyProperty.InsertTime = TimeOnly.FromDateTime(DateTime.Now);
+                            insertTimeOnlyProperty.InsertTime = TimeOnly.FromDateTime(now);
 
                         if (entry.Entity is IInsertDateProperty insertDateProperty)
-                            insertDateProperty.InsertDateMi = DateTime.Now;
+                            insertDateProperty.InsertDateMi = now;
 
                         if (entry.Entity is IInsertDateProperties insertDateProperties)
                         {
-                            insertDateProperties.InsertDateMi = DateTime.Now;
-                            insertDateProperties.InsertDateSh = DateTime.Now.ToPersianDate();
+                            insertDateProperties.InsertDateMi = now;
+                            insertDateProperties.InsertDateSh = PersianNow();
                         }
 
 
                         if (entry.Entity is IModifyDateOnlyProperty modifyDateOnlyProperty)
-                            modifyDateOnlyProperty.ModifyDate = DateOnly.FromDateTime(DateTime.Now);
+                            modifyDateOnlyProperty.ModifyDate = DateOnly.FromDateTime(now);
 
                         if (entry.Entity is IModifyTimeOnlyProperty modifyTimeOnlyProperty)
-                            modifyTimeOnlyProperty.ModifyTime = TimeOnly.FromDateTime(DateTime.Now);
+                            modifyTimeOnlyProperty.ModifyTime = TimeOnly.FromDateTime(now);
 
                         if (entry.Entity is IModifyDateProperty modifyDateProperty)
-                            modifyDateProperty.ModifyDateMi = DateTime.Now;
+                            modifyDateProperty.ModifyDateMi = now;
 
                         if (entry.Entity is IModifyDateProperties modifyDateProperties)
                         {
-                            modifyDateProperties.ModifyDateMi = DateTime.Now;
-                            modifyDateProperties.ModifyDateSh = DateTime.Now.ToPersianDate();
+                            modifyDateProperties.ModifyDateMi = now;
+                            modifyDateProperties.ModifyDateSh = PersianNow();
                         }
                         break;
                     }
                 case EntityState.Modified:
                     {
                         if (entry.Entity is IModifyDateOnlyProperty modifyDateOnlyProperty)
-                            modifyDateOnlyProperty.ModifyDate = DateOnly.FromDateTime(DateTime.Now);
+                            modifyDateOnlyProperty.ModifyDate = DateOnly.FromDateTime(now);
 
                         if (entry.Entity is IModifyTimeOnlyProperty modifyTimeOnlyProperty)
-                            modifyTimeOnlyProperty.ModifyTime = TimeOnly.FromDateTime(DateTime.Now);
+                            modifyTimeOnlyProperty.ModifyTime = TimeOnly.FromDateTime(now);
                         
                         if (entry.Entity is IModifyDateProperty modifyDateProperty)
-                            modifyDateProperty.ModifyDateMi = DateTime.Now;
+                            modifyDateProperty.ModifyDateMi = now;
                         
                         if (entry.Entity is IModifyDateProperties modifyDateProperties)
                         {
-                            modifyDateProperties.ModifyDateMi = DateTime.Now;
-                            modifyDateProperties.ModifyDateSh = PersianDateTime.Now.ToString();
+                            modifyDateProperties.ModifyDateMi = now;
+                            modifyDateProperties.ModifyDateSh = PersianNow();
                         }
                         break;
                     }
@@ -126,11 +133,13 @@ public static class DbContextExtensions
             }
             catch (ValidationException validationException)
             {
-                result.Add(entity.GetType().FullName, new ValidationError
+                // Fixed: Add() threw ArgumentException when two entities of the same type were invalid, and
+                // Value/MemberNames could be null/empty. The first error per entity type is kept (key format unchanged).
+                result.TryAdd(entity.GetType().FullName, new ValidationError
                 {
-                    Value = validationException.Value.ToString(),
+                    Value = validationException.Value?.ToString(),
                     ValidationSource = validationException.Source,
-                    Field = validationException.ValidationResult.MemberNames.First(),
+                    Field = validationException.ValidationResult.MemberNames.FirstOrDefault(),
                     ValidationMessage = validationException.ValidationResult.ErrorMessage
                 });
             }
@@ -146,8 +155,14 @@ public static class DbContextExtensions
 
             var auditList = new List<TEntity>();
             var tableName = string.Empty;
-            foreach (var entry in dbContext.GetChangedEntity())
+            // Fixed: every tracked entry (including Unchanged ones and the audit rows themselves) used to produce an
+            // audit row; Unchanged entries produced empty rows. Only Added/Modified/Deleted entries are audited now.
+            // ToList(): the loop does not add entries, but GetDatabaseValues() must not run while enumerating the tracker.
+            foreach (var entry in dbContext.ChangeTracker.Entries().ToList())
             {
+                if (entry.State is not (EntityState.Added or EntityState.Modified or EntityState.Deleted)) continue;
+                if (entry.Entity is TEntity) continue;
+
                 tableName = entry.Entity.GetType().FullName;
                 tableName = tableName.Contains('_') ? tableName[..tableName.IndexOf('_')] : tableName;
                 var audit = new TEntity() as IAuditLogProperties;

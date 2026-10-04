@@ -119,10 +119,8 @@ public static class NumberExtensions
             return number.ToString("##,###") + " ریال ";
     }
 
-    private static string ToText(long number, int level)
-    {
-        var numstr = new string[][]
-        {
+    private static readonly string[][] numStr =
+        [
             ["0","1","2","3","4","5","6","7","8","9"],
             ["10","11","12","13","14","15","16","17","18","19","20","30","40","50","60","70","80","90"],
             ["","100","200","300","400","500","600","700","800","900"] ,
@@ -131,52 +129,54 @@ public static class NumberExtensions
             ["ميليارد"],
             ["تريليون"],
             ["تريليارد"]
-        };
+        ];
 
+    private static string ToText(long number, int level)
+    {
         switch (level)
         {
             case 1:
                 if (number < 10)
-                    return numstr[0][System.Convert.ToInt32(number)];
+                    return numStr[0][System.Convert.ToInt32(number)];
 
                 if (number % 100 < 20 && number % 100 > 9)
                 {
                     if (number < 20)
-                        return numstr[1][System.Convert.ToInt32(number % 10)];
-                    return ToText(number / 100, 3) + " و " + numstr[1][System.Convert.ToInt32(number % 10)];
+                        return numStr[1][System.Convert.ToInt32(number % 10)];
+                    return ToText(number / 100, 3) + " و " + numStr[1][System.Convert.ToInt32(number % 10)];
                 }
-                return ToText(number / 10, 2) + ((number % 10 != 0) ? " و " + numstr[0][System.Convert.ToInt32(number % 10)] : "");
+                return ToText(number / 10, 2) + ((number % 10 != 0) ? " و " + numStr[0][System.Convert.ToInt32(number % 10)] : "");
 
             case 2:
                 if (number < 10)
-                    return numstr[1][System.Convert.ToInt32(number % 10 + 8)];
+                    return numStr[1][System.Convert.ToInt32(number % 10 + 8)];
 
-                return ToText(number / 10, 3) + ((number % 10 >= 2) ? " و " + numstr[1][System.Convert.ToInt32(number % 10 + 8)] : "");
+                return ToText(number / 10, 3) + ((number % 10 >= 2) ? " و " + numStr[1][System.Convert.ToInt32(number % 10 + 8)] : "");
             case 3:
                 if (number < 10)
-                    return numstr[2][System.Convert.ToInt32(number % 10)];
+                    return numStr[2][System.Convert.ToInt32(number % 10)];
 
-                return ToText(number / 10, 4) + ((number % 10 != 0) ? " و " : "") + numstr[2][System.Convert.ToInt32(number % 10)];
+                return ToText(number / 10, 4) + ((number % 10 != 0) ? " و " : "") + numStr[2][System.Convert.ToInt32(number % 10)];
             case 4:
                 if (number < 1000)
-                    return ToText(number, 1) + " " + numstr[3][0];
+                    return ToText(number, 1) + " " + numStr[3][0];
 
-                return ToText(number / 1000, 5) + ((System.Convert.ToInt32(number % 1000) != 0) ? " و " + ToText(number % 1000, 1) + " " + numstr[3][0] : "");
+                return ToText(number / 1000, 5) + ((System.Convert.ToInt32(number % 1000) != 0) ? " و " + ToText(number % 1000, 1) + " " + numStr[3][0] : "");
             case 5:
                 if (number < 1000)
-                    return ToText(number, 1) + " " + numstr[4][0];
-                return ToText(number / 1000, 6) + ((System.Convert.ToInt32(number % 1000) != 0) ? " و " + ToText(number % 1000, 1) + " " + numstr[4][0] : "");
+                    return ToText(number, 1) + " " + numStr[4][0];
+                return ToText(number / 1000, 6) + ((System.Convert.ToInt32(number % 1000) != 0) ? " و " + ToText(number % 1000, 1) + " " + numStr[4][0] : "");
             case 6:
                 if (number < 1000)
-                    return ToText(number, 1) + " " + numstr[5][0];
-                return ToText(number / 1000, 7) + ((System.Convert.ToInt32(number % 1000) != 0) ? " و " + ToText(number % 1000, 1) + " " + numstr[5][0] : "");
+                    return ToText(number, 1) + " " + numStr[5][0];
+                return ToText(number / 1000, 7) + ((System.Convert.ToInt32(number % 1000) != 0) ? " و " + ToText(number % 1000, 1) + " " + numStr[5][0] : "");
             case 7:
                 if (number < 1000)
-                    return ToText(number, 1) + " " + numstr[6][0];
-                return ToText(number / 1000, 8) + ((System.Convert.ToInt32(number % 1000) != 0) ? " و " + ToText(number % 1000, 1) + " " + numstr[6][0] : "");
+                    return ToText(number, 1) + " " + numStr[6][0];
+                return ToText(number / 1000, 8) + ((System.Convert.ToInt32(number % 1000) != 0) ? " و " + ToText(number % 1000, 1) + " " + numStr[6][0] : "");
             case 8:
                 if (number < 1000)
-                    return ToText(number, 1) + " " + numstr[7][0];
+                    return ToText(number, 1) + " " + numStr[7][0];
                 return "";
             default:
                 return "";
@@ -360,7 +360,7 @@ public static class NumberExtensions
 
     public static string ToCurrency(this double value, string cultureName)
     {
-        var currentCulture = new CultureInfo(cultureName);
+        var currentCulture = CultureInfo.GetCultureInfo(cultureName);
         return string.Format(currentCulture, "{0:C}", value);
     }
 

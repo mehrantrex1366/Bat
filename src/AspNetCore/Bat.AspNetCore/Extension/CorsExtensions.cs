@@ -50,17 +50,13 @@ public static class CorsExtensions
 
     public static void UseBatCors(this IApplicationBuilder app, List<string> domains = null, List<string> headers = null, List<string> methods = null)
     {
-        var policyBuilder = new CorsPolicyBuilder();
-        var corsPolicy = domains == null
-                        ? policyBuilder.AllowAnyOrigin()
-                        : policyBuilder.WithOrigins(domains.ToArray());
-        corsPolicy = headers == null
-                        ? policyBuilder.AllowAnyHeader()
-                        : policyBuilder.WithHeaders(headers.ToArray());
-        corsPolicy = methods == null
-                        ? policyBuilder.AllowAnyMethod()
-                        : policyBuilder.WithMethods(methods.ToArray());
-
-        app.UseCors(corsPolicyBuilder => corsPolicyBuilder = corsPolicy);
+        // Fixed: `corsPolicyBuilder = corsPolicy` only reassigned the lambda parameter, so an empty policy
+        // (nothing allowed) was applied. Configure the builder that UseCors actually uses.
+        app.UseCors(builder =>
+        {
+            if (domains == null) builder.AllowAnyOrigin(); else builder.WithOrigins([.. domains]);
+            if (headers == null) builder.AllowAnyHeader(); else builder.WithHeaders([.. headers]);
+            if (methods == null) builder.AllowAnyMethod(); else builder.WithMethods([.. methods]);
+        });
     }
 }

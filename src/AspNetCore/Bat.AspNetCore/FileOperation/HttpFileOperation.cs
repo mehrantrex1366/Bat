@@ -6,19 +6,15 @@ namespace Bat.AspNetCore;
 
 public static class HttpFileOperation
 {
-    public static byte[] ToByteArray(IFormFile file)
-    {
-        using var target = new MemoryStream();
-        file.OpenReadStream().CopyTo(target);
-        return target.ToArray();
-    }
+    public static byte[] ToByteArray(IFormFile file) 
+        => file.ToByteArray();
 
-    public static string ToBase64(IFormFile file)
-    {
-        using var target = new MemoryStream();
-        file.OpenReadStream().CopyTo(target);
-        return Convert.ToBase64String(target.ToArray());
-    }
+    public static string ToBase64(IFormFile file) 
+        => file.ToBase64();
+
+    // Converts a "a/b/c" web path to an OS path. The old code always used '\\', which on Linux
+    // (Kubernetes) produced single directories with backslashes in their names.
+    private static string ToOsPath(string path) => path.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar);
 
     public static string GetPath(string fileNameWithExtension, string root = "~",
             bool includeYearInPath = false, bool includeMonthInPath = false,
@@ -32,7 +28,7 @@ public static class HttpFileOperation
         if (includeMonthInPath) path += "/" + persianDate.Month;
         if (includeDayInPath) path += "/" + persianDate.Day;
         path += (objectId == null ? string.Empty : ("/" + objectId));
-        var directoryAddress = Path.Combine(Directory.GetCurrentDirectory(), urlPrefix ?? "", "wwwroot", path.Replace("/", "\\"));
+        var directoryAddress = Path.Combine(Directory.GetCurrentDirectory(), urlPrefix ?? "", "wwwroot", ToOsPath(path));
         #endregion
 
         #region Create File Name
@@ -59,12 +55,8 @@ public static class HttpFileOperation
     {
         if (fileBytes is null || fileBytes.Length <= 0) return null;
 
-        var file = new FormFile(null, 0, fileBytes.Length, "", "");
-
-        using (var stream = new FileStream(fullPath, FileMode.Create))
-        {
-            file.CopyTo(stream);
-        }
+        // Fixed: the bytes were wrapped in a FormFile with a null stream, so nothing was written (it threw).
+        File.WriteAllBytes(fullPath, fileBytes);
         if (File.Exists(fullPath)) return fullPath;
         return null;
     }
@@ -110,7 +102,7 @@ public static class HttpFileOperation
         model.Root = string.Join("/", model.Root, pDate.Year, pDate.Month);
         if (model.IncludeDayInPath) model.Root = model.Root + "/" + pDate.Day;
         model.Root = model.Root + (model.Id == null ? string.Empty : ("/" + model.Id.ToString()));
-        var dir = Path.Combine(Directory.GetCurrentDirectory(), model.UrlPrefix ?? "", "wwwroot", model.Root.Replace("/", "\\"));
+        var dir = Path.Combine(Directory.GetCurrentDirectory(), model.UrlPrefix ?? "", "wwwroot", ToOsPath(model.Root));
         #endregion
 
         model.FileNamePrefix = model.FileNamePrefix != null ? model.FileNamePrefix + "_" : string.Empty;
@@ -120,29 +112,22 @@ public static class HttpFileOperation
         while (section != null)
         {
             var hasContentDispositionHeader = ContentDispositionHeaderValue.TryParse(section.ContentDisposition, out var contentDisposition);
-            var trustedFileName = WebUtility.HtmlEncode(contentDisposition.FileName.Value);
-            var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(trustedFileName);
-            var fileName = model.FileNamePrefix + fileNameWithoutExtension + pDate.Ticks.ToString() + Path.GetExtension(trustedFileName);
-            rep = "~/" + model.Root + "/" + fileName;
 
             if (hasContentDispositionHeader)
             {
+                // Fixed: contentDisposition was dereferenced before checking that the header could be parsed.
+                var trustedFileName = WebUtility.HtmlEncode(contentDisposition.FileName.Value);
+                var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(trustedFileName);
+                var fileName = model.FileNamePrefix + fileNameWithoutExtension + pDate.Ticks.ToString() + Path.GetExtension(trustedFileName);
+                rep = "~/" + model.Root + "/" + fileName;
+
                 if (!MultipartRequestHelper.HasFileContentDisposition(contentDisposition))
                     return null;
-                else
-                {
-                    byte[] streamedFileContent;
-                    using (var memoryStream = new MemoryStream())
-                    {
-                        await section.Body.CopyToAsync(memoryStream);
-                        streamedFileContent = memoryStream.ToArray();
-                    }
 
-                    using (var targetStream = File.Create(Path.Combine(dir, fileName)))
-                    {
-                        await targetStream.WriteAsync(streamedFileContent);
-                    }
-                }
+                // Stream straight to disk; buffering the whole section in a MemoryStream (and copying it again
+                // with ToArray) defeated the purpose of a "large file" upload and put big arrays on the LOH.
+                await using var targetStream = File.Create(Path.Combine(dir, fileName));
+                await section.Body.CopyToAsync(targetStream);
             }
             section = await reader.ReadNextSectionAsync();
         }

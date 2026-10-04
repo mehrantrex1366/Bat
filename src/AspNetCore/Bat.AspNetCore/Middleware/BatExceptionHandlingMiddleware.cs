@@ -28,7 +28,12 @@ public class BatExceptionHandlingMiddleware
     private async Task HandleExceptionAsync(HttpContext context, Exception ex)
     {
         var requestBody = await context.Request.ReadRequestBody();
-        _logger.LogError(ex, $"Url: {context.Request.Path}, QueryString: {context.Request.QueryString.Value}, RequestBody: {requestBody}");
+        // Message template (not an interpolated string) so the values become structured log properties
+        // and the template is not re-parsed for every distinct message.
+        _logger.LogError(ex, "Url: {Url}, QueryString: {QueryString}, RequestBody: {RequestBody}", context.Request.Path.Value, context.Request.QueryString.Value, requestBody);
+
+        // If the response has already started, headers/status can no longer be changed (it would throw).
+        if (context.Response.HasStarted) return;
 
         object response;
         if (ex is DomainException)
@@ -63,7 +68,7 @@ public class BatExceptionHandlingMiddleware
         }
 
         context.Response.ContentType = "application/Json";
-        var responseBody = Encoding.UTF8.GetBytes(response.SerializeToJson());
+        var responseBody = response.SerializeToJsonUtf8Bytes();
         await context.Response.Body.WriteAsync(responseBody);
     }
 }

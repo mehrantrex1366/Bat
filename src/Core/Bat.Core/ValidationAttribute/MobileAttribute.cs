@@ -3,7 +3,7 @@
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
 public sealed class MobileAttribute : ValidationAttribute
 {
-    private readonly Regex rgx = new(RegexPattern.MobileNumber);
+    private static readonly Regex rgx = BatRegex.MobileNumber;
 
     public override bool IsValid(object value)
     {

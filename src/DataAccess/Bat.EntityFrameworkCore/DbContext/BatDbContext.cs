@@ -9,45 +9,46 @@ public abstract class BatDbContext : DbContext, IBatDbContext
     public virtual new DatabaseFacade Database => base.Database;
     public virtual new ChangeTracker ChangeTracker => base.ChangeTracker;
     
+    // Writable public string properties per entity type. GetProperties() + LINQ used to run for every
+    // tracked entity, twice, on every SaveChanges.
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<Type, System.Reflection.PropertyInfo[]> _stringProperties = new();
+
+    private static System.Reflection.PropertyInfo[] GetStringProperties(Type type)
+        => _stringProperties.GetOrAdd(type, static t => t.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+            .Where(x => x.CanRead && x.CanWrite && x.PropertyType == typeof(string))
+            .ToArray());
+
+    // Note: like before, this visits every tracked entry (including Unchanged ones); values are only written when they change.
     public virtual void ApplyPersianYK()
     {
-        var changedEntitis = this.GetChangedEntity();
-        foreach (var item in changedEntitis)
+        foreach (var item in ChangeTracker.Entries())
         {
             if (item.Entity == null) continue;
 
-            var propertyInfo = item.Entity.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                .Where(x => x.CanRead && x.CanWrite && x.PropertyType == typeof(string));
-            foreach (var property in propertyInfo)
+            foreach (var property in GetStringProperties(item.Entity.GetType()))
             {
-                var value = property.GetValue(item.Entity);
-                if (value != null)
+                if (property.GetValue(item.Entity) is string value)
                 {
-                    var newValue = value.ToString().ToPersianCharacters();
-                    if (newValue != value.ToString()) property.SetValue(item.Entity, newValue);
+                    var newValue = value.ToPersianCharacters();
+                    if (newValue != value) property.SetValue(item.Entity, newValue);
                 }
             }
         }
     }
     public virtual void ApplyEnglishNumber()
     {
-        var changedEntitis = this.GetChangedEntity();
-        foreach (var item in changedEntitis)
+        // Only string properties can contain Persian/Arabic digits. int/long/float/double were also scanned
+        // before, but their ToString() never contains them (and writing a string back into them would have thrown).
+        foreach (var item in ChangeTracker.Entries())
         {
             if (item.Entity == null) continue;
 
-            var propertyInfo = item.Entity.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                .Where(x => x.CanRead && x.CanWrite &&
-                (x.PropertyType == typeof(string) ||
-                x.PropertyType == typeof(int) || x.PropertyType == typeof(long) ||
-                x.PropertyType == typeof(float) || x.PropertyType == typeof(double)));
-            foreach (var property in propertyInfo)
+            foreach (var property in GetStringProperties(item.Entity.GetType()))
             {
-                var value = property.GetValue(item.Entity);
-                if (value != null)
+                if (property.GetValue(item.Entity) is string value)
                 {
-                    var newValue = value.ToString().ToEnglishNumber();
-                    if (newValue != value.ToString()) property.SetValue(item.Entity, newValue);
+                    var newValue = value.ToEnglishNumber();
+                    if (!ReferenceEquals(newValue, value) && newValue != value) property.SetValue(item.Entity, newValue);
                 }
             }
         }

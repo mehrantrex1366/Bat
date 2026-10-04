@@ -13,12 +13,16 @@ public class PasswordComplexityConfig
 
 public static class ValidatorExtensions
 {
+    private static readonly HashSet<string> _pictureExtensions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".heic"
+    };
+
     public static bool IsIp(this string ip)
     {
         if (string.IsNullOrWhiteSpace(ip)) return false;
 
-        var regex = new Regex(RegexPattern.Ip1);
-        if (!regex.Match(ip).Success) return false;
+        if (!BatRegex.Ip1.IsMatch(ip)) return false;
 
         return true;
     }
@@ -27,8 +31,7 @@ public static class ValidatorExtensions
     {
         if (string.IsNullOrWhiteSpace(ip)) return false;
 
-        var regex = new Regex(RegexPattern.Ip2);
-        if (!regex.Match(ip).Success) return false;
+        if (!BatRegex.Ip2.IsMatch(ip)) return false;
 
         return true;
     }
@@ -37,8 +40,7 @@ public static class ValidatorExtensions
     {
         if (string.IsNullOrWhiteSpace(url)) return false;
 
-        var regex = new Regex(RegexPattern.Url);
-        if (!regex.Match(url).Success) return false;
+        if (!BatRegex.Url.IsMatch(url)) return false;
 
         return true;
     }
@@ -47,7 +49,7 @@ public static class ValidatorExtensions
     {
         if (string.IsNullOrWhiteSpace(iban)) return false;
         iban = iban.ToUpper().Trim().Replace(" ", string.Empty);
-        if (!Regex.IsMatch(iban, "^[A-Z]{2}[0-9]{24}$")) return false;
+        if (!BatRegex.Iban.IsMatch(iban)) return false;
 
         string bank = iban.Substring(4, iban.Length - 4) + iban.Substring(0, 4);
         int asciiShift = 55;
@@ -78,8 +80,7 @@ public static class ValidatorExtensions
     {
         if (string.IsNullOrWhiteSpace(email)) return false;
 
-        var regex = new Regex(RegexPattern.Email);
-        if (!regex.Match(email).Success) return false;
+        if (!BatRegex.Email.IsMatch(email)) return false;
 
         return true;
     }
@@ -88,8 +89,7 @@ public static class ValidatorExtensions
     {
         if (string.IsNullOrWhiteSpace(time)) return false;
 
-        var regex = new Regex(RegexPattern.Time);
-        if (!regex.Match(time).Success) return false;
+        if (!BatRegex.Time.IsMatch(time)) return false;
 
         return true;
     }
@@ -98,30 +98,23 @@ public static class ValidatorExtensions
     {
         if (string.IsNullOrWhiteSpace(persianDate)) return false;
 
-        var regex = new Regex(RegexPattern.PersianDate);
-        if (!regex.Match(persianDate).Success) return false;
+        if (!BatRegex.PersianDate.IsMatch(persianDate)) return false;
 
         return true;
     }
 
     public static bool IsPicture(this string fileNameWithExtension)
     {
+        // Fixed: the old condition (!jpg || !jpeg || !png ...) was always true, so this always returned false.
         var fileExtention = Path.GetExtension(fileNameWithExtension);
-        if (!fileExtention.ToLower().Contains("jpg") ||
-                !fileExtention.ToLower().Contains("jpeg") ||
-                !fileExtention.ToLower().Contains("png") ||
-                !fileExtention.ToLower().Contains("gif") ||
-                !fileExtention.ToLower().Contains("bmp")) return false;
-
-        return true;
+        return _pictureExtensions.Contains(fileExtention ?? string.Empty);
     }
 
     public static bool IsDateTime(this string dateTime)
     {
         if (string.IsNullOrWhiteSpace(dateTime)) return false;
 
-        var regex = new Regex(RegexPattern.LatinDateTime);
-        if (!regex.Match(dateTime).Success) return false;
+        if (!BatRegex.LatinDateTime.IsMatch(dateTime)) return false;
 
         return true;
     }
@@ -145,13 +138,12 @@ public static class ValidatorExtensions
         for (int i = 0; i < numbers.Count; i++)
             sum += numbers[i] * (i + 2);
 
+        // Fixed: the old nested if/else (dangling else) never checked the "remaining >= 2" case,
+        // so most invalid codes were accepted.
         var remaining = sum % 11;
-        if (remaining < 2)
-            if (remaining != checkNumber) return false;
-            else
-                if ((11 - remaining) != checkNumber) return false;
+        if (remaining < 2) return remaining == checkNumber;
 
-        return true;
+        return (11 - remaining) == checkNumber;
     }
 
     public static bool IsNationalCode2(this string nationalCode)
@@ -190,8 +182,7 @@ public static class ValidatorExtensions
         if (string.IsNullOrWhiteSpace(bankCardNumber)) return false;
         if (bankCardNumber.Length != 19) return false;
 
-        var regex = new Regex(RegexPattern.BankCardNumber);
-        if (!regex.Match(bankCardNumber).Success) return false;
+        if (!BatRegex.BankCardNumber.IsMatch(bankCardNumber)) return false;
 
         return true;
     }
@@ -215,19 +206,20 @@ public static class ValidatorExtensions
     public static bool IsCarPlate(this string CarPlate)
     {
         if (string.IsNullOrWhiteSpace(CarPlate)) return false;
-        if (CarPlate.Length != 24) return false;
 
-        var regex = new Regex(RegexPattern.CarPlate);
-        if (!regex.Match(CarPlate).Success) return false;
+        if (!BatRegex.CarPlate.IsMatch(CarPlate)) return false;
 
         return true;
     }
 
     public static bool IsComplexPassword(this string password, PasswordComplexityConfig config = default)
     {
+        if (password is null) return false;
+        config ??= new PasswordComplexityConfig();
+
+        // Static Regex.IsMatch uses the framework's Regex cache, so repeated calls with the same config don't re-parse.
         var regexPattern = $"^(?=.*[A-Z]{{{config.MinUpperCase},}})(?=.*[a-z]{{{config.MinLowerCase},}})(?=.*[0-9]{{{config.MinNumbers},}})(?=.*[^A-Za-z0-9]{{{config.MinSpecialChars},}}).{{{config.MinLength},}}$";
-        var regex = new Regex(regexPattern);
-        return regex.IsMatch(password);
+        return Regex.IsMatch(password, regexPattern);
     }
 
 }

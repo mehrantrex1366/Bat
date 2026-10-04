@@ -23,6 +23,24 @@ public class MenuModel
     public bool HavePath { get { return !string.IsNullOrWhiteSpace(Path); } }
 
     [NotMapped]
-    public List<MenuModel> ChildMenus { get { return (Menus ?? "[]").DeSerializeJson<List<MenuModel>>(); } }
+    public List<MenuModel> ChildMenus
+    {
+        get
+        {
+            // Deserialize once per Menus value instead of on every property access
+            // (it is read in loops, views and during serialization).
+            var menus = Menus;
+            if (_childMenus is null || !ReferenceEquals(_childMenusSource, menus))
+            {
+                _childMenus = (menus ?? "[]").DeSerializeJson<List<MenuModel>>();
+                _childMenusSource = menus;
+            }
+
+            return _childMenus;
+        }
+    }
+
+    private string _childMenusSource;
+    private List<MenuModel> _childMenus;
 
 }

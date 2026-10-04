@@ -3,7 +3,7 @@
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
 public sealed class EmailAttribute : ValidationAttribute
 {
-    private readonly Regex rgx = new(RegexPattern.Email);
+    private static readonly Regex rgx = BatRegex.Email;
 
     public override bool IsValid(object value)
     {

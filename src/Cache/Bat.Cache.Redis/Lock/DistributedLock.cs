@@ -2,7 +2,35 @@ namespace Bat.Cache.Redis;
 
 public class DistributedLock : IDistributedLock
 {
+    // Lua scripts that only touch the lock when we still own it (value == our token).
+    private const string ReleaseScript = @"
+            if redis.call('get', KEYS[1]) == ARGV[1] then
+                return redis.call('del', KEYS[1])
+            else
+                return 0
+            end";
+
+    private const string RenewScript = @"
+            if redis.call('get', KEYS[1]) == ARGV[1] then
+                return redis.call('expire', KEYS[1], ARGV[2])
+            else
+                return 0
+            end";
+
     private readonly IRedisCacheProvider _redisCache;
+
+    // ScriptEvaluateAsync uses EVALSHA (script cached on the server) instead of sending the script text on every call.
+    // Falls back to a raw EVAL for IRedisCacheProvider implementations/mocks that don't expose _redisCache.
+    private async Task<bool> EvaluateAsync(string script, string key, RedisValue[] args)
+    {
+        var database = _redisCache._redisCache;
+        if (database is not null)
+            return (long)await database.ScriptEvaluateAsync(script, [key], args) == 1;
+
+        var commandArgs = new List<object> { script, 1, key };
+        foreach (var arg in args) commandArgs.Add(arg.ToString());
+        return await _redisCache.ExecuteAsync("EVAL", commandArgs) == "1";
+    }
     private readonly DistributedLockOptions _defaultOptions;
 
     public DistributedLock(IRedisCacheProvider redisCache, IOptions<DistributedLockOptions> options = null)
@@ -16,9 +44,12 @@ public class DistributedLock : IDistributedLock
     {
         try
         {
-            // SET key value NX EX seconds
-            // NX: Only set if key doesn't exist
-            // EX: Set expiry time in seconds
+            // SET key value NX EX seconds. Typed API when the database is available; the raw command is kept as a
+            // fallback for IRedisCacheProvider implementations/mocks that don't expose _redisCache.
+            var database = _redisCache._redisCache;
+            if (database is not null)
+                return await database.StringSetAsync(key, value, TimeSpan.FromSeconds(expirySeconds), When.NotExists);
+
             var result = await _redisCache.ExecuteAsync("SET", [key, value, "NX", "EX", expirySeconds]);
             return result == "OK";
         }
@@ -62,7 +93,7 @@ public class DistributedLock : IDistributedLock
 
             if (acquired)
             {
-                return new DistributedLockResult(this, lockKey, lockValue, options.AutoRenew, options.RenewalInterval);
+                return new DistributedLockResult(this, lockKey, lockValue, options.AutoRenew, options.RenewalInterval, options.LockExpiry);
             }
 
             await Task.Delay(options.RetryDelay, cancellationToken);
@@ -91,17 +122,9 @@ public class DistributedLock : IDistributedLock
             return false;
 
         // Lua script to ensure we only delete the lock if we own it
-        const string script = @"
-            if redis.call('get', KEYS[1]) == ARGV[1] then
-                return redis.call('del', KEYS[1])
-            else
-                return 0
-            end";
-
         try
         {
-            var result = await _redisCache.ExecuteAsync("EVAL", [script, 1, key, value]);
-            return result == "1";
+            return await EvaluateAsync(ReleaseScript, key, [value]);
         }
         catch
         {
@@ -115,17 +138,9 @@ public class DistributedLock : IDistributedLock
             return false;
 
         // Lua script to renew lock only if we own it
-        const string script = @"
-            if redis.call('get', KEYS[1]) == ARGV[1] then
-                return redis.call('expire', KEYS[1], ARGV[2])
-            else
-                return 0
-            end";
-
         try
         {
-            var result = await _redisCache.ExecuteAsync("EVAL", [script, 1, key, value, expirySeconds]);
-            return result == "1";
+            return await EvaluateAsync(RenewScript, key, [value, expirySeconds]);
         }
         catch
         {

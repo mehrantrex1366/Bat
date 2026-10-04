@@ -2,6 +2,12 @@
 
 public static partial class FileOperation
 {
+    private static readonly HashSet<string> _image = new(StringComparer.OrdinalIgnoreCase) { ".png", ".jpg", ".jpeg", ".gif", ".tiff", ".heic" };
+    private static readonly HashSet<string> _audio = new(StringComparer.OrdinalIgnoreCase) { ".mp3", ".wav", ".flm", ".fsm", ".ogg", ".m4a", ".m4b", ".m4p", ".m4r" };
+    private static readonly HashSet<string> _video = new(StringComparer.OrdinalIgnoreCase) { ".mp4", ".mkv", ".avi", ".ts", ".m4v", ".flv" };
+    private static readonly HashSet<string> _archive = new(StringComparer.OrdinalIgnoreCase) { ".zip", ".rar", ".iso", ".tar" };
+    private static readonly HashSet<string> _document = new(StringComparer.OrdinalIgnoreCase) { ".pdf", ".doc", ".docx", ".xln", ".txt", ".xls", ".xlm", ".josn", ".xlsx", ".pptx" };
+
     public static bool Save(string fileName, byte[] file, string absolatePath)
     {
         string path = Path.Combine(absolatePath, fileName);
@@ -38,40 +44,36 @@ public static partial class FileOperation
         return false;
     }
 
+    // Directory.CreateDirectory creates every missing segment. The old implementation joined segments
+    // with '\\' and dropped the leading '/', so on Linux it created relative folders with backslashes in their names.
     public static bool CreateDirectory(string path)
     {
-        if (!string.IsNullOrEmpty(path))
-        {
-            string[] dirs = path.Split(new char[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries);
-            if (dirs.Length > 1)
-            {
-                string stepByStepPath = $"{dirs[0]}";
-                for (int i = 1; i <= dirs.Length - 1; i++)
-                {
-                    if (!string.IsNullOrEmpty(dirs[i])) { stepByStepPath = $@"{stepByStepPath}\{dirs[i]}"; }
-                    if (!Directory.Exists(stepByStepPath)) Directory.CreateDirectory(stepByStepPath);
-                }
-                return true;
-            }
-            return false;
-        }
-        return false;
+        if (string.IsNullOrWhiteSpace(path)) return false;
+
+        var normalized = path.Replace('\\', Path.DirectorySeparatorChar).Replace('/', Path.DirectorySeparatorChar);
+        Directory.CreateDirectory(normalized);
+        return true;
     }
 
-    public static bool CheckExtention(FileType fileType, string fileName)
+    // Old (misspelled) name kept so services compiled against 10.0.0 still build.
+    [Obsolete("Use CheckExtension.")]
+    public static bool CheckExtention(FileType fileType, string fileName) => CheckExtension(fileType, fileName);
+
+    public static bool CheckExtension(FileType fileType, string fileName)
     {
         switch (fileType)
         {
             case FileType.Image:
-                return new string[] { ".png", ".jpg", ".jpeg", ".gif", ".tiff" }.Contains(Path.GetExtension(fileName));
+                return _image.Contains(Path.GetExtension(fileName) ?? string.Empty);
             case FileType.Audio:
-                return new string[] { ".mp3", ".wav", ".flm", ".fsm", ".ogg", ".m4a", ".m4b", ".m4p", ".m4r" }.Contains(Path.GetExtension(fileName));
+                return _audio.Contains(Path.GetExtension(fileName) ?? string.Empty);
             case FileType.Video:
-                return new string[] { ".mp4", ".mkv", ".avi", ".ts", ".m4v", ".flv" }.Contains(Path.GetExtension(fileName));
+                return _video.Contains(Path.GetExtension(fileName) ?? string.Empty);
             case FileType.Archive:
-                return new string[] { ".zip", ".rar", ".iso", ".tar" }.Contains(Path.GetExtension(fileName));
+                return _archive.Contains(Path.GetExtension(fileName) ?? string.Empty);
             case FileType.Document:
-                return new string[] { ".pdf", ".doc", ".docx", ".xln", ".txt", ".xls", ".xlm", ".josn", ".xlsx", ".pptx" }.Contains(Path.GetExtension(fileName));
+                return _document.Contains(Path.GetExtension(fileName) ?? string.Empty);
+            case FileType.Unknown:
             default:
                 return false;
 
@@ -87,6 +89,7 @@ public static partial class FileOperation
             case ".jpeg":
             case ".gif":
             case ".tiff":
+            case ".heic":
                 return FileType.Image;
             case ".mp3":
             case ".wav":

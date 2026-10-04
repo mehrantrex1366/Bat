@@ -11,8 +11,9 @@ public class JwtToken
 
     public JwtToken(SecurityTokenDescriptor securityTokenDescriptor)
     {
-        var securityToken = new JwtSecurityTokenHandler().CreateToken(securityTokenDescriptor);
-        Token = new JwtSecurityTokenHandler().WriteToken(securityToken);
+        var handler = new JwtSecurityTokenHandler();
+        var securityToken = handler.CreateToken(securityTokenDescriptor);
+        Token = handler.WriteToken(securityToken);
         TokenType = "Bearer";
         ExpireTime = securityToken.ValidTo.AddHours(3.5);
         RefreshToken = Randomizer.GetRandomString(32);

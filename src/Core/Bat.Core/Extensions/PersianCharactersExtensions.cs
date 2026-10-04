@@ -11,6 +11,7 @@ public static class PersianCharactersExtensions
     public const char PersianKeChar = (char)1705;
 
 
+    // string.Replace(char, char) returns the same instance when nothing changes, so this is cheap for the common case.
     public static string ToPersianCharacters(this string data)
         => string.IsNullOrWhiteSpace(data) 
             ? string.Empty 

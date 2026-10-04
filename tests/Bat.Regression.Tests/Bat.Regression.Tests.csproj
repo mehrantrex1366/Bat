@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <!--
+    Regression tests for the Bat packages. Run: dotnet test tests/Bat.Regression.Tests
+    Sdk.Web is used only so the HTTP tests can host a tiny local server (no external network needed).
+  -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <OutputType>Library</OutputType>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.10.1" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.7" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\AspNetCore\Bat.Http\Bat.Http.csproj" />
+    <ProjectReference Include="..\..\src\AspNetCore\Bat.AspNetCore\Bat.AspNetCore.csproj" />
+    <ProjectReference Include="..\..\src\Cache\Bat.Cache\Bat.Cache.csproj" />
+    <ProjectReference Include="..\..\src\Cache\Bat.Cache.Redis\Bat.Cache.Redis.csproj" />
+    <ProjectReference Include="..\..\src\DataAccess\Bat.Dapper\Bat.Dapper.csproj" />
+    <ProjectReference Include="..\..\src\DataAccess\Bat.EntityFrameworkCore.Tools\Bat.EntityFrameworkCore.Tools.csproj" />
+  </ItemGroup>
+</Project>

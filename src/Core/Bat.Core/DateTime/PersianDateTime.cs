@@ -12,9 +12,6 @@ public class PersianDateTime
     private static readonly string PM = "ب.ظ";
 
     private static readonly PersianDateTimeMode Mode = PersianDateTimeMode.UtcOffset;
-    private static readonly TimeSpan DaylightSavingTimeStart = TimeSpan.FromDays(1);
-    private static readonly TimeSpan DaylightSavingTimeEnd = TimeSpan.FromDays(185);
-    private static readonly TimeSpan DaylightSavingTime = TimeSpan.FromHours(1);
     private static readonly TimeSpan OffsetFromUtc = new(3, 30, 0);
 
     public static TimeZoneInfo GetPersianTimeZoneInfo()
@@ -75,7 +72,8 @@ public class PersianDateTime
 
     public static bool operator !=(PersianDateTime d1, PersianDateTime d2) => !(d1 == d2);
 
-    public static string GetMonthName(int month) => _monthNames[month + 1];
+    // Fixed: was _monthNames[month + 1] (off by two; threw for month 11 and 12).
+    public static string GetMonthName(int month) => _monthNames[month - 1];
 
     public static string GetDayName(int day) => _dayNames[day];
 
@@ -98,8 +96,9 @@ public class PersianDateTime
                     return new PersianDateTime(TimeZoneInfo.ConvertTime(DateTime.Now, PersianTimeZoneInfo));
 
                 case PersianDateTimeMode.UtcOffset:
-                    PersianDateTime now = new(DateTime.UtcNow.Add(OffsetFromUtc));
-                    return now.IsInDaylightSavingTime ? now.Add(DaylightSavingTime) : now;
+                    // Iran abolished daylight saving time in 1401 (2022); the clock is UTC+03:30 all year.
+                    // The old code added one hour during the first 6 months, so Now was 1 hour ahead.
+                    return new PersianDateTime(DateTime.UtcNow.Add(OffsetFromUtc));
 
                 default:
                     throw new NotSupportedException(Mode.ToString());
@@ -130,15 +129,6 @@ public class PersianDateTime
     public int Millisecond => _dateTime.Millisecond;
 
     public long Ticks => _dateTime.Ticks;
-
-    private bool IsInDaylightSavingTime
-    {
-        get
-        {
-            TimeSpan timeOfYear = TimeOfYear;
-            return timeOfYear > DaylightSavingTimeStart && timeOfYear < DaylightSavingTimeEnd;
-        }
-    }
 
     public TimeSpan TimeOfDay => _dateTime.TimeOfDay;
 

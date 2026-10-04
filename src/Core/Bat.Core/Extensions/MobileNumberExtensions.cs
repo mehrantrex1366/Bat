@@ -6,8 +6,7 @@ public static class MobileNumberExtensions
     {
         try
         {
-            Regex rgx = new(RegexPattern.MobileNumber);
-            return rgx.IsMatch(mobileNumber);
+            return BatRegex.MobileNumber.IsMatch(mobileNumber);
         }
         catch
         {
@@ -19,8 +18,7 @@ public static class MobileNumberExtensions
     {
         try
         {
-            Regex rgx = new(RegexPattern.MobileNumber);
-            return rgx.IsMatch(mobileNumber.ToString());
+            return BatRegex.MobileNumber.IsMatch(mobileNumber.ToString(System.Globalization.CultureInfo.InvariantCulture));
         }
         catch
         {
@@ -32,8 +30,7 @@ public static class MobileNumberExtensions
     {
         if (!IsMobileNumber(number)) return false;
 
-        var regex = new Regex(RegexPattern.MciMobileNumber);
-        if (!regex.Match(number).Success) return false;
+        if (!BatRegex.MciMobileNumber.IsMatch(number)) return false;
 
         return true;
     }
@@ -42,8 +39,7 @@ public static class MobileNumberExtensions
     {
         if (!IsMobileNumber(number)) return false;
 
-        var regex = new Regex(RegexPattern.IrancellMobileNumber);
-        if (!regex.Match(number).Success) return false;
+        if (!BatRegex.IranCellMobileNumber.IsMatch(number)) return false;
 
         return true;
     }
@@ -80,15 +76,16 @@ public static class MobileNumberExtensions
     }
 
     public static long ToStandardMobileNumber(this string mobileNumber)
-        => long.Parse(mobileNumber.StartsWith("98") ? mobileNumber.Substring(2, mobileNumber.Length) : mobileNumber);
+        => long.Parse(mobileNumber.StartsWith("98") ? mobileNumber[2..] : mobileNumber);
 
     public static long ToMobileNumber(this long mobileNumber)
     {
-        if (!mobileNumber.ToString().IsMobileNumber()) return 0;
+        var text = mobileNumber.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        if (!text.IsMobileNumber()) return 0;
 
-        if (mobileNumber.ToString().Length == 12) return mobileNumber;
-        else if (mobileNumber.ToString().Length == 11) return long.Parse("98" + mobileNumber.ToString()[1..]);
-        else if (mobileNumber.ToString().Length == 10) return long.Parse("98" + mobileNumber);
+        if (text.Length == 12) return mobileNumber;
+        else if (text.Length == 11) return long.Parse("98" + text[1..]);
+        else if (text.Length == 10) return long.Parse("98" + text);
 
         return 0;
     }

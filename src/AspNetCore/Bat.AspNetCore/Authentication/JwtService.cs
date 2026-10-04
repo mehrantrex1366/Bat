@@ -4,6 +4,9 @@ namespace Bat.AspNetCore;
 
 public class JwtService : IJwtService
 {
+    // JwtSecurityTokenHandler is stateless for validation/reading and safe to share (JwtBearer did the same).
+    private static readonly JwtSecurityTokenHandler tokenHandler = new();
+
     public JwtToken CreateToken(SecurityTokenDescriptor securityTokenDescriptor)
         => new JwtToken(securityTokenDescriptor);
 
@@ -93,7 +96,7 @@ public class JwtService : IJwtService
             IssuerSigningKey = issuerSigningKey
         };
 
-        var principal = new JwtSecurityTokenHandler().ValidateToken(token, tokenValidationParameters, out SecurityToken securityToken);
+        var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out SecurityToken securityToken);
         var jwtSecurityToken = securityToken as JwtSecurityToken;
         if (jwtSecurityToken == null || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.Aes128KW, StringComparison.InvariantCultureIgnoreCase)) return null;
 
@@ -102,10 +105,10 @@ public class JwtService : IJwtService
 
 
     public SecurityToken ReadToken(string token)
-        => new JwtSecurityTokenHandler().ReadToken(token);
+        => tokenHandler.ReadToken(token);
 
     public JwtSecurityToken ReadJwtToken(string token)
-        => new JwtSecurityTokenHandler().ReadJwtToken(token);
+        => tokenHandler.ReadJwtToken(token);
 
 
     public TokenValidationTime GetTokenExpireTime(string token, JwtSettings jwtSettings)
@@ -128,7 +131,7 @@ public class JwtService : IJwtService
             IssuerSigningKey = issuerSigningKey
         };
 
-        new JwtSecurityTokenHandler().ValidateToken(token, tokenValidationParameters, out SecurityToken securityToken);
+        tokenHandler.ValidateToken(token, tokenValidationParameters, out SecurityToken securityToken);
         var jwtSecurityToken = securityToken as JwtSecurityToken;
 
         return new TokenValidationTime { ValidFrom = jwtSecurityToken.ValidFrom.AddHours(3.5), ValidTo = jwtSecurityToken.ValidTo.AddHours(3.5) };

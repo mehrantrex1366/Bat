@@ -49,14 +49,66 @@ public static class HttpRequestTools
         }
     }
 
-    private static void ConfigureCertificateValidation(HttpClientHandler handler, bool bypassCertificate)
-    {
-        if (bypassCertificate is false)
-            return;
+    #region Shared HttpClient
+    // Previously every call created (and disposed) a new HttpClient/HttpClientHandler. That opens a new TCP/TLS
+    // connection per request, leaves sockets in TIME_WAIT (port exhaustion under load) and defeats connection pooling.
+    // Two long-lived clients are used instead (normal and "bypass certificate validation"). PooledConnectionLifetime
+    // makes pooled connections pick up DNS changes. Cookies are disabled so that nothing leaks between unrelated
+    // calls (each call used to get a fresh, empty cookie container).
+    private static readonly TimeSpan _defaultTimeout = TimeSpan.FromSeconds(100); // HttpClient's default timeout
+    private static readonly Lazy<HttpClient> _defaultClient = new(() => CreateClient(bypassCertificate: false));
+    private static readonly Lazy<HttpClient> _bypassCertificateClient = new(() => CreateClient(bypassCertificate: true));
 
-        handler.ClientCertificateOptions = ClientCertificateOption.Manual;
-        handler.ServerCertificateCustomValidationCallback = (httpRequestMessage, cert, certChain, policyErrors) => true;
+    private static HttpClient CreateClient(bool bypassCertificate)
+    {
+        var handler = new SocketsHttpHandler
+        {
+            UseCookies = false,
+            PooledConnectionLifetime = TimeSpan.FromMinutes(2),
+            PooledConnectionIdleTimeout = TimeSpan.FromMinutes(1),
+        };
+
+        if (bypassCertificate)
+            handler.SslOptions.RemoteCertificateValidationCallback = (sender, cert, chain, policyErrors) => true;
+
+        // Timeouts are applied per request (see SendAsync) because a shared client's Timeout cannot change.
+        return new HttpClient(handler, disposeHandler: true) { Timeout = Timeout.InfiniteTimeSpan };
     }
+
+    private static HttpClient SharedClient(bool bypassCertificate)
+        => bypassCertificate ? _bypassCertificateClient.Value : _defaultClient.Value;
+
+    private static bool IsShared(HttpClient httpClient)
+        => (_defaultClient.IsValueCreated && ReferenceEquals(httpClient, _defaultClient.Value))
+        || (_bypassCertificateClient.IsValueCreated && ReferenceEquals(httpClient, _bypassCertificateClient.Value));
+
+    /// <summary>
+    /// Sends the request with a per-request timeout. Setting HttpClient.Timeout (what the old code did on
+    /// caller-supplied clients) throws InvalidOperationException once the client has sent its first request,
+    /// and would change the timeout for every other user of that client.
+    /// </summary>
+    private static async Task<HttpResponseMessage> SendAsync(HttpClient httpClient, HttpRequestMessage request, int? timeOutSecond, CancellationToken cancellationToken)
+    {
+        TimeSpan? timeout = timeOutSecond is > 0
+            ? TimeSpan.FromSeconds(timeOutSecond.Value)
+            : (IsShared(httpClient) ? _defaultTimeout : null);
+
+        if (timeout is null)
+            return await httpClient.SendAsync(request, cancellationToken);
+
+        using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        timeoutCts.CancelAfter(timeout.Value);
+        try
+        {
+            return await httpClient.SendAsync(request, timeoutCts.Token);
+        }
+        catch (OperationCanceledException ex) when (!cancellationToken.IsCancellationRequested)
+        {
+            // Same exception shape HttpClient uses for its own timeout.
+            throw new TaskCanceledException($"The request was canceled due to the configured timeout of {timeout.Value.TotalSeconds} seconds elapsing.", new TimeoutException(ex.Message, ex));
+        }
+    }
+    #endregion
 
 
     public static bool IsAjaxRequest(this HttpRequest request)
@@ -69,29 +121,28 @@ public static class HttpRequestTools
 
     public static async Task<T> GetAsync<T>(string url, CancellationToken cancellationToken = default)
     {
-        using var httpClient = new HttpClient();
-        var request = new HttpRequestMessage(HttpMethod.Get, new Uri(url));
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        var httpClient = SharedClient(false);
+        using var request = new HttpRequestMessage(HttpMethod.Get, new Uri(url));
+        using var response = await SendAsync(httpClient, request, null, cancellationToken);
         var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
         return responseBody.DeSerializeJson<T>();
     }
 
     public static async Task<(HttpStatusCode httpStatusCode, string response)> GetAsync(string url, CancellationToken cancellationToken = default)
     {
-        using var httpClient = new HttpClient();
-        var request = new HttpRequestMessage(HttpMethod.Get, new Uri(url));
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        var httpClient = SharedClient(false);
+        using var request = new HttpRequestMessage(HttpMethod.Get, new Uri(url));
+        using var response = await SendAsync(httpClient, request, null, cancellationToken);
         return (response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
     }
 
     public static async Task<T> GetAsync<T>(string url, string mediaType = "application/json", CancellationToken cancellationToken = default) where T : class
     {
-        using var httpClient = new HttpClient();
-        var response = new HttpResponseMessage();
-
-        httpClient.DefaultRequestHeaders.Accept.Clear();
-        httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(mediaType));
-        response = await httpClient.GetAsync(url, cancellationToken);
+        // The Accept header is set per request: the client is shared, so DefaultRequestHeaders must not be mutated.
+        var httpClient = SharedClient(false);
+        using var request = new HttpRequestMessage(HttpMethod.Get, new Uri(url));
+        request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(mediaType));
+        using var response = await SendAsync(httpClient, request, null, cancellationToken);
         response.EnsureSuccessStatusCode();
         var result = await response.Content.ReadAsStringAsync(cancellationToken);
         return result.DeSerializeJson<T>();
@@ -102,9 +153,9 @@ public static class HttpRequestTools
         var queryString = BuildQueryString(parameter, objectType);
         var completeUrl = BuildCompleteUrl(url, queryString);
 
-        using var httpClient = new HttpClient();
-        var request = new HttpRequestMessage(HttpMethod.Get, new Uri(completeUrl));
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        var httpClient = SharedClient(false);
+        using var request = new HttpRequestMessage(HttpMethod.Get, new Uri(completeUrl));
+        using var response = await SendAsync(httpClient, request, null, cancellationToken);
         var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
         return responseBody.DeSerializeJson<T>();
     }
@@ -114,9 +165,9 @@ public static class HttpRequestTools
         var queryString = BuildQueryString(parameter, objectType);
         var completeUrl = BuildCompleteUrl(url, queryString);
 
-        using var httpClient = new HttpClient();
-        var request = new HttpRequestMessage(HttpMethod.Get, new Uri(completeUrl));
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        var httpClient = SharedClient(false);
+        using var request = new HttpRequestMessage(HttpMethod.Get, new Uri(completeUrl));
+        using var response = await SendAsync(httpClient, request, null, cancellationToken);
         return (response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
     }
 
@@ -125,9 +176,9 @@ public static class HttpRequestTools
         var queryString = BuildQueryString(parameter);
         var completeUrl = BuildCompleteUrl(url, queryString);
 
-        using var httpClient = new HttpClient();
-        var request = new HttpRequestMessage(HttpMethod.Get, new Uri(completeUrl));
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        var httpClient = SharedClient(false);
+        using var request = new HttpRequestMessage(HttpMethod.Get, new Uri(completeUrl));
+        using var response = await SendAsync(httpClient, request, null, cancellationToken);
         var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
         return responseBody.DeSerializeJson<T>();
     }
@@ -137,9 +188,9 @@ public static class HttpRequestTools
         var queryString = BuildQueryString(parameter);
         var completeUrl = BuildCompleteUrl(url, queryString);
 
-        using var httpClient = new HttpClient();
-        var request = new HttpRequestMessage(HttpMethod.Get, new Uri(completeUrl));
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        var httpClient = SharedClient(false);
+        using var request = new HttpRequestMessage(HttpMethod.Get, new Uri(completeUrl));
+        using var response = await SendAsync(httpClient, request, null, cancellationToken);
         return (response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
     }
 
@@ -148,11 +199,11 @@ public static class HttpRequestTools
         var queryString = BuildQueryString(parameter);
         var completeUrl = BuildCompleteUrl(url, queryString);
 
-        var request = new HttpRequestMessage(HttpMethod.Get, new Uri(completeUrl));
+        using var request = new HttpRequestMessage(HttpMethod.Get, new Uri(completeUrl));
         AddHeaders(request, header);
 
-        using var httpClient = new HttpClient();
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        var httpClient = SharedClient(false);
+        using var response = await SendAsync(httpClient, request, null, cancellationToken);
         var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
         return responseBody.DeSerializeJson<T>();
     }
@@ -162,11 +213,11 @@ public static class HttpRequestTools
         var queryString = BuildQueryString(parameter);
         var completeUrl = BuildCompleteUrl(url, queryString);
 
-        var request = new HttpRequestMessage(HttpMethod.Get, new Uri(completeUrl));
+        using var request = new HttpRequestMessage(HttpMethod.Get, new Uri(completeUrl));
         AddHeaders(request, header);
 
-        using var httpClient = new HttpClient();
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        var httpClient = SharedClient(false);
+        using var response = await SendAsync(httpClient, request, null, cancellationToken);
         return (response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
     }
 
@@ -175,14 +226,11 @@ public static class HttpRequestTools
         var queryString = BuildQueryString(parameter);
         var completeUrl = BuildCompleteUrl(url, queryString);
 
-        var request = new HttpRequestMessage(HttpMethod.Get, new Uri(completeUrl));
+        using var request = new HttpRequestMessage(HttpMethod.Get, new Uri(completeUrl));
         AddHeaders(request, header);
 
-        using var handler = new HttpClientHandler();
-        ConfigureCertificateValidation(handler, byPassServerSertificate);
-        using var httpClient = new HttpClient(handler);
-        httpClient.Timeout = TimeSpan.FromSeconds(timeOutSecond);
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        var httpClient = SharedClient(byPassServerSertificate);
+        using var response = await SendAsync(httpClient, request, timeOutSecond, cancellationToken);
         var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
         return responseBody.DeSerializeJson<T>();
     }
@@ -192,21 +240,18 @@ public static class HttpRequestTools
         var queryString = BuildQueryString(parameter);
         var completeUrl = BuildCompleteUrl(url, queryString);
 
-        var request = new HttpRequestMessage(HttpMethod.Get, new Uri(completeUrl));
+        using var request = new HttpRequestMessage(HttpMethod.Get, new Uri(completeUrl));
         AddHeaders(request, header);
 
-        using var handler = new HttpClientHandler();
-        ConfigureCertificateValidation(handler, byPassServerSertificate);
-        using var httpClient = new HttpClient(handler);
-        httpClient.Timeout = TimeSpan.FromSeconds(timeOutSecond);
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        var httpClient = SharedClient(byPassServerSertificate);
+        using var response = await SendAsync(httpClient, request, timeOutSecond, cancellationToken);
         return (response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
     }
 
 
     public static async Task<T> GetAsync<T>(HttpClient httpClient, string url, CancellationToken cancellationToken = default)
     {
-        var response = await httpClient.GetAsync(url, cancellationToken);
+        using var response = await httpClient.GetAsync(url, cancellationToken);
         var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
         return responseBody.DeSerializeJson<T>();
     }
@@ -216,7 +261,7 @@ public static class HttpRequestTools
         var queryString = BuildQueryString(parameter);
         var completeUrl = BuildCompleteUrl(url, queryString);
 
-        var response = await httpClient.GetAsync(completeUrl, cancellationToken);
+        using var response = await httpClient.GetAsync(completeUrl, cancellationToken);
         var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
         return responseBody.DeSerializeJson<T>();
     }
@@ -226,7 +271,7 @@ public static class HttpRequestTools
         var queryString = BuildQueryString(parameter);
         var completeUrl = BuildCompleteUrl(url, queryString);
 
-        var response = await httpClient.GetAsync(completeUrl, cancellationToken);
+        using var response = await httpClient.GetAsync(completeUrl, cancellationToken);
         return (response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
     }
 
@@ -235,7 +280,7 @@ public static class HttpRequestTools
         var queryString = BuildQueryString(parameter, objectType);
         var completeUrl = BuildCompleteUrl(url, queryString);
 
-        var response = await httpClient.GetAsync(completeUrl, cancellationToken);
+        using var response = await httpClient.GetAsync(completeUrl, cancellationToken);
         var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
         return responseBody.DeSerializeJson<T>();
     }
@@ -245,10 +290,10 @@ public static class HttpRequestTools
         var queryString = BuildQueryString(parameter);
         var completeUrl = BuildCompleteUrl(url, queryString);
 
-        var request = new HttpRequestMessage(HttpMethod.Get, new Uri(completeUrl));
+        using var request = new HttpRequestMessage(HttpMethod.Get, new Uri(completeUrl));
         AddHeaders(request, header);
 
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        using var response = await SendAsync(httpClient, request, null, cancellationToken);
         var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
         return responseBody.DeSerializeJson<T>();
     }
@@ -258,10 +303,10 @@ public static class HttpRequestTools
         var queryString = BuildQueryString(parameter);
         var completeUrl = BuildCompleteUrl(url, queryString);
 
-        var request = new HttpRequestMessage(HttpMethod.Get, new Uri(completeUrl));
+        using var request = new HttpRequestMessage(HttpMethod.Get, new Uri(completeUrl));
         AddHeaders(request, header);
 
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        using var response = await SendAsync(httpClient, request, null, cancellationToken);
         return (response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
     }
 
@@ -270,11 +315,10 @@ public static class HttpRequestTools
         var queryString = BuildQueryString(parameter);
         var completeUrl = BuildCompleteUrl(url, queryString);
 
-        var request = new HttpRequestMessage(HttpMethod.Get, new Uri(completeUrl));
+        using var request = new HttpRequestMessage(HttpMethod.Get, new Uri(completeUrl));
         AddHeaders(request, header);
 
-        httpClient.Timeout = TimeSpan.FromSeconds(timeOutSecond);
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        using var response = await SendAsync(httpClient, request, timeOutSecond, cancellationToken);
         var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
         return responseBody.DeSerializeJson<T>();
     }
@@ -284,11 +328,10 @@ public static class HttpRequestTools
         var queryString = BuildQueryString(parameter);
         var completeUrl = BuildCompleteUrl(url, queryString);
 
-        var request = new HttpRequestMessage(HttpMethod.Get, new Uri(completeUrl));
+        using var request = new HttpRequestMessage(HttpMethod.Get, new Uri(completeUrl));
         AddHeaders(request, header);
 
-        httpClient.Timeout = TimeSpan.FromSeconds(timeOutSecond);
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        using var response = await SendAsync(httpClient, request, timeOutSecond, cancellationToken);
         return (response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
     }
 
@@ -297,88 +340,82 @@ public static class HttpRequestTools
 
     public static async Task<T> PostAsync<T>(string url, object contentValues, Dictionary<string, string> header = null, Encoding resultEncoding = null, CancellationToken cancellationToken = default) where T : class
     {
-        var request = new HttpRequestMessage(HttpMethod.Post, new Uri(url))
+        using var request = new HttpRequestMessage(HttpMethod.Post, new Uri(url))
         {
             Content = new StringContent(contentValues.SerializeToJson(), resultEncoding ?? Encoding.UTF8, "application/json")
         };
         AddHeaders(request, header);
 
-        using var httpClient = new HttpClient();
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        var httpClient = SharedClient(false);
+        using var response = await SendAsync(httpClient, request, null, cancellationToken);
         var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
         return responseBody.DeSerializeJson<T>();
     }
 
     public static async Task<(HttpStatusCode httpStatusCode, string response)> PostAsync(string url, object contentValues, Dictionary<string, string> header = null, Encoding resultEncoding = null, CancellationToken cancellationToken = default)
     {
-        var request = new HttpRequestMessage(HttpMethod.Post, new Uri(url))
+        using var request = new HttpRequestMessage(HttpMethod.Post, new Uri(url))
         {
             Content = new StringContent(contentValues.SerializeToJson(), resultEncoding ?? Encoding.UTF8, "application/json")
         };
         AddHeaders(request, header);
 
-        using var httpClient = new HttpClient();
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        var httpClient = SharedClient(false);
+        using var response = await SendAsync(httpClient, request, null, cancellationToken);
         return (response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
     }
 
     public static async Task<T> PostAsync<T>(string url, string contentJsonString, Dictionary<string, string> header = null, Encoding resultEncoding = null, CancellationToken cancellationToken = default) where T : class
     {
-        var request = new HttpRequestMessage(HttpMethod.Post, new Uri(url))
+        using var request = new HttpRequestMessage(HttpMethod.Post, new Uri(url))
         {
             Content = new StringContent(contentJsonString, resultEncoding ?? Encoding.UTF8, "application/json")
         };
         AddHeaders(request, header);
 
-        using var httpClient = new HttpClient();
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        var httpClient = SharedClient(false);
+        using var response = await SendAsync(httpClient, request, null, cancellationToken);
         var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
         return responseBody.DeSerializeJson<T>();
     }
 
     public static async Task<(HttpStatusCode httpStatusCode, string response)> PostAsync(string url, string contentJsonString, Dictionary<string, string> header = null, Encoding resultEncoding = null, CancellationToken cancellationToken = default)
     {
-        var request = new HttpRequestMessage(HttpMethod.Post, new Uri(url))
+        using var request = new HttpRequestMessage(HttpMethod.Post, new Uri(url))
         {
             Content = new StringContent(contentJsonString, resultEncoding ?? Encoding.UTF8, "application/json")
         };
         AddHeaders(request, header);
 
-        using var httpClient = new HttpClient();
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        var httpClient = SharedClient(false);
+        using var response = await SendAsync(httpClient, request, null, cancellationToken);
         return (response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
     }
 
     public static async Task<T> PostAsync<T>(string url, string contentJsonString, Dictionary<string, string> header, Encoding resultEncoding, bool byPassServerSertificate, int timeOutSecond, CancellationToken cancellationToken = default) where T : class
     {
-        var request = new HttpRequestMessage(HttpMethod.Post, new Uri(url))
+        using var request = new HttpRequestMessage(HttpMethod.Post, new Uri(url))
         {
             Content = new StringContent(contentJsonString, resultEncoding ?? Encoding.UTF8, "application/json")
         };
         AddHeaders(request, header);
 
-        using var handler = new HttpClientHandler();
-        ConfigureCertificateValidation(handler, byPassServerSertificate);
-        using var httpClient = new HttpClient(handler);
-        httpClient.Timeout = TimeSpan.FromSeconds(timeOutSecond);
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        var httpClient = SharedClient(byPassServerSertificate);
+        using var response = await SendAsync(httpClient, request, timeOutSecond, cancellationToken);
         var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
         return responseBody.DeSerializeJson<T>();
     }
 
     public static async Task<(HttpStatusCode httpStatusCode, string response)> PostAsync(string url, string contentJsonString, Dictionary<string, string> header, Encoding resultEncoding, bool byPassServerSertificate, int timeOutSecond, CancellationToken cancellationToken = default)
     {
-        var request = new HttpRequestMessage(HttpMethod.Post, new Uri(url))
+        using var request = new HttpRequestMessage(HttpMethod.Post, new Uri(url))
         {
             Content = new StringContent(contentJsonString, resultEncoding ?? Encoding.UTF8, "application/json")
         };
         AddHeaders(request, header);
 
-        using var handler = new HttpClientHandler();
-        ConfigureCertificateValidation(handler, byPassServerSertificate);
-        using var httpClient = new HttpClient(handler);
-        httpClient.Timeout = TimeSpan.FromSeconds(timeOutSecond);
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        var httpClient = SharedClient(byPassServerSertificate);
+        using var response = await SendAsync(httpClient, request, timeOutSecond, cancellationToken);
         return (response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
     }
 
@@ -389,14 +426,14 @@ public static class HttpRequestTools
             foreach (var item in formBody)
                 formData.Add(new StringContent(item.Value, resultEncoding ?? Encoding.UTF8), item.Key);
 
-        var request = new HttpRequestMessage(HttpMethod.Post, new Uri(url))
+        using var request = new HttpRequestMessage(HttpMethod.Post, new Uri(url))
         {
             Content = formData
         };
         AddHeaders(request, header);
 
-        using var httpClient = new HttpClient();
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        var httpClient = SharedClient(false);
+        using var response = await SendAsync(httpClient, request, null, cancellationToken);
         var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
         return responseBody.DeSerializeJson<T>();
     }
@@ -408,14 +445,14 @@ public static class HttpRequestTools
             foreach (var item in formBody)
                 formData.Add(new StringContent(item.Value, resultEncoding ?? Encoding.UTF8), item.Key);
 
-        var request = new HttpRequestMessage(HttpMethod.Post, new Uri(url))
+        using var request = new HttpRequestMessage(HttpMethod.Post, new Uri(url))
         {
             Content = formData
         };
         AddHeaders(request, header);
 
-        using var httpClient = new HttpClient();
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        var httpClient = SharedClient(false);
+        using var response = await SendAsync(httpClient, request, null, cancellationToken);
         return (response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
     }
 
@@ -426,16 +463,14 @@ public static class HttpRequestTools
         fileContent.Headers.ContentType = new MediaTypeHeaderValue("multipart/form-data");
         formData.Add(fileContent, "file", fileName);
 
-        HttpRequestMessage request = new(HttpMethod.Post, new Uri(url))
+        using HttpRequestMessage request = new(HttpMethod.Post, new Uri(url))
         {
             Content = formData
         };
         AddHeaders(request, header);
 
-        using var handler = new HttpClientHandler();
-        ConfigureCertificateValidation(handler, byPassServerCertificate);
-        using var httpClient = new HttpClient(handler);
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        var httpClient = SharedClient(byPassServerCertificate);
+        using var response = await SendAsync(httpClient, request, null, cancellationToken);
         return (response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
     }
 
@@ -446,16 +481,14 @@ public static class HttpRequestTools
         fileContent.Headers.ContentType = new MediaTypeHeaderValue(fileMediaType);
         formData.Add(fileContent, "file", fileName);
 
-        HttpRequestMessage request = new(HttpMethod.Post, new Uri(url))
+        using HttpRequestMessage request = new(HttpMethod.Post, new Uri(url))
         {
             Content = formData
         };
         AddHeaders(request, header);
 
-        using var handler = new HttpClientHandler();
-        ConfigureCertificateValidation(handler, byPassServerCertificate);
-        using var httpClient = new HttpClient(handler);
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        var httpClient = SharedClient(byPassServerCertificate);
+        using var response = await SendAsync(httpClient, request, null, cancellationToken);
         return (response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
     }
 
@@ -466,17 +499,14 @@ public static class HttpRequestTools
             foreach (var item in formBody)
                 formData.Add(new StringContent(item.Value, resultEncoding ?? Encoding.UTF8), item.Key);
 
-        var request = new HttpRequestMessage(HttpMethod.Post, new Uri(url))
+        using var request = new HttpRequestMessage(HttpMethod.Post, new Uri(url))
         {
             Content = formData
         };
         AddHeaders(request, header);
 
-        using var handler = new HttpClientHandler();
-        ConfigureCertificateValidation(handler, byPassServerSertificate);
-        using var httpClient = new HttpClient(handler);
-        httpClient.Timeout = TimeSpan.FromSeconds(timeOutSecond);
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        var httpClient = SharedClient(byPassServerSertificate);
+        using var response = await SendAsync(httpClient, request, timeOutSecond, cancellationToken);
         var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
         return responseBody.DeSerializeJson<T>();
     }
@@ -488,70 +518,65 @@ public static class HttpRequestTools
             foreach (var item in formBody)
                 formData.Add(new StringContent(item.Value, resultEncoding ?? Encoding.UTF8), item.Key);
 
-        var request = new HttpRequestMessage(HttpMethod.Post, new Uri(url))
+        using var request = new HttpRequestMessage(HttpMethod.Post, new Uri(url))
         {
             Content = formData
         };
         AddHeaders(request, header);
 
-        using var handler = new HttpClientHandler();
-        ConfigureCertificateValidation(handler, byPassServerSertificate);
-        using var httpClient = new HttpClient(handler);
-        httpClient.Timeout = TimeSpan.FromSeconds(timeOutSecond);
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        var httpClient = SharedClient(byPassServerSertificate);
+        using var response = await SendAsync(httpClient, request, timeOutSecond, cancellationToken);
         return (response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
     }
 
 
     public static async Task<T> PostAsync<T>(HttpClient httpClient, string url, string contentJsonString, Dictionary<string, string> header = null, Encoding resultEncoding = null, CancellationToken cancellationToken = default) where T : class
     {
-        var request = new HttpRequestMessage(HttpMethod.Post, new Uri(url))
+        using var request = new HttpRequestMessage(HttpMethod.Post, new Uri(url))
         {
             Content = new StringContent(contentJsonString, resultEncoding ?? Encoding.UTF8, "application/json")
         };
         AddHeaders(request, header);
 
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        using var response = await SendAsync(httpClient, request, null, cancellationToken);
         var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
         return responseBody.DeSerializeJson<T>();
     }
 
     public static async Task<(HttpStatusCode httpStatusCode, string response)> PostAsync(HttpClient httpClient, string url, string contentJsonString, Dictionary<string, string> header = null, Encoding resultEncoding = null, CancellationToken cancellationToken = default)
     {
-        var request = new HttpRequestMessage(HttpMethod.Post, new Uri(url))
+        using var request = new HttpRequestMessage(HttpMethod.Post, new Uri(url))
         {
             Content = new StringContent(contentJsonString, resultEncoding ?? Encoding.UTF8, "application/json")
         };
         AddHeaders(request, header);
 
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        using var response = await SendAsync(httpClient, request, null, cancellationToken);
         return (response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
     }
 
     public static async Task<T> PostAsync<T>(HttpClient httpClient, string url, string contentJsonString, Dictionary<string, string> header, Encoding resultEncoding, int timeOutSecond, CancellationToken cancellationToken = default) where T : class
     {
-        var request = new HttpRequestMessage(HttpMethod.Post, new Uri(url))
+        using var request = new HttpRequestMessage(HttpMethod.Post, new Uri(url))
         {
             Content = new StringContent(contentJsonString, resultEncoding ?? Encoding.UTF8, "application/json")
         };
         AddHeaders(request, header);
 
-        httpClient.Timeout = TimeSpan.FromSeconds(timeOutSecond);
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        using var response = await SendAsync(httpClient, request, timeOutSecond, cancellationToken);
         var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
         return responseBody.DeSerializeJson<T>();
     }
 
     public static async Task<(HttpStatusCode httpStatusCode, string response)> PostAsync(HttpClient httpClient, string url, string contentJsonString, Dictionary<string, string> header, Encoding resultEncoding, int timeOutSecond, CancellationToken cancellationToken = default)
     {
-        var request = new HttpRequestMessage(HttpMethod.Post, new Uri(url))
+        using var request = new HttpRequestMessage(HttpMethod.Post, new Uri(url))
         {
             Content = new StringContent(contentJsonString, resultEncoding ?? Encoding.UTF8, "application/json")
         };
         AddHeaders(request, header);
 
-        httpClient.Timeout = TimeSpan.FromSeconds(timeOutSecond);
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        using var response = await SendAsync(httpClient, request, timeOutSecond, cancellationToken);
         return (response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
     }
 
@@ -562,14 +587,13 @@ public static class HttpRequestTools
             foreach (var item in formBody)
                 formData.Add(new StringContent(item.Value, resultEncoding ?? Encoding.UTF8), item.Key);
 
-        var request = new HttpRequestMessage(HttpMethod.Post, new Uri(url))
+        using var request = new HttpRequestMessage(HttpMethod.Post, new Uri(url))
         {
             Content = formData
         };
         AddHeaders(request, header);
 
-        httpClient.Timeout = TimeSpan.FromSeconds(timeOutSecond);
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        using var response = await SendAsync(httpClient, request, timeOutSecond, cancellationToken);
         return (response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
     }
 
@@ -580,13 +604,13 @@ public static class HttpRequestTools
         fileContent.Headers.ContentType = new MediaTypeHeaderValue("multipart/form-data");
         formData.Add(fileContent, "file", fileName);
 
-        HttpRequestMessage request = new(HttpMethod.Post, new Uri(url))
+        using HttpRequestMessage request = new(HttpMethod.Post, new Uri(url))
         {
             Content = formData
         };
         AddHeaders(request, header);
 
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        using var response = await SendAsync(httpClient, request, null, cancellationToken);
         return (response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
     }
 
@@ -597,13 +621,13 @@ public static class HttpRequestTools
         fileContent.Headers.ContentType = new MediaTypeHeaderValue(fileMediaType);
         formData.Add(fileContent, "file", fileName);
 
-        HttpRequestMessage request = new(HttpMethod.Post, new Uri(url))
+        using HttpRequestMessage request = new(HttpMethod.Post, new Uri(url))
         {
             Content = formData
         };
         AddHeaders(request, header);
 
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        using var response = await SendAsync(httpClient, request, null, cancellationToken);
         return (response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
     }
 
@@ -612,172 +636,165 @@ public static class HttpRequestTools
 
     public static async Task<T> PutAsync<T>(string url, object contentValues, Dictionary<string, string> header = null, Encoding resultEncoding = null, CancellationToken cancellationToken = default) where T : class
     {
-        var request = new HttpRequestMessage(HttpMethod.Put, new Uri(url))
+        using var request = new HttpRequestMessage(HttpMethod.Put, new Uri(url))
         {
             Content = new StringContent(contentValues.SerializeToJson(), resultEncoding ?? Encoding.UTF8, "application/json")
         };
         AddHeaders(request, header);
 
-        using var httpClient = new HttpClient();
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        var httpClient = SharedClient(false);
+        using var response = await SendAsync(httpClient, request, null, cancellationToken);
         var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
         return responseBody.DeSerializeJson<T>();
     }
 
     public static async Task<(HttpStatusCode httpStatusCode, string response)> PutAsync(string url, object contentValues, Dictionary<string, string> header = null, Encoding resultEncoding = null, CancellationToken cancellationToken = default)
     {
-        var request = new HttpRequestMessage(HttpMethod.Put, new Uri(url))
+        using var request = new HttpRequestMessage(HttpMethod.Put, new Uri(url))
         {
             Content = new StringContent(contentValues.SerializeToJson(), resultEncoding ?? Encoding.UTF8, "application/json")
         };
         AddHeaders(request, header);
 
-        using var httpClient = new HttpClient();
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        var httpClient = SharedClient(false);
+        using var response = await SendAsync(httpClient, request, null, cancellationToken);
         return (response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
     }
 
     public static async Task<T> PutAsync<T>(string url, string contentJsonString, Dictionary<string, string> header = null, Encoding resultEncoding = null, CancellationToken cancellationToken = default) where T : class
     {
-        var request = new HttpRequestMessage(HttpMethod.Put, new Uri(url))
+        using var request = new HttpRequestMessage(HttpMethod.Put, new Uri(url))
         {
             Content = new StringContent(contentJsonString, resultEncoding ?? Encoding.UTF8, "application/json")
         };
         AddHeaders(request, header);
 
-        using var httpClient = new HttpClient();
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        var httpClient = SharedClient(false);
+        using var response = await SendAsync(httpClient, request, null, cancellationToken);
         var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
         return responseBody.DeSerializeJson<T>();
     }
 
     public static async Task<(HttpStatusCode httpStatusCode, string response)> PutAsync(string url, string contentJsonString, Dictionary<string, string> header = null, Encoding resultEncoding = null, CancellationToken cancellationToken = default)
     {
-        var request = new HttpRequestMessage(HttpMethod.Put, new Uri(url))
+        using var request = new HttpRequestMessage(HttpMethod.Put, new Uri(url))
         {
             Content = new StringContent(contentJsonString, resultEncoding ?? Encoding.UTF8, "application/json")
         };
         AddHeaders(request, header);
 
-        using var httpClient = new HttpClient();
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        var httpClient = SharedClient(false);
+        using var response = await SendAsync(httpClient, request, null, cancellationToken);
         return (response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
     }
 
     public static async Task<T> PutAsync<T>(string url, string contentJsonString, Dictionary<string, string> header, Encoding resultEncoding, bool byPassServerSertificate, int timeOutSecond, CancellationToken cancellationToken = default) where T : class
     {
-        var request = new HttpRequestMessage(HttpMethod.Put, new Uri(url))
+        using var request = new HttpRequestMessage(HttpMethod.Put, new Uri(url))
         {
             Content = new StringContent(contentJsonString, resultEncoding ?? Encoding.UTF8, "application/json")
         };
         AddHeaders(request, header);
 
-        using var handler = new HttpClientHandler();
-        ConfigureCertificateValidation(handler, byPassServerSertificate);
-        using var httpClient = new HttpClient(handler);
-        httpClient.Timeout = TimeSpan.FromSeconds(timeOutSecond);
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        var httpClient = SharedClient(byPassServerSertificate);
+        using var response = await SendAsync(httpClient, request, timeOutSecond, cancellationToken);
         var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
         return responseBody.DeSerializeJson<T>();
     }
 
     public static async Task<(HttpStatusCode httpStatusCode, string response)> PutAsync(string url, string contentJsonString, Dictionary<string, string> header, Encoding resultEncoding, bool byPassServerSertificate, int timeOutSecond, CancellationToken cancellationToken = default)
     {
-        var request = new HttpRequestMessage(HttpMethod.Put, new Uri(url))
+        using var request = new HttpRequestMessage(HttpMethod.Put, new Uri(url))
         {
             Content = new StringContent(contentJsonString, resultEncoding ?? Encoding.UTF8, "application/json")
         };
         AddHeaders(request, header);
 
-        using var handler = new HttpClientHandler();
-        ConfigureCertificateValidation(handler, byPassServerSertificate);
-        using var httpClient = new HttpClient(handler);
-        httpClient.Timeout = TimeSpan.FromSeconds(timeOutSecond);
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        var httpClient = SharedClient(byPassServerSertificate);
+        using var response = await SendAsync(httpClient, request, timeOutSecond, cancellationToken);
         return (response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
     }
 
     public static async Task<(HttpStatusCode httpStatusCode, string response)> PutFormAsync(string url, Dictionary<string, string> formBody, Dictionary<string, string> header = null, bool byPassServerSertificate = true, CancellationToken cancellationToken = default)
     {
-        var request = new HttpRequestMessage(HttpMethod.Put, new Uri(url));
+        // Fixed: the request (with the headers) was built but never sent; PutAsync(url, formData) sent it without headers.
+        using var request = new HttpRequestMessage(HttpMethod.Put, new Uri(url));
         AddHeaders(request, header);
 
         var formData = new MultipartFormDataContent();
         if (formBody is not null)
             foreach (var item in formBody)
                 formData.Add(new StringContent(item.Value, Encoding.UTF8), item.Key);
+        request.Content = formData;
 
-        using var handler = new HttpClientHandler();
-        ConfigureCertificateValidation(handler, byPassServerSertificate);
-        using var httpClient = new HttpClient(handler);
-        var response = await httpClient.PutAsync(url, formData, cancellationToken);
+        var httpClient = SharedClient(byPassServerSertificate);
+        using var response = await SendAsync(httpClient, request, null, cancellationToken);
         return (response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
     }
 
 
     public static async Task<T> PutAsync<T>(HttpClient httpClient, string url, string contentJsonString, Dictionary<string, string> header = null, Encoding resultEncoding = null, CancellationToken cancellationToken = default) where T : class
     {
-        var request = new HttpRequestMessage(HttpMethod.Put, new Uri(url))
+        using var request = new HttpRequestMessage(HttpMethod.Put, new Uri(url))
         {
             Content = new StringContent(contentJsonString, resultEncoding ?? Encoding.UTF8, "application/json")
         };
         AddHeaders(request, header);
 
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        using var response = await SendAsync(httpClient, request, null, cancellationToken);
         var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
         return responseBody.DeSerializeJson<T>();
     }
 
     public static async Task<(HttpStatusCode httpStatusCode, string response)> PutAsync(HttpClient httpClient, string url, string contentJsonString, Dictionary<string, string> header = null, Encoding resultEncoding = null, CancellationToken cancellationToken = default)
     {
-        var request = new HttpRequestMessage(HttpMethod.Put, new Uri(url))
+        using var request = new HttpRequestMessage(HttpMethod.Put, new Uri(url))
         {
             Content = new StringContent(contentJsonString, resultEncoding ?? Encoding.UTF8, "application/json")
         };
         AddHeaders(request, header);
 
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        using var response = await SendAsync(httpClient, request, null, cancellationToken);
         return (response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
     }
 
     public static async Task<T> PutAsync<T>(HttpClient httpClient, string url, string contentJsonString, Dictionary<string, string> header, Encoding resultEncoding, int timeOutSecond, CancellationToken cancellationToken = default) where T : class
     {
-        var request = new HttpRequestMessage(HttpMethod.Put, new Uri(url))
+        using var request = new HttpRequestMessage(HttpMethod.Put, new Uri(url))
         {
             Content = new StringContent(contentJsonString, resultEncoding ?? Encoding.UTF8, "application/json")
         };
         AddHeaders(request, header);
 
-        httpClient.Timeout = TimeSpan.FromSeconds(timeOutSecond);
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        using var response = await SendAsync(httpClient, request, timeOutSecond, cancellationToken);
         var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
         return responseBody.DeSerializeJson<T>();
     }
 
     public static async Task<(HttpStatusCode httpStatusCode, string response)> PutAsync(HttpClient httpClient, string url, string contentJsonString, Dictionary<string, string> header, Encoding resultEncoding, int timeOutSecond, CancellationToken cancellationToken = default)
     {
-        var request = new HttpRequestMessage(HttpMethod.Put, new Uri(url))
+        using var request = new HttpRequestMessage(HttpMethod.Put, new Uri(url))
         {
             Content = new StringContent(contentJsonString, resultEncoding ?? Encoding.UTF8, "application/json")
         };
         AddHeaders(request, header);
 
-        httpClient.Timeout = TimeSpan.FromSeconds(timeOutSecond);
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        using var response = await SendAsync(httpClient, request, timeOutSecond, cancellationToken);
         return (response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
     }
 
     public static async Task<(HttpStatusCode httpStatusCode, string response)> PutFormAsync(HttpClient httpClient, string url, Dictionary<string, string> formBody, Dictionary<string, string> header = null, bool byPassServerSertificate = true, CancellationToken cancellationToken = default)
     {
-        var request = new HttpRequestMessage(HttpMethod.Put, new Uri(url));
+        using var request = new HttpRequestMessage(HttpMethod.Put, new Uri(url));
         AddHeaders(request, header);
 
         var formData = new MultipartFormDataContent();
         if (formBody is not null)
             foreach (var item in formBody)
                 formData.Add(new StringContent(item.Value, Encoding.UTF8), item.Key);
+        request.Content = formData;
 
-        var response = await httpClient.PutAsync(url, formData, cancellationToken);
+        using var response = await SendAsync(httpClient, request, null, cancellationToken);
         return (response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
     }
 
@@ -786,121 +803,113 @@ public static class HttpRequestTools
 
     public static async Task<T> DeleteAsync<T>(string url, object contentValues = null, Dictionary<string, string> header = null, Encoding resultEncoding = null, CancellationToken cancellationToken = default) where T : class
     {
-        var request = new HttpRequestMessage(HttpMethod.Delete, new Uri(url));
+        using var request = new HttpRequestMessage(HttpMethod.Delete, new Uri(url));
         if (contentValues is not null) request.Content = new StringContent(contentValues.SerializeToJson(), resultEncoding ?? Encoding.UTF8, "application/json");
         AddHeaders(request, header);
 
-        using var httpClient = new HttpClient();
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        var httpClient = SharedClient(false);
+        using var response = await SendAsync(httpClient, request, null, cancellationToken);
         var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
         return responseBody.DeSerializeJson<T>();
     }
 
     public static async Task<(HttpStatusCode httpStatusCode, string response)> DeleteAsync(string url, object contentValues = null, Dictionary<string, string> header = null, Encoding resultEncoding = null, CancellationToken cancellationToken = default)
     {
-        var request = new HttpRequestMessage(HttpMethod.Delete, new Uri(url));
+        using var request = new HttpRequestMessage(HttpMethod.Delete, new Uri(url));
         if (contentValues is not null) request.Content = new StringContent(contentValues.SerializeToJson(), resultEncoding ?? Encoding.UTF8, "application/json");
         AddHeaders(request, header);
 
-        using var httpClient = new HttpClient();
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        var httpClient = SharedClient(false);
+        using var response = await SendAsync(httpClient, request, null, cancellationToken);
         return (response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
     }
 
     public static async Task<T> DeleteAsync<T>(string url, string contentJsonString = null, Dictionary<string, string> header = null, Encoding resultEncoding = null, CancellationToken cancellationToken = default) where T : class
     {
-        var request = new HttpRequestMessage(HttpMethod.Delete, new Uri(url));
+        using var request = new HttpRequestMessage(HttpMethod.Delete, new Uri(url));
         if (contentJsonString is not null) request.Content = new StringContent(contentJsonString, resultEncoding ?? Encoding.UTF8, "application/json");
         AddHeaders(request, header);
 
-        using var httpClient = new HttpClient();
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        var httpClient = SharedClient(false);
+        using var response = await SendAsync(httpClient, request, null, cancellationToken);
         var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
         return responseBody.DeSerializeJson<T>();
     }
 
     public static async Task<(HttpStatusCode httpStatusCode, string response)> DeleteAsync(string url, string contentJsonString = null, Dictionary<string, string> header = null, Encoding resultEncoding = null, CancellationToken cancellationToken = default)
     {
-        var request = new HttpRequestMessage(HttpMethod.Delete, new Uri(url));
+        using var request = new HttpRequestMessage(HttpMethod.Delete, new Uri(url));
         if (contentJsonString is not null) request.Content = new StringContent(contentJsonString, resultEncoding ?? Encoding.UTF8, "application/json");
         AddHeaders(request, header);
 
-        using var httpClient = new HttpClient();
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        var httpClient = SharedClient(false);
+        using var response = await SendAsync(httpClient, request, null, cancellationToken);
         return (response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
     }
 
     public static async Task<T> DeleteAsync<T>(string url, string contentJsonString, Dictionary<string, string> header, Encoding resultEncoding, bool byPassServerSertificate, int timeOutSecond, CancellationToken cancellationToken = default) where T : class
     {
-        var request = new HttpRequestMessage(HttpMethod.Delete, new Uri(url));
+        using var request = new HttpRequestMessage(HttpMethod.Delete, new Uri(url));
         if (contentJsonString is not null) request.Content = new StringContent(contentJsonString, resultEncoding ?? Encoding.UTF8, "application/json");
         AddHeaders(request, header);
 
-        using var handler = new HttpClientHandler();
-        ConfigureCertificateValidation(handler, byPassServerSertificate);
-        using var httpClient = new HttpClient(handler);
-        httpClient.Timeout = TimeSpan.FromSeconds(timeOutSecond);
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        var httpClient = SharedClient(byPassServerSertificate);
+        using var response = await SendAsync(httpClient, request, timeOutSecond, cancellationToken);
         var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
         return responseBody.DeSerializeJson<T>();
     }
 
     public static async Task<(HttpStatusCode httpStatusCode, string response)> DeleteAsync(string url, string contentJsonString, Dictionary<string, string> header, Encoding resultEncoding, bool byPassServerSertificate, int timeOutSecond, CancellationToken cancellationToken = default)
     {
-        var request = new HttpRequestMessage(HttpMethod.Delete, new Uri(url));
+        using var request = new HttpRequestMessage(HttpMethod.Delete, new Uri(url));
         if (contentJsonString is not null) request.Content = new StringContent(contentJsonString, resultEncoding ?? Encoding.UTF8, "application/json");
         AddHeaders(request, header);
 
-        using var handler = new HttpClientHandler();
-        ConfigureCertificateValidation(handler, byPassServerSertificate);
-        using var httpClient = new HttpClient(handler);
-        httpClient.Timeout = TimeSpan.FromSeconds(timeOutSecond);
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        var httpClient = SharedClient(byPassServerSertificate);
+        using var response = await SendAsync(httpClient, request, timeOutSecond, cancellationToken);
         return (response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
     }
 
 
     public static async Task<T> DeleteAsync<T>(HttpClient httpClient, string url, string contentJsonString = null, Dictionary<string, string> header = null, Encoding resultEncoding = null, CancellationToken cancellationToken = default) where T : class
     {
-        var request = new HttpRequestMessage(HttpMethod.Delete, new Uri(url));
+        using var request = new HttpRequestMessage(HttpMethod.Delete, new Uri(url));
         if (contentJsonString is not null) request.Content = new StringContent(contentJsonString, resultEncoding ?? Encoding.UTF8, "application/json");
         AddHeaders(request, header);
 
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        using var response = await SendAsync(httpClient, request, null, cancellationToken);
         var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
         return responseBody.DeSerializeJson<T>();
     }
 
     public static async Task<(HttpStatusCode httpStatusCode, string response)> DeleteAsync(HttpClient httpClient, string url, string contentJsonString = null, Dictionary<string, string> header = null, Encoding resultEncoding = null, CancellationToken cancellationToken = default)
     {
-        var request = new HttpRequestMessage(HttpMethod.Delete, new Uri(url));
+        using var request = new HttpRequestMessage(HttpMethod.Delete, new Uri(url));
         if (contentJsonString is not null) request.Content = new StringContent(contentJsonString, resultEncoding ?? Encoding.UTF8, "application/json");
         AddHeaders(request, header);
 
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        using var response = await SendAsync(httpClient, request, null, cancellationToken);
         return (response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
     }
 
     public static async Task<T> DeleteAsync<T>(HttpClient httpClient, string url, string contentJsonString, Dictionary<string, string> header, Encoding resultEncoding, int timeOutSecond, CancellationToken cancellationToken = default) where T : class
     {
-        var request = new HttpRequestMessage(HttpMethod.Delete, new Uri(url));
+        using var request = new HttpRequestMessage(HttpMethod.Delete, new Uri(url));
         if (contentJsonString is not null) request.Content = new StringContent(contentJsonString, resultEncoding ?? Encoding.UTF8, "application/json");
         AddHeaders(request, header);
 
-        httpClient.Timeout = TimeSpan.FromSeconds(timeOutSecond);
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        using var response = await SendAsync(httpClient, request, timeOutSecond, cancellationToken);
         var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
         return responseBody.DeSerializeJson<T>();
     }
 
     public static async Task<(HttpStatusCode httpStatusCode, string response)> DeleteAsync(HttpClient httpClient, string url, string contentJsonString, Dictionary<string, string> header, Encoding resultEncoding, int timeOutSecond, CancellationToken cancellationToken = default)
     {
-        var request = new HttpRequestMessage(HttpMethod.Delete, new Uri(url));
+        using var request = new HttpRequestMessage(HttpMethod.Delete, new Uri(url));
         if (contentJsonString is not null) request.Content = new StringContent(contentJsonString, resultEncoding ?? Encoding.UTF8, "application/json");
         AddHeaders(request, header);
 
-        httpClient.Timeout = TimeSpan.FromSeconds(timeOutSecond);
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        using var response = await SendAsync(httpClient, request, timeOutSecond, cancellationToken);
         return (response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
     }
 
@@ -909,27 +918,27 @@ public static class HttpRequestTools
 
     public static async Task<(HttpStatusCode httpStatusCode, string response)> PostXMLAsync(string url, string contentXmlString, Dictionary<string, string> header = null, Encoding resultEncoding = null, CancellationToken cancellationToken = default)
     {
-        var request = new HttpRequestMessage(HttpMethod.Post, new Uri(url))
+        using var request = new HttpRequestMessage(HttpMethod.Post, new Uri(url))
         {
             Content = new StringContent(contentXmlString, resultEncoding ?? Encoding.UTF8, "text/xml; charset=utf-8")
         };
         AddHeaders(request, header);
 
-        using var httpClient = new HttpClient();
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        var httpClient = SharedClient(false);
+        using var response = await SendAsync(httpClient, request, null, cancellationToken);
         return (response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
     }
 
     public static async Task<T> PostXMLAsync<T>(string url, string contentXmlString, Dictionary<string, string> header = null, Encoding resultEncoding = null, CancellationToken cancellationToken = default) where T : class
     {
-        var request = new HttpRequestMessage(HttpMethod.Post, new Uri(url))
+        using var request = new HttpRequestMessage(HttpMethod.Post, new Uri(url))
         {
             Content = new StringContent(contentXmlString, resultEncoding ?? Encoding.UTF8, "text/xml; charset=utf-8")
         };
         AddHeaders(request, header);
 
-        using var httpClient = new HttpClient();
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        var httpClient = SharedClient(false);
+        using var response = await SendAsync(httpClient, request, null, cancellationToken);
         var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
         return responseBody.DeSerializeJson<T>();
     }

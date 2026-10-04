@@ -1,57 +1,12 @@
-﻿using System.Text;
-using System.Security.Cryptography;
+﻿namespace Bat.Core;
 
-namespace Bat.Core;
-
+// RijndaelManaged with a 128-bit block (the only block size .NET supports) is AES, so the shared AES
+// implementation produces identical output.
 public class RijndaelAlgorithm
 {
     public static string Encrypt(string plainText, string passPhrase, string saltValue, string hashAlgorithm, int passwordIterations, string initVector, int keySize)
-    {
-        var initVectorBytes = Encoding.ASCII.GetBytes(initVector);
-        var saltValueBytes = Encoding.ASCII.GetBytes(saltValue);
-        var password = new PasswordDeriveBytes(passPhrase, saltValueBytes, hashAlgorithm, passwordIterations);
-        var keyBytes = password.GetBytes(keySize / 8);
-#pragma warning disable SYSLIB0022 // Type or member is obsolete
-        var symmetricKey = new RijndaelManaged
-        {
-            Mode = CipherMode.CBC,
-            Key = keyBytes,
-            IV = initVectorBytes
-        };
-#pragma warning restore SYSLIB0022 // Type or member is obsolete
-        var encryptor = symmetricKey.CreateEncryptor();
-        byte[] cipherTextBytes;
-        using (var memoryStream = new MemoryStream())
-        {
-            using var cryptoStream = new CryptoStream(memoryStream, encryptor, CryptoStreamMode.Write);
-            using (var streamWriter = new StreamWriter(cryptoStream))
-            {
-                streamWriter.Write(plainText);
-            }
-            cipherTextBytes = memoryStream.ToArray();
-        }
-        return Convert.ToBase64String(cipherTextBytes);
-    }
+        => SymmetricCrypto.Encrypt(plainText, passPhrase, saltValue, hashAlgorithm, passwordIterations, initVector, keySize);
 
     public static string Decrypt(string cipherText, string passPhrase, string saltValue, string hashAlgorithm, int passwordIterations, string initVector, int keySize)
-    {
-        var initVectorBytes = Encoding.ASCII.GetBytes(initVector);
-        var saltValueBytes = Encoding.ASCII.GetBytes(saltValue);
-        var cipherTextBytes = Convert.FromBase64String(cipherText);
-        var password = new PasswordDeriveBytes(passPhrase, saltValueBytes, hashAlgorithm, passwordIterations);
-        var keyBytes = password.GetBytes(keySize / 8);
-#pragma warning disable SYSLIB0022 // Type or member is obsolete
-        var symmetricKey = new RijndaelManaged
-        {
-            Mode = CipherMode.CBC,
-            Key = keyBytes,
-            IV = initVectorBytes
-        };
-#pragma warning restore SYSLIB0022 // Type or member is obsolete
-        var decryptor = symmetricKey.CreateDecryptor();
-        using var memoryStream = new MemoryStream(cipherTextBytes);
-        using var cryptoStream = new CryptoStream(memoryStream, decryptor, CryptoStreamMode.Read);
-        using var streamReader = new StreamReader(cryptoStream);
-        return streamReader.ReadToEnd();
-    }
+        => SymmetricCrypto.Decrypt(cipherText, passPhrase, saltValue, hashAlgorithm, passwordIterations, initVector, keySize);
 }

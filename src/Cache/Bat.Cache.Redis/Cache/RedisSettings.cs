@@ -43,6 +43,10 @@ public class RedisSettings
 public class RedisSslSettings
 {
     public bool UseSsl { get; set; } = false; //Specifies that SSL encryption should be used
-    public string Host { get; set; } = null; //Enforces a particular SSL host identity on the server’s certificate
+    public string SslHost { get; set; } = null; //Enforces a particular SSL host identity on the server’s certificate
+
+    // Old name kept for code and appsettings that still use "Host"; it reads/writes SslHost.
+    [Obsolete("Use SslHost.")]
+    public string Host { get => SslHost; set { if (value is not null) SslHost = value; } }
     public SslProtocols Protocol { get; set; } = SslProtocols.None; //Ssl/Tls versions supported when using an encrypted connection. Use ‘|’ to provide multiple values.
 }

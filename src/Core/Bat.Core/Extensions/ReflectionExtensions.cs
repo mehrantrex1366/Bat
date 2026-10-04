@@ -32,33 +32,25 @@ public static class ReflectionExtensions
         return displayAttributes.Length == 1 ? ((DisplayNameAttribute)displayAttributes[0]).DisplayName : propertyMember.Name;
     }
 
+    // Same lookup order as before (member attributes first, then attributes of the object's type),
+    // but without using exceptions (failed casts) for control flow.
     public static object GetAttribute(this object obj, Type attributeName)
     {
-        object[] attributes = null;
-        try { attributes = ((System.Reflection.PropertyInfo)obj).GetCustomAttributes(attributeName, false); } catch { }
-        if (attributes != null && attributes.Length > 0) return attributes[0];
-        else
+        if (obj is null) return null;
+
+        object[] attributes;
+        if (obj is MemberInfo memberInfo)
         {
-            try { attributes = ((FieldInfo)obj).GetCustomAttributes(attributeName, false); } catch { }
-            if (attributes != null && attributes.Length > 0) return attributes[0];
-            else
-            {
-                try { attributes = ((MemberInfo)obj).GetCustomAttributes(attributeName, false); } catch { }
-                if (attributes != null && attributes.Length > 0) return attributes[0];
-            }
+            attributes = memberInfo.GetCustomAttributes(attributeName, false);
+            if (attributes.Length > 0) return attributes[0];
         }
 
         try
         {
             attributes = obj.GetType().GetCustomAttributes(attributeName, false);
-            if (attributes != null && attributes.Length > 0) return attributes[0];
+            if (attributes.Length > 0) return attributes[0];
         }
-        catch
-        {
-            return attributes[0] == null
-                        ? null
-                        : (attributes.Length > 0 ? attributes[0] : string.Empty);
-        }
+        catch { }
 
         return null;
     }
@@ -112,12 +104,8 @@ public static class ReflectionExtensions
             Value = x.GetValue(classType, null),
             Type = x.MemberType.ToString(),
             DataType = x.PropertyType.Name,
-            Description = x.GetAttribute(typeof(DescriptionAttribute)) == null
-                            ? string.Empty
-                            : ((DescriptionAttribute)x.GetAttribute(typeof(DescriptionAttribute))).Description,
-            DisplayName = x.GetAttribute(typeof(DisplayAttribute)) == null
-                            ? string.Empty
-                            : ((DisplayAttribute)x.GetAttribute(typeof(DisplayAttribute))).GetName()
+            Description = (x.GetAttribute(typeof(DescriptionAttribute)) as DescriptionAttribute)?.Description ?? string.Empty,
+            DisplayName = (x.GetAttribute(typeof(DisplayAttribute)) as DisplayAttribute)?.GetName() ?? string.Empty
         });
     }
 
@@ -129,12 +117,8 @@ public static class ReflectionExtensions
             Value = x.GetValue(classType, null),
             Type = x.MemberType.ToString(),
             DataType = x.PropertyType.Name,
-            Description = x.GetAttribute(typeof(DescriptionAttribute)) == null
-                            ? string.Empty
-                            : ((DescriptionAttribute)x.GetAttribute(typeof(DescriptionAttribute))).Description,
-            DisplayName = x.GetAttribute(typeof(DisplayAttribute)) == null
-                            ? string.Empty
-                            : ((DisplayAttribute)x.GetAttribute(typeof(DisplayAttribute))).GetName()
+            Description = (x.GetAttribute(typeof(DescriptionAttribute)) as DescriptionAttribute)?.Description ?? string.Empty,
+            DisplayName = (x.GetAttribute(typeof(DisplayAttribute)) as DisplayAttribute)?.GetName() ?? string.Empty
         });
     }
 

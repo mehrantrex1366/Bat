@@ -47,6 +47,6 @@ public static class ExpressionExtensions
         var right = rightVisitor.Visit(expr2.Body);
 
         return Expression.Lambda<Func<T, bool>>(
-            Expression.Or(left, right), parameter);
+            Expression.OrElse(left, right), parameter);
     }
 }

@@ -2,9 +2,14 @@
 
 public static class ExcelExtension
 {
+    // The license only needs to be set once per process; the static constructor is thread-safe and runs before first use.
+    static ExcelExtension() => ExcelPackage.License.SetNonCommercialPersonal("Mehran");
+
+    private static void EnsureLicense() { }
+
     public static byte[] ToExcel<T>(this List<T> data) where T : class
     {
-        ExcelPackage.License.SetNonCommercialPersonal("Mehran");
+        EnsureLicense();
         using var package = new ExcelPackage();
         var workSheet = package.Workbook.Worksheets.Add("Data");
         var reportFields = data.Count > 0
@@ -70,7 +75,7 @@ public static class ExcelExtension
 
     public static byte[] ToExcel<T>(this List<T> data, string sheetName) where T : class
     {
-        ExcelPackage.License.SetNonCommercialPersonal("Mehran");
+        EnsureLicense();
         using var package = new ExcelPackage();
         var workSheet = package.Workbook.Worksheets.Add(sheetName);
         var reportFields = data.Count > 0
@@ -137,7 +142,7 @@ public static class ExcelExtension
     public static byte[] ToExcel<T>(this List<T> data, string sheetName,
         bool withAnonymousObject, bool withCollectionsObject) where T : class
     {
-        ExcelPackage.License.SetNonCommercialPersonal("Mehran");
+        EnsureLicense();
         using var package = new ExcelPackage();
         var workSheet = package.Workbook.Worksheets.Add(sheetName);
         var reportFields = data.Count > 0
@@ -217,11 +222,11 @@ public static class ExcelExtension
     public static byte[] ToExcel<T>(this List<T> data, string sheetName,
         bool withAnonymousObject = true, bool withCollectionsObject = true, List<string> excludeProperties = null) where T : class
     {
-        ExcelPackage.License.SetNonCommercialPersonal("Mehran");
+        EnsureLicense();
         using var package = new ExcelPackage();
         var workSheet = package.Workbook.Worksheets.Add(sheetName);
         var reportFields = data.Count > 0 ? [.. data.First().GetType().GetProperties()] : typeof(T).GetProperties().ToList();
-        if (excludeProperties.Count != 0) reportFields = reportFields.Except(reportFields.Where(x => excludeProperties.Contains(x.Name)).ToList()).ToList();
+        if (excludeProperties is { Count: > 0 }) reportFields = reportFields.Except(reportFields.Where(x => excludeProperties.Contains(x.Name)).ToList()).ToList();
 
         var row = 1;
         var cell = 1;

@@ -4,27 +4,19 @@ namespace Bat.Core;
 
 public static class Randomizer
 {
+    // Uses the shared thread-safe Random instead of allocating a new Random per digit.
     public static int GetRandomInteger(int length)
-        => int.Parse(new string(Enumerable.Repeat("123456789", length).Select(s => s[new Random().Next(9)]).ToArray()));
+        => int.Parse(Random.Shared.GetString("123456789", length));
 
+    // Fixed: the index was random.Next(length) instead of random.Next(chars.Length), so only the first
+    // `length` characters were ever used (and length > 36 threw IndexOutOfRangeException).
+    // Uses a cryptographically secure generator because this is used for refresh tokens.
     public static string GetRandomString(int length)
-    {
-        var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        var random = new Random();
-        return new string(
-             Enumerable.Repeat(chars, length)
-                       .Select(s => s[random.Next(length)])
-                       .ToArray());
-    }
+        => RandomNumberGenerator.GetString("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", length);
 
+    // Fixed: same index bug as above (random.Next(length) instead of pattern.Length).
     public static string GetRandomString(int length, string pattern)
-    {
-        var random = new Random();
-        return new string(
-             Enumerable.Repeat(pattern, length)
-                       .Select(s => s[random.Next(length)])
-                       .ToArray());
-    }
+        => RandomNumberGenerator.GetString(pattern, length);
 
     public static string GetUniqueKey(int length = 5)
     {

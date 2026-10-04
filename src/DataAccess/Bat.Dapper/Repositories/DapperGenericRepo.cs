@@ -25,6 +25,9 @@ public class DapperGenericRepo<T> : IDapperGenericRepo<T> where T : class
     public List<T> Get(string sqlStatement, object parameters = null, IDbTransaction transaction = null, bool buffered = true, int? commandTimOut = null)
         => _sqlConnection.Query<T>(sqlStatement, parameters, transaction, buffered, commandTimOut).ToList();
 
+    // Note: paging happens in memory (the whole result set is read). The result is always buffered now: with
+    // buffered = false the lazy reader was enumerated twice (Count() and then Skip/Take), running the query twice
+    // or failing. `buffered` is kept for source compatibility. Prefer OFFSET/FETCH in SQL for large tables.
     public PagingListDetails<T> GetPaging(string sqlStatement, PagingParameter pagingParameter, object parameters = null, IDbTransaction transaction = null, bool buffered = false, int? commandTimOut = null)
-        => _sqlConnection.Query<T>(sqlStatement, parameters, transaction, buffered, commandTimOut).AsQueryable().ToPagingListDetails(pagingParameter);
+        => _sqlConnection.Query<T>(sqlStatement, parameters, transaction, buffered: true, commandTimOut).ToList().ToPagingListDetails(pagingParameter);
 }

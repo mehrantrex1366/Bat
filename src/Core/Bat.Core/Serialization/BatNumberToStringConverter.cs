@@ -11,9 +11,11 @@ public class BatNumberToStringConverter : JsonConverter<string>
     {
         if (reader.TokenType is JsonTokenType.Number)
         {
+            // Invariant culture: under fa-IR/ar cultures the default ToString() would emit
+            // localized minus signs / decimal separators and corrupt the value.
             return reader.TryGetInt64(out long l)
-                ? l.ToString()
-                : reader.GetDouble().ToString();
+                ? l.ToString(System.Globalization.CultureInfo.InvariantCulture)
+                : reader.GetDouble().ToString(System.Globalization.CultureInfo.InvariantCulture);
         }
 
         if (reader.TokenType is JsonTokenType.String)
@@ -25,6 +27,6 @@ public class BatNumberToStringConverter : JsonConverter<string>
 
     public override void Write(Utf8JsonWriter writer, string value, JsonSerializerOptions options)
     {
-        writer.WriteStringValue(value.ToString());
+        writer.WriteStringValue(value);
     }
 }

@@ -20,22 +20,30 @@ public class BatJwtParserMiddleware
     public async Task Invoke(HttpContext context)
     {
         var token = context.Request.Headers.Authorization.FirstOrDefault()?.Split(" ").Last();
+
+        // Fixes:
+        // - after writing an error response the middleware used to continue the pipeline (and, when the
+        //   JWT service was missing, also called it and threw NullReferenceException);
+        // - `await _next(context)` was inside the try, so ANY exception thrown by the rest of the pipeline
+        //   (controllers, EF, ...) was caught here, logged as a token error and answered with 401.
+        //   Only token parsing is guarded now; downstream exceptions propagate to the exception middleware.
         try
         {
             if (token != null)
             {
                 if (_jwtService.IsNull())
                 {
-                    var response = Encoding.UTF8.GetBytes(new
+                    var response = new
                     {
                         resultCode = 1001,
                         isSuccessful = false,
                         message = "Jwt Service Not Configure !"
-                    }.SerializeToJson());
+                    }.SerializeToJsonUtf8Bytes();
 
                     context.Response.ContentType = "application/Json";
                     context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
                     await context.Response.Body.WriteAsync(response);
+                    return;
                 }
 
                 var userClaims = _jwtService.GetClaimsPrincipal(token, _jwtSettings);
@@ -47,17 +55,16 @@ public class BatJwtParserMiddleware
                 {
                     context.Response.ContentType = "application/Json";
                     context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                    var bytes = Encoding.UTF8.GetBytes(new
+                    var bytes = new
                     {
                         resultCode = 401,
                         isSuccessful = false,
                         message = "UnAuthorized Access To Api !. Token Not Sent.",
-                    }.SerializeToJson());
+                    }.SerializeToJsonUtf8Bytes();
                     await context.Response.Body.WriteAsync(bytes);
+                    return;
                 }
             }
-
-            await _next(context);
         }
         catch (Exception e)
         {
@@ -91,6 +98,9 @@ public class BatJwtParserMiddleware
             context.Response.ContentType = "application/Json";
             context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
             await context.Response.Body.WriteAsync(response);
+            return;
         }
+
+        await _next(context);
     }
 }

@@ -32,7 +32,9 @@ public static class ControllerExtensions
                 new HtmlHelperOptions()
             );
 
-            viewResult.View.RenderAsync(viewContext);
+            // Fixed: RenderAsync was not awaited, so the returned string could be empty/partial.
+            // Prefer RenderViewToStringAsync; this sync wrapper blocks until rendering completes.
+            viewResult.View.RenderAsync(viewContext).GetAwaiter().GetResult();
             return writer.GetStringBuilder().ToString();
         }
         catch (Exception exc)

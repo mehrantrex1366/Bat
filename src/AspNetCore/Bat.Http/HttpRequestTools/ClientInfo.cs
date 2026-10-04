@@ -61,29 +61,10 @@ public static class ClientInfo
     {
         if (os == null) throw new ArgumentNullException(nameof(os));
 
-        var version = string.Empty;
-        var temp = userAgent[(userAgent.IndexOf(os) + os.Length)..].TrimStart();
-        if (string.IsNullOrWhiteSpace(temp) | temp.StartsWith(".")) return version;
+        var index = userAgent.IndexOf(os, StringComparison.Ordinal);
+        if (index < 0) return string.Empty;
 
-        foreach (var character in temp)
-        {
-            var validCharacter = false;
-            if (int.TryParse(character.ToString(), out int test))
-            {
-                version += character;
-                validCharacter = true;
-            }
-
-            if (character == '.' || character == '_')
-            {
-                version += '.';
-                validCharacter = true;
-            }
-
-            if (validCharacter == false) break;
-        }
-
-        return version;
+        return ReadVersion(userAgent.AsSpan(index + os.Length));
     }
 
     public static void GetRequestBrowser(string userAgent, out string browser, out string version)
@@ -136,41 +117,44 @@ public static class ClientInfo
 
     public static string GetRequestBrowserVersion(string userAgent, string browser)
     {
-        var version = string.Empty;
         if (browser == "Unknown") return "0.0";
 
-        var temp = userAgent[(userAgent.IndexOf(browser) + browser.Length + 1)..].TrimStart();
-        if (string.IsNullOrWhiteSpace(temp) | temp.StartsWith(".")) return version;
+        // The old code threw ArgumentOutOfRangeException when the browser name was the last thing in the
+        // User-Agent (index + length + 1 > length); the exception was swallowed by GetRequestDetails.
+        var index = userAgent.IndexOf(browser, StringComparison.Ordinal);
+        if (index < 0) return string.Empty;
 
-        foreach (var character in temp)
-        {
-            var validCharacter = false;
-            if (int.TryParse(character.ToString(), out int test))
-            {
-                version += character;
-                validCharacter = true;
-            }
+        var start = index + browser.Length + 1;
+        if (start >= userAgent.Length) return string.Empty;
 
-            if (character == '.' || character == '_')
-            {
-                version += '.';
-                validCharacter = true;
-            }
+        return ReadVersion(userAgent.AsSpan(start));
+    }
 
-            if (validCharacter == false) break;
-        }
+    // Reads "12.3_4" style versions (digits, '.' and '_' -> '.') from the start of the text, without per-char string allocations.
+    private static string ReadVersion(ReadOnlySpan<char> text)
+    {
+        text = text.TrimStart();
+        if (text.IsEmpty || text[0] == '.') return string.Empty;
 
-        return version;
+        var length = 0;
+        while (length < text.Length && (char.IsAsciiDigit(text[length]) || text[length] == '.' || text[length] == '_'))
+            length++;
+
+        return length == 0 ? string.Empty : text[..length].ToString().Replace('_', '.');
     }
 
     public static string GetRequestDeviceModel(string userAgent)
     {
-        var model = userAgent[userAgent.IndexOf("(")..userAgent.IndexOf(")")];
-        var result = model.Split(";");
-        //if (result.Length == 2) model = result[1];
-        //else model = result[2];
+        // Fixed: user agents without "(...)" (health checks, curl, bots) threw an exception on every request,
+        // which made GetRequestDetails return null after paying for an exception.
+        var open = userAgent.IndexOf('(');
+        var close = open < 0 ? -1 : userAgent.IndexOf(')', open);
+        if (open < 0 || close < 0) return string.Empty;
 
-        return result.Last();
+        var model = userAgent[open..close];
+        var result = model.Split(';');
+
+        return result[^1];
     }
 
     public static string GetRequestDeviceManufacture(string os)

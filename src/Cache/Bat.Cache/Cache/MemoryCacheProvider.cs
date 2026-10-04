@@ -17,11 +17,15 @@ public class MemoryCacheProvider : IMemoryCacheProvider
     }
 
 
-    public bool Set(string key, object value, DateTimeOffset expireTime) => _cache.Add(key, value, expireTime);
+    // Set overwrites an existing entry. It used MemoryCache.Add, which silently keeps the OLD value when the key
+    // already exists, so updated data was never visible until the old entry expired. Use Add(...) for add-if-absent.
+    public bool Set(string key, object value, DateTimeOffset expireTime) { _cache.Set(key, value, expireTime); return true; }
 
     public bool Add(string key, object value, CacheItemPolicy cachePolicy) => _cache.Add(key, value, cachePolicy);
 
-    public bool Set(string key, object value, DateTimeOffset expireTime, TimeSpan slidingTime) => _cache.Add(key, value, new CacheItemPolicy { AbsoluteExpiration = expireTime, SlidingExpiration = slidingTime });
+    // Note: System.Runtime.Caching does not allow both absolute and sliding expiration on one item
+    // (it throws ArgumentException); pass ObjectCache.InfiniteAbsoluteExpiration to use sliding expiration only.
+    public bool Set(string key, object value, DateTimeOffset expireTime, TimeSpan slidingTime) { _cache.Set(key, value, new CacheItemPolicy { AbsoluteExpiration = expireTime, SlidingExpiration = slidingTime }); return true; }
 
     public object GetSet(string key, object value, DateTimeOffset expireTime) => _cache.AddOrGetExisting(key, value, expireTime);
 

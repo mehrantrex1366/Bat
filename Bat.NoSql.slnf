@@ -1,0 +1,20 @@
+{
+  "solution": {
+    "path": "Bat.sln",
+    "projects": [
+      "src\\Core\\Bat.Core\\Bat.Core.csproj",
+      "src\\Core\\Bat.Tools\\Bat.Tools.csproj",
+      "src\\DataAccess\\Bat.Dapper\\Bat.Dapper.csproj",
+      "src\\DataAccess\\Bat.EntityFrameworkCore\\Bat.EntityFrameworkCore.csproj",
+      "src\\DataAccess\\Bat.EntityFrameworkCore.Tools\\Bat.EntityFrameworkCore.Tools.csproj",
+      "src\\Queue\\Bat.Queue\\Bat.Queue.csproj",
+      "src\\Cache\\Bat.Cache\\Bat.Cache.csproj",
+      "src\\Cache\\Bat.Cache.Redis\\Bat.Cache.Redis.csproj",
+      "src\\AspNetCore\\Bat.AspNetCore\\Bat.AspNetCore.csproj",
+      "src\\AspNetCore\\Bat.Di\\Bat.Di.csproj",
+      "src\\AspNetCore\\Bat.Http\\Bat.Http.csproj",
+      "src\\Test\\Bat.Test\\Bat.Test.csproj",
+      "tests\\Bat.Regression.Tests\\Bat.Regression.Tests.csproj"
+    ]
+  }
+}

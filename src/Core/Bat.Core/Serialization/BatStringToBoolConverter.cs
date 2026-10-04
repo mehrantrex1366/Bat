@@ -24,6 +24,6 @@ public class BatStringToBoolConverter : JsonConverter<object>
 
     public override void Write(Utf8JsonWriter writer, object value, JsonSerializerOptions options)
     {
-        writer.WriteBooleanValue(bool.Parse(value.ToString()));
+        writer.WriteBooleanValue(value is bool b ? b : bool.Parse(value.ToString()));
     }
 }

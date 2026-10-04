@@ -1,7 +1,53 @@
-﻿namespace Bat.Dapper;
+﻿using System.Collections.Concurrent;
+
+namespace Bat.Dapper;
 
 public static class ParameterExtension
 {
+    // Column metadata per CLR type (the reflection + attribute checks used to run on every call).
+    private static readonly ConcurrentDictionary<Type, System.Reflection.PropertyInfo[]> _fields = new();
+
+    private static System.Reflection.PropertyInfo[] GetFields(Type type)
+        => _fields.GetOrAdd(type, static t =>
+        {
+            var assemblyName = t.Assembly.FullName.Split(',')[0];
+            return t.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .Where(x => x.CanRead && x.CanWrite
+                && x.GetCustomAttribute(typeof(NotMappedAttribute)) == null
+                && x.GetCustomAttribute(typeof(ForeignKeyAttribute)) == null
+                && (x.PropertyType.FullName.StartsWith("Bat.") ||
+                x.PropertyType.FullName.StartsWith(assemblyName) ||
+                (x.PropertyType.FullName.StartsWith("System.")
+                && (!x.PropertyType.FullName.Contains("System.Collection"))))).ToArray();
+        });
+
+    private static DataTable CreateTable(System.Reflection.PropertyInfo[] fields)
+    {
+        var dataTable = new DataTable();
+        foreach (var field in fields)
+        {
+            // Fixed: DataTable does not support Nullable<T> columns ("DataSet does not support System.Nullable<>"),
+            // so any int?/DateTime?/... property made this throw. Use the underlying type; nulls become DBNull.
+            var type = Nullable.GetUnderlyingType(field.PropertyType) ?? field.PropertyType;
+            if (type.IsEnum)
+                if (type.IsInheritFrom(typeof(byte))) dataTable.Columns.Add(field.Name, typeof(byte));
+                else dataTable.Columns.Add(field.Name, typeof(int));
+            else
+                dataTable.Columns.Add(field.Name, type);
+        }
+
+        return dataTable;
+    }
+
+    private static object[] GetRow(System.Reflection.PropertyInfo[] fields, object obj)
+    {
+        var row = new object[fields.Length];
+        for (int i = 0; i < fields.Length; i++)
+            row[i] = fields[i].GetValue(obj, null) ?? DBNull.Value;
+
+        return row;
+    }
+
     /// <summary>
     /// This extension converts an enumerable set to a Dapper TVP
     /// </summary>
@@ -12,28 +58,11 @@ public static class ParameterExtension
     public static SqlMapper.ICustomQueryParameter ToTableValuedParameter<T>
         (this List<T> parameter, string typeName)
     {
-        var dataTable = new DataTable();
-        var assemblyName = typeof(T).Assembly.FullName.Split(',')[0];
-        var fields = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                .Where(x => x.CanRead && x.CanWrite
-                && x.GetCustomAttribute(typeof(NotMappedAttribute)) == null
-                && x.GetCustomAttribute(typeof(ForeignKeyAttribute)) == null
-                && (x.PropertyType.FullName.StartsWith("Bat.") ||
-                x.PropertyType.FullName.StartsWith(assemblyName) ||
-                (x.PropertyType.FullName.StartsWith("System.")
-                && (!x.PropertyType.FullName.Contains("System.Collection"))))).ToArray();
-
-        foreach (var field in fields)
-        {
-            if (field.PropertyType.IsEnum)
-                if (field.PropertyType.IsInheritFrom(typeof(byte))) dataTable.Columns.Add(field.Name, typeof(byte));
-                else dataTable.Columns.Add(field.Name, typeof(int));
-            else
-                dataTable.Columns.Add(field.Name, field.PropertyType);
-        }
+        var fields = GetFields(typeof(T));
+        var dataTable = CreateTable(fields);
 
         foreach (T obj in parameter)
-            dataTable.Rows.Add(fields.Select(x => x.GetValue(obj, null)).ToArray());
+            dataTable.Rows.Add(GetRow(fields, obj));
 
         return dataTable.AsTableValuedParameter(typeName);
     }
@@ -50,34 +79,18 @@ public static class ParameterExtension
     public static SqlMapper.ICustomQueryParameter ToTableValuedParameter<T>
         (this T parameter, string typeName, string columnNames = null)
     {
-        var dataTable = new DataTable();
+        DataTable dataTable;
         if (typeof(T).IsValueType)// || typeof(T).FullName.Equals("System.String"))
         {
-            dataTable.Columns.Add(columnNames == null ? "NONAME" : columnNames, typeof(T));
-            dataTable.Rows.Add(parameter);
+            dataTable = new DataTable();
+            dataTable.Columns.Add(columnNames == null ? "NONAME" : columnNames, Nullable.GetUnderlyingType(typeof(T)) ?? typeof(T));
+            dataTable.Rows.Add((object)parameter ?? DBNull.Value);
         }
         else
         {
-            var assemblyName = typeof(T).Assembly.FullName.Split(',')[0];
-            var fields = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                .Where(x => x.CanRead && x.CanWrite
-                && x.GetCustomAttribute(typeof(NotMappedAttribute)) == null
-                && x.GetCustomAttribute(typeof(ForeignKeyAttribute)) == null
-                && (x.PropertyType.FullName.StartsWith("Bat.") ||
-                x.PropertyType.FullName.StartsWith(assemblyName) ||
-                (x.PropertyType.FullName.StartsWith("System.")
-                && (!x.PropertyType.FullName.Contains("System.Collection"))))).ToArray();
-
-            foreach (var field in fields)
-            {
-                if (field.PropertyType.IsEnum)
-                    if (field.PropertyType.IsInheritFrom(typeof(byte))) dataTable.Columns.Add(field.Name, typeof(byte));
-                    else dataTable.Columns.Add(field.Name, typeof(int));
-                else
-                    dataTable.Columns.Add(field.Name, field.PropertyType);
-            }
-
-            dataTable.Rows.Add(fields.Select(x => x.GetValue(parameter, null)).ToArray());
+            var fields = GetFields(typeof(T));
+            dataTable = CreateTable(fields);
+            dataTable.Rows.Add(GetRow(fields, parameter));
         }
 
         return dataTable.AsTableValuedParameter(typeName);

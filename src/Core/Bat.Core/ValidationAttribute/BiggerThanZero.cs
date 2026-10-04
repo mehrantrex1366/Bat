@@ -5,8 +5,9 @@ public sealed class BiggerThanZero : ValidationAttribute
 {
     public override bool IsValid(object value)
     {
-        if (int.TryParse(value.ToString(), out _))
-            if (int.Parse(value.ToString()) > 0) return true;
+        // null is "not provided" (use [Required] for that); previously this threw NullReferenceException.
+        if (value is null) return true;
+        if (int.TryParse(value.ToString(), out var number) && number > 0) return true;
 
         return false;
     }

@@ -22,11 +22,11 @@ public class CurrentUserPrincipal : ICurrentUserPrincipal
 
     public void SetIdentity(string username) => Identity = new GenericIdentity(username);
 
-    public bool IsInRole(string role) => Roles.Any(x => x == role);
+    public bool IsInRole(string role) => Roles?.Contains(role) == true;
 
     public bool? IsAuthorized(string controller, string action)
     {
-        if (UserActionList == null || UserActionList.Count() == 0) return null;
+        if (UserActionList == null || UserActionList.Count == 0) return null;
 
         return UserActionList.Any(x => x.Controller == controller && x.Action == action);
     }
