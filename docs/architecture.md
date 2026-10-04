@@ -18,14 +18,14 @@ Bat.SqlClrAssembly (.NET Framework, standalone; contains its own copies of Persi
 Every package depends on **Bat.Core**. A change in Bat.Core ships to every consumer, which is why all packages share
 one version number (see [build-test-release.md](build-test-release.md)).
 
-## Third-party dependencies (as of 10.0.1)
+## Third-party dependencies (as of 10.0.2)
 
 | Package | Main dependencies |
 |---|---|
 | Bat.Core | none (BCL only) |
 | Bat.Tools | EPPlus 8.x, EPPlus.DataExtractor, System.Security.Cryptography.Xml (pinned, vulnerability fix) |
 | Bat.Cache | System.Runtime.Caching |
-| Bat.Cache.Redis | StackExchange.Redis 2.12, Microsoft.Extensions.Caching.StackExchangeRedis, Microsoft.Extensions.Caching.Hybrid |
+| Bat.Cache.Redis | StackExchange.Redis 3.x, Microsoft.Extensions.Caching.StackExchangeRedis, Microsoft.Extensions.Caching.Hybrid |
 | Bat.Http | Microsoft.AspNetCore.Http.Abstractions 2.3 (for `HttpContext`), Polly / Microsoft.Extensions.Http.Polly (referenced, not used by code) |
 | Bat.AspNetCore | `Microsoft.NET.Sdk.Web`, JwtBearer, Swashbuckle 10, Microsoft.OpenApi (pinned) |
 | Bat.Di | Autofac.Extensions.DependencyInjection, DryIoc.Microsoft.DependencyInjection |

@@ -27,7 +27,7 @@ ForExample : Implementation Of StackExchange Library Of Redis, ...
 Tel : 09301919109
 Mail : mehrannoruzi@gmail.com</PackageReleaseNotes>
 		<NeutralLanguage>en-US</NeutralLanguage>
-		<Version>10.0.1</Version>
+		<Version>10.0.2</Version>
 		<RepositoryUrl>https://github.com/mehrannoruzi/Bat</RepositoryUrl>
 		<PackageReadmeFile>readme.md</PackageReadmeFile>
 	</PropertyGroup>
@@ -45,10 +45,10 @@ Mail : mehrannoruzi@gmail.com</PackageReleaseNotes>
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.Extensions.Caching.Hybrid" Version="10.5.0" />
-		<PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.7" />
-		<PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.7" />
-		<PackageReference Include="StackExchange.Redis" Version="2.12.14" />
+		<PackageReference Include="Microsoft.Extensions.Caching.Hybrid" Version="10.10.0" />
+		<PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.12" />
+		<PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.12" />
+		<PackageReference Include="StackExchange.Redis" Version="3.3.1" />
 	</ItemGroup>
 
 	<ItemGroup>

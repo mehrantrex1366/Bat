@@ -26,14 +26,14 @@ dotnet test Bat.NoSql.slnf            # or: dotnet test tests/Bat.Regression.Tes
 - `HttpTests.cs` — `HttpRequestTools` against an in-process Kestrel server (headers, cookies, timeouts, PUT form), `ClientInfo` parsing.
 
 Not covered by automated tests (need infrastructure): Redis provider/lock, RabbitMQ, SQL Server specifics, Swagger filters, tag helpers.
-For 10.0.1 the Redis provider + distributed lock were verified manually against a local `redis-server`, and the RabbitMQ
+For 10.0.1 and 10.0.2 the Redis provider + distributed lock were verified manually against a local `redis-server`, and the RabbitMQ
 producer/consumer against a local `rabbitmq-server` (200 concurrent publishes over one connection). Do the same when you
 change those parts and describe what you verified.
 
 `src/Test/Bat.Test` is **not** a test project; it is a published helper library for consumers' unit tests.
 
 ## Versioning
-- All packages share one version (`<Version>` in each `src/**/*.csproj`, currently `10.0.1`).
+- All packages share one version (`<Version>` in each `src/**/*.csproj`, currently `10.0.2`).
 - Major = .NET major (10). Patch for fixes/perf, minor for new APIs.
 - Any change → bump **all** packages + entry in `CHANGELOG.md`.
 
@@ -46,4 +46,4 @@ Publishing (NuGet feed and API key) is done by the owner; agents must not publis
 
 ## After releasing
 Consumers must update **all** Bat packages to the same version (e.g. a service that uses Bat.Cache.Redis and Bat.Http
-must not mix 10.0.0 and 10.0.1), otherwise an older Bat.Core may be resolved.
+must not mix 10.0.1 and 10.0.2), otherwise an older Bat.Core may be resolved.

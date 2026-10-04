@@ -28,14 +28,14 @@ Tel : +989301919109
 Mail : mehrannoruzi@gmail.com		</PackageReleaseNotes>
 		<PackageTags>Dapper DapperExtensionMethods ExecuteSp ExecuteQuery ExecuteQueryCommand</PackageTags>
 		<NeutralLanguage>en-US</NeutralLanguage>
-		<Version>10.0.1</Version>
+		<Version>10.0.2</Version>
 		<PackageReadmeFile>readme.md</PackageReadmeFile>
 		<RepositoryUrl>https://github.com/mehrannoruzi/Bat</RepositoryUrl>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Dapper" Version="2.1.72" />
-		<PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.1" />
+		<PackageReference Include="Dapper" Version="2.1.89" />
+		<PackageReference Include="Microsoft.Data.SqlClient" Version="7.1.1" />
 		<PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
 	</ItemGroup>
 

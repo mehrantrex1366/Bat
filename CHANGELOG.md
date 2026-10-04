@@ -2,6 +2,39 @@
 
 All packages share one version. Newest first.
 
+## 10.0.2 — dependency updates (2026-10)
+
+All NuGet dependencies updated to their latest stable versions. No code changes; build has 0 warnings, all regression tests
+pass, and Redis (provider, distributed lock, `IDistributedCache`, `HybridCache`), RabbitMQ (200 concurrent publishes) and the
+Bat.Test helpers were re-verified against real local services.
+
+| Package | From | To |
+|---|---|---|
+| **StackExchange.Redis** | 2.12.14 | **3.3.1 (major)** |
+| **NSubstitute** (Bat.Test) | 5.3.0 | **6.2.0 (major)** |
+| xunit.runner.visualstudio (tests only) | 3.1.5 | 4.0.0 |
+| Microsoft.EntityFrameworkCore / .SqlServer / .Tools / .InMemory | 10.0.7 | 10.0.12 |
+| Microsoft.AspNetCore.Authentication.JwtBearer | 10.0.7 | 10.0.12 |
+| Microsoft.Extensions.Caching.StackExchangeRedis, Configuration, Options, Http.Polly; System.Runtime.Caching | 10.0.7 | 10.0.12 |
+| Microsoft.Extensions.Caching.Hybrid | 10.5.0 | 10.10.0 |
+| Swashbuckle.AspNetCore | 10.1.7 | 10.2.3 |
+| Microsoft.Data.SqlClient | 7.0.1 | 7.1.1 |
+| Dapper | 2.1.72 | 2.1.89 |
+| EPPlus | 8.5.4 | 8.7.1 |
+| RabbitMQ.Client | 7.2.1 | 7.2.2 |
+| Autofac.Extensions.DependencyInjection | 11.0.0 | 11.0.2 |
+| Polly | 8.6.6 | 8.8.0 |
+| Microsoft.AspNetCore.Http.Abstractions | 2.3.9 | 2.3.13 |
+| Moq | 4.20.72 | 4.21.0 |
+| MockQueryable.Moq / .EntityFrameworkCore | 10.0.5 | 10.0.12 |
+
+Intentionally not upgraded:
+- `Microsoft.OpenApi` stays on 2.12.2 (latest 2.x). 3.x is a breaking major and Swashbuckle 10.2.3 is built against 2.x.
+- `DryIoc.Microsoft.DependencyInjection` 8.0.0-preview-04 is already the latest published version.
+
+Consumers: services that reference StackExchange.Redis or NSubstitute directly should move to the same majors, or NuGet
+will raise a downgrade error (NU1605).
+
 ## 10.0.1 — performance and correctness review (2026-10)
 
 No public type or member was removed or renamed; all changes are source compatible.

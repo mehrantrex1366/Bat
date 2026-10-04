@@ -10,7 +10,7 @@
 	<PropertyGroup>
 		<TargetFramework>net10.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
-		<Version>10.0.1</Version>
+		<Version>10.0.2</Version>
 		<Authors>Mehran Norouzi</Authors>
 		<Company>Mehran Norouzi</Company>
 		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
@@ -32,8 +32,8 @@ Mail : mehrannoruzi@gmail.com		</PackageReleaseNotes>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.7" />
-		<PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.7" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.12" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.3" />
 		<!-- Pinned: the version pulled in by Swashbuckle has a known high-severity vulnerability (NU1903). -->
 		<PackageReference Include="Microsoft.OpenApi" Version="2.12.2" />
 	</ItemGroup>
