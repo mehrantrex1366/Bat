@@ -20,7 +20,7 @@ ForExample : Implementation Of DapperExtensionMethods, ExecuteSp, ExecuteQuery, 
 		<Copyright>© All rights reserved.</Copyright>
 		<PackageIcon>Bat.png</PackageIcon>
 		<PackageIconUrl />
-		<RepositoryType>GitHub</RepositoryType>
+		<RepositoryType>git</RepositoryType>
 		<PackageReleaseNotes>For Contact Us Please Send Mail Or Call To :
 
 

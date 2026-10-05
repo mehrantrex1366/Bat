@@ -19,7 +19,8 @@
 ForExample : Implementation Of MSM Queue, Rabbit MQueue,  ...</Description>
 		<Copyright>© All rights reserved.</Copyright>
 		<PackageIconUrl></PackageIconUrl>
-		<RepositoryType>Microsoft DevOps Server</RepositoryType>
+		<RepositoryType>git</RepositoryType>
+		<RepositoryUrl>https://github.com/mehrannoruzi/Bat</RepositoryUrl>
 		<PackageReleaseNotes>For Contact Us Please Send Mail Or Call To :
 
 Tel : +989301919109

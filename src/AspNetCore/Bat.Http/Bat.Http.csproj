@@ -17,7 +17,7 @@
 
 ForExample : Implementation Of HttpRequestTools, ClientInfo, ExtentionMethod, ...		</Description>
 		<Copyright>© All rights reserved.</Copyright>
-		<RepositoryType>GitHub</RepositoryType>
+		<RepositoryType>git</RepositoryType>
 		<PackageTags>Asp Asp.NetCore ExtentionMethod HttpRequestTools ClientInfo</PackageTags>
 		<PackageReleaseNotes>For Contact Us Please Send Mail Or Call To :
 

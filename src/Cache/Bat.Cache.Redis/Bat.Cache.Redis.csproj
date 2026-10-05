@@ -12,7 +12,7 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<Copyright>© All rights reserved.</Copyright>
-		<RepositoryType>GitHub</RepositoryType>
+		<RepositoryType>git</RepositoryType>
 		<Description>This Package Contain Useful Library And Extension Method For Easy Develop High Tech .Net Application.
 
 ForExample : Implementation Of StackExchange Library Of Redis, ...

@@ -18,7 +18,7 @@
 
 ForExample : Implementation Of Authentication, Authorization, TagHelpers, CustomAttribute, ResponseCache, ExtensionMethod, ...</Description>
 		<Copyright>© All rights reserved.</Copyright>
-		<RepositoryType>GitHub</RepositoryType>
+		<RepositoryType>git</RepositoryType>
 		<PackageTags>Asp Asp.Net Asp.NetCore Mvc Attribute Authorization Authentication ResponseCache TagHelpers ExtentionMethod</PackageTags>
 		<PackageReleaseNotes>For Contact Us Please Send Mail Or Call To :
 

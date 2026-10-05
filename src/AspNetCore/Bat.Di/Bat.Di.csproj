@@ -20,7 +20,7 @@
 ForExample : ExtensionMethods For Dynamically Register Service And Componnent Base On Inherit From ITransientInjection, IScopedInjection Or ISingletonInjection</Description>
 		<PackageIcon>Bat.png</PackageIcon>
 		<PackageIconUrl />
-		<RepositoryType>GitHub</RepositoryType>
+		<RepositoryType>git</RepositoryType>
 		<PackageTags>Ioc Di Dependency DependencyInjection AutofacExtension ExtentionMethod Autofac DryIoc</PackageTags>
 		<PackageReleaseNotes>For Contact Us Please Send Mail Or Call To :
 

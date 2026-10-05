@@ -19,7 +19,7 @@
 ForExample : Implementation Of Custom Entity Validation, Extension Method, Bulk Operation, Annotation, StoredProcedure ...</Description>
 		<Copyright>© All rights reserved.</Copyright>
 		<PackageIconUrl></PackageIconUrl>
-		<RepositoryType>GitHub</RepositoryType>
+		<RepositoryType>git</RepositoryType>
 		<PackageTags>EntityValidation ExtensionMethod Annotation StoredProcedure ModelBuilder</PackageTags>
 		<PackageReleaseNotes>For Contact Us Please Send Mail Or Call To :
 

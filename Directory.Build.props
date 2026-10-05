@@ -1,0 +1,13 @@
+<Project>
+
+	<!-- NuGet package health: Source Link, symbol package and deterministic builds.
+	     Pack with: dotnet pack -c Release -p:ContinuousIntegrationBuild=true -->
+	<PropertyGroup>
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<EmbedUntrackedSources>true</EmbedUntrackedSources>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<Deterministic>true</Deterministic>
+	</PropertyGroup>
+
+</Project>

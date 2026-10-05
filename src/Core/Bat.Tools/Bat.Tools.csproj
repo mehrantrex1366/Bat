@@ -8,7 +8,7 @@
 	  <Company>Mehran Norouzi</Company>
     <PackageIcon>Bat.png</PackageIcon>
     <RepositoryUrl>https://github.com/mehrannoruzi/Bat</RepositoryUrl>
-    <RepositoryType>GitHub</RepositoryType>
+    <RepositoryType>git</RepositoryType>
     <PackageReadmeFile>readme.md</PackageReadmeFile>
   </PropertyGroup>
 

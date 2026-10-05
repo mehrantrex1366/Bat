@@ -22,7 +22,7 @@ ForExample : Implementation Of Convertor, FileOperation, FileLoger, Encryption, 
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
 		<PackageIconUrl></PackageIconUrl>
-		<RepositoryType>GitHub</RepositoryType>
+		<RepositoryType>git</RepositoryType>
 		<PackageReleaseNotes>For Contact Us Please Send Mail Or Call To :
 
 Tel : +989301919109

@@ -23,7 +23,7 @@ Mail : mehrannoruzi@gmail.com		</PackageReleaseNotes>
 ForExample : Implementation Of Custom DbContext, DbContext Extension Method, DbSet Extension Method, ...		</Description>
 		<Copyright>© All rights reserved.</Copyright>
 		<PackageIconUrl></PackageIconUrl>
-		<RepositoryType>GitHub</RepositoryType>
+		<RepositoryType>git</RepositoryType>
 		<PackageTags>EntityFrameworkCore DbContext  ExtensionMethod EntityValidation Log AuditLog EventLog</PackageTags>
 		<PackageIcon>Bat.png</PackageIcon>
 		<UserSecretsId>573a03b9-e138-4f18-ac14-5a7c6a480b13</UserSecretsId>
