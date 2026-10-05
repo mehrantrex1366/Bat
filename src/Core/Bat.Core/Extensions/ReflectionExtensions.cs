@@ -71,13 +71,17 @@ public static class ReflectionExtensions
         return genericType.ToString();
     }
 
+    // Returns string.Empty when the value is null or is not a defined member (e.g. (MyEnum)99);
+    // returns the member name when it has no [Description].
     public static string GetDescription<T>(this T genericType)
     {
-        var fieldInfo = genericType.GetType().GetField(genericType.ToString());
-        var attributes = (DescriptionAttribute[])fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false);
+        if (genericType is null) return string.Empty;
 
-        if (attributes != null && attributes.Length > 0) return attributes[0].Description;
-        else return genericType.ToString();
+        var name = genericType.ToString();
+        var fieldInfo = genericType.GetType().GetField(name);
+        if (fieldInfo is null) return string.Empty;
+
+        return fieldInfo.GetCustomAttribute<DescriptionAttribute>(false)?.Description ?? name;
     }
 
     public static string GetDisplayName<T>(this T genericType)

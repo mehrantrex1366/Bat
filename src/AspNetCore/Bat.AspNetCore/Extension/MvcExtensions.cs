@@ -5,25 +5,23 @@ namespace Bat.AspNetCore;
 
 public static class MvcExtensions
 {
+    // Text is the member's [Description], or its name when it has none.
+    // A null enum yields an empty list.
     public static List<SelectListItem> ToSelectListFromDescription(this Enum @enum)
     {
-        var values = from Enum e in Enum.GetValues(@enum.GetType()) select new { ID = e, Name = e.GetDescription() };
-        return values.Select(x => new SelectListItem
-        {
-            Value = x.ID.ToString(),
-            Text = x.Name.ToString()
-        }).ToList();
+        if (@enum is null) return [];
+
+        return Enum.GetValues(@enum.GetType())
+            .Cast<Enum>()
+            .Select(e => new SelectListItem
+            {
+                Value = e.ToString(),
+                Text = e.GetDescription()
+            }).ToList();
     }
 
     public static List<SelectListItem> ToSelectListFromDescriptionAttribute(this Enum @enum)
-    {
-        var values = from Enum e in Enum.GetValues(@enum.GetType()) select new { ID = e, Name = e.GetDescription() };
-        return values.Select(x => new SelectListItem
-        {
-            Value = x.ID.ToString(),
-            Text = x.Name.ToString()
-        }).ToList();
-    }
+        => ToSelectListFromDescription(@enum);
 
     public static List<SelectListItem> ToSelectListItems(this IDictionary<object, object> keyValues)
         => keyValues.Select(x => new SelectListItem

@@ -13,18 +13,17 @@ public static class EnumExtensions
         else return enumObj.ToString();
     }
 
+    // Returns string.Empty when the value is null or is not a defined member (e.g. (MyEnum)99);
+    // returns the member name when it has no [Description].
     public static string GetDescription(this Enum enumObj)
     {
-        var type = enumObj.GetType();
-        var memberInfo = type.GetMember(enumObj.ToString());
+        if (enumObj is null) return string.Empty;
 
-        if (memberInfo != null && memberInfo.Length > 0)
-        {
-            var attributes = memberInfo[0].GetCustomAttributes(typeof(DescriptionAttribute), false);
-            if (attributes != null && attributes.Length > 0) return ((DescriptionAttribute)attributes[0]).Description;
-        }
+        var name = enumObj.ToString();
+        var fieldInfo = enumObj.GetType().GetField(name);
+        if (fieldInfo is null) return string.Empty;
 
-        return enumObj.ToString();
+        return fieldInfo.GetCustomAttribute<DescriptionAttribute>(false)?.Description ?? name;
     }
 
     public static IEnumerable<Core.PropertyInfo> GetEnumElements<T>() where T : Enum

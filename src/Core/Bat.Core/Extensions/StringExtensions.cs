@@ -50,6 +50,31 @@ public static class StringExtensions
 
     public static byte[] ToBytesFromBase64(this string text) => Convert.FromBase64String(text);
 
+    public static string NormalizePersianDate(this string date)
+    {
+        if (string.IsNullOrWhiteSpace(date))
+            return date ?? string.Empty;
+
+        date = date.Trim()
+            .Replace('۰', '0')
+            .Replace('۱', '1')
+            .Replace('۲', '2')
+            .Replace('۳', '3')
+            .Replace('۴', '4')
+            .Replace('۵', '5')
+            .Replace('۶', '6')
+            .Replace('۷', '7')
+            .Replace('۸', '8')
+            .Replace('۹', '9');
+
+        var parts = date.Split('/');
+
+        if (parts.Length != 3)
+            return date;
+
+        return $"{parts[0].PadLeft(4, '0')}/{parts[1].PadLeft(2, '0')}/{parts[2].PadLeft(2, '0')}";
+    }
+
     public static string ToPersianAlphaNumeric(this string text) => Regex.Replace(text, "[^A-Za-z0-9]", string.Empty);
 
     public static string ToUTF8Number(this string text, string codePage = "iso-8859-1")
