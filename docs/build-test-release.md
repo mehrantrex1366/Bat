@@ -13,8 +13,19 @@ on that project (`MSB4278 ... SSDT ... targets`) — expected. If you add a proj
 
 Single project: `dotnet build src/Core/Bat.Core/Bat.Core.csproj -c Release -p:GeneratePackageOnBuild=false`.
 
-Expected result: 0 warnings, 0 errors. Vulnerable transitive packages are pinned explicitly (see csproj comments);
-if a new `NU1903` warning appears, pin the patched version the same way.
+Expected result: 0 warnings, 0 errors. Vulnerable transitive packages are pinned explicitly (see the "Security pins"
+group in `Directory.Packages.props`); if a new `NU1903` warning appears, pin the patched version the same way.
+
+## Build files (Central Package Management)
+| File | Holds |
+|---|---|
+| `Directory.Packages.props` | Every NuGet package version (`<PackageVersion>`). csproj files use `<PackageReference Include="X" />` without a version. |
+| `Directory.Build.props` | All projects: `TargetFramework`, `ImplicitUsings`, Source Link / symbols / deterministic settings. |
+| `src/Directory.Build.props` | Published packages: shared `Version`, authors, company, copyright, repository, `IsPackable`. |
+| `src/Directory.Build.targets` | Published packages: `Bat.png` icon and `readme.md` when the file exists next to the csproj. |
+
+A csproj keeps only what is specific to it (Description, PackageTags, PackageReleaseNotes, references, resources).
+Full rules and rationale: [../Specs/central-package-management/](../Specs/central-package-management/README.md).
 
 ## Test
 ```bash
@@ -33,15 +44,19 @@ change those parts and describe what you verified.
 `src/Test/Bat.Test` is **not** a test project; it is a published helper library for consumers' unit tests.
 
 ## Versioning
-- All packages share one version (`<Version>` in each `src/**/*.csproj`, currently `10.0.2`).
+- All packages share one version: `<Version>` in `src/Directory.Build.props` (currently `10.0.12`).
 - Major = .NET major (10). Patch for fixes/perf, minor for new APIs.
-- Any change → bump **all** packages + entry in `CHANGELOG.md`.
+- Any change → bump the version there (it applies to **all** packages) + entry in `CHANGELOG.md`.
 
 ## Pack / publish
 ```bash
-dotnet pack Bat.NoSql.slnf -c Release -o ./artifacts
+dotnet pack Bat.NoSql.slnf -c Release -p:ContinuousIntegrationBuild=true -o ./artifacts
 ```
-Packages include `Bat.png` and the package `readme.md` (`PackageReadmeFile`). `Bat.Queue` has no readme.
+This produces 12 packages (`.nupkg` + `.snupkg` each): every `src/**` project except the SQL CLR one.
+Packages include `Bat.png` and the package `readme.md` (`PackageReadmeFile`) when the project has them; `Bat.Queue` has no
+readme and `Bat.Test` has no icon. `ContinuousIntegrationBuild=true` makes the build deterministic (normalized source paths)
+for Source Link; don't set it for local debugging builds. Pack from a pushed commit: Source Link points at the current commit.
+Expected pack warning: `NU5104` on Bat.Di (depends on the prerelease `DryIoc.Microsoft.DependencyInjection`, the only published version).
 Publishing (NuGet feed and API key) is done by the owner; agents must not publish packages.
 
 ## After releasing

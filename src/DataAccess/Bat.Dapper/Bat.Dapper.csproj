@@ -8,51 +8,27 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<TargetFramework>net10.0</TargetFramework>
-		<ImplicitUsings>enable</ImplicitUsings>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-		<Authors>Mehran Norouzi</Authors>
-		<Company></Company>
 		<Description>This Package Contain Useful Library And Extension Method For Easy Develop High Tech .Net Application.
 
 
 ForExample : Implementation Of DapperExtensionMethods, ExecuteSp, ExecuteQuery, ExecuteQueryCommand  ...		</Description>
-		<Copyright>© All rights reserved.</Copyright>
-		<PackageIcon>Bat.png</PackageIcon>
-		<PackageIconUrl />
-		<RepositoryType>git</RepositoryType>
 		<PackageReleaseNotes>For Contact Us Please Send Mail Or Call To :
 
 
 Tel : +989301919109
 Mail : mehrannoruzi@gmail.com		</PackageReleaseNotes>
 		<PackageTags>Dapper DapperExtensionMethods ExecuteSp ExecuteQuery ExecuteQueryCommand</PackageTags>
-		<NeutralLanguage>en-US</NeutralLanguage>
-		<Version>10.0.2</Version>
-		<PackageReadmeFile>readme.md</PackageReadmeFile>
-		<RepositoryUrl>https://github.com/mehrannoruzi/Bat</RepositoryUrl>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Dapper" Version="2.1.89" />
-		<PackageReference Include="Microsoft.Data.SqlClient" Version="7.1.1" />
-		<PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
+		<PackageReference Include="Dapper" />
+		<PackageReference Include="Microsoft.Data.SqlClient" />
+		<PackageReference Include="System.ComponentModel.Annotations" />
 	</ItemGroup>
-
 
 	<ItemGroup>
 	  <ProjectReference Include="..\..\Core\Bat.Core\Bat.Core.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <None Update="Bat.png">
-	    <Pack>True</Pack>
-	    <PackagePath>\</PackagePath>
-	  </None>
-	  <None Update="readme.md">
-	    <Pack>True</Pack>
-	    <PackagePath>\</PackagePath>
-	  </None>
 	</ItemGroup>
 
 </Project>

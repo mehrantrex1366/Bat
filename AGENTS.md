@@ -66,9 +66,13 @@ dotnet test  Bat.NoSql.slnf                                              # regre
 5. **Cross-platform paths.** Use `Path.Combine` / `Path.DirectorySeparatorChar`. Never hard-code `\\`.
 6. **Culture.** Servers may run with `fa-IR` culture. Format/parse machine-readable numbers with `CultureInfo.InvariantCulture`.
    "Iran time" is `PersianDateTime.Now` (UTC+03:30, no DST since 2022); `DateTime.Now` is the server's local time (often UTC on Kubernetes).
-7. **Versioning.** All packages share one version. When you change any package, bump `<Version>` in **every**
-   `src/**/*.csproj` (consumers reference them together) and add an entry to `CHANGELOG.md`.
+7. **Versioning.** All packages share one version. When you change any package, bump `<Version>` in
+   `src/Directory.Build.props` (the only place it is set; consumers reference all packages together) and add an entry to `CHANGELOG.md`.
 8. **Tests.** Every bug fix gets a regression test in `tests/Bat.Regression.Tests` when it can run without external services.
+9. **Package versions are central.** NuGet versions live only in `Directory.Packages.props` (Central Package Management).
+   Never put `Version=` on a `<PackageReference>`; add or change the `<PackageVersion>` there instead. Shared metadata
+   (authors, copyright, repository, icon, readme) comes from `src/Directory.Build.props` / `.targets` — don't repeat it in a csproj.
+   Details: [Specs/central-package-management/](Specs/central-package-management/README.md).
 
 ## Code conventions (short version — full list in docs/conventions.md)
 
@@ -92,5 +96,6 @@ dotnet test  Bat.NoSql.slnf                                              # regre
 | Build, test, pack, version, publish | [docs/build-test-release.md](docs/build-test-release.md) |
 | Known bugs / tech debt not fixed yet | [docs/known-issues.md](docs/known-issues.md) |
 | What changed and why | [CHANGELOG.md](CHANGELOG.md) |
+| Build files, package versions (CPM), shared metadata | [Specs/central-package-management/](Specs/central-package-management/README.md) |
 
 Keep these docs up to date in the same change when you alter a package's behavior or public surface.

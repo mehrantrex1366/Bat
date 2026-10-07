@@ -10,6 +10,7 @@ rest of the solution.
 | [build-test-release.md](build-test-release.md) | Build, test, pack, versioning |
 | [known-issues.md](known-issues.md) | Known bugs, security debt and design issues intentionally not changed yet |
 | [../CHANGELOG.md](../CHANGELOG.md) | What changed in each version and why |
+| [../Specs/](../Specs/README.md) | Specs of structural changes (e.g. Central Package Management): requirements, design, verification, runbooks |
 
 ## Package reference
 | Package | Page |

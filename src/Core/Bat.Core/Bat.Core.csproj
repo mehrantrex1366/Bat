@@ -8,30 +8,17 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<TargetFramework>net10.0</TargetFramework>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<Version>10.0.2</Version>
-		<Authors>Mehran Norouzi</Authors>
-		<Company>Mehran Norouzi</Company>
 		<Product>Bat.Core</Product>
 		<Description>This Package Contain Useful Library And Extension Method For Easy Develop High Tech .Net Application.
 
 ForExample : Implementation Of Convertor, FileOperation, FileLoger, Encryption, Hash, Validation,  ...
 		</Description>
-		<Copyright>© All rights reserved.</Copyright>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-		<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-		<PackageIconUrl></PackageIconUrl>
-		<RepositoryType>git</RepositoryType>
 		<PackageReleaseNotes>For Contact Us Please Send Mail Or Call To :
 
 Tel : +989301919109
 Mail : mehrannoruzi@gmail.com</PackageReleaseNotes>
 		<PackageTags>FileOperation Convertor FileLoger Encryption Hash Validation Attributes ExtensionMethods</PackageTags>
-		<PackageIcon>Bat.png</PackageIcon>
-		<NeutralLanguage>en-US</NeutralLanguage>
-		<PackageReadmeFile>readme.md</PackageReadmeFile>
-		<RepositoryUrl>https://github.com/mehrannoruzi/Bat</RepositoryUrl>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -47,17 +34,6 @@ Mail : mehrannoruzi@gmail.com</PackageReleaseNotes>
 			<Generator>ResXFileCodeGenerator</Generator>
 			<LastGenOutput>DisplayName.Designer.cs</LastGenOutput>
 		</EmbeddedResource>
-	</ItemGroup>
-
-	<ItemGroup>
-	  <None Update="Bat.png">
-	    <Pack>True</Pack>
-	    <PackagePath>\</PackagePath>
-	  </None>
-	  <None Update="readme.md">
-	    <Pack>True</Pack>
-	    <PackagePath>\</PackagePath>
-	  </None>
 	</ItemGroup>
 
 </Project>

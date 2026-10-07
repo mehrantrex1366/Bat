@@ -1,5 +1,17 @@
 <Project>
 
+	<!--
+		Settings shared by every project in the repository (src/ and tests/).
+		Package metadata shared by the published packages lives in src/Directory.Build.props.
+		NuGet package versions live in Directory.Packages.props.
+	-->
+
+	<!-- SDK-style C# projects only: the SSDT project (Bat.SqlClrAssembly.sqlproj) targets .NET Framework 4.8. -->
+	<PropertyGroup Condition="'$(MSBuildProjectExtension)' == '.csproj'">
+		<TargetFramework>net10.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+	</PropertyGroup>
+
 	<!-- NuGet package health: Source Link, symbol package and deterministic builds.
 	     Pack with: dotnet pack -c Release -p:ContinuousIntegrationBuild=true -->
 	<PropertyGroup>
