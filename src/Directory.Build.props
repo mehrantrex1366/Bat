@@ -1,0 +1,23 @@
+<Project>
+
+	<!-- Repository-wide settings (target framework, Source Link, symbols). -->
+	<Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+
+	<!--
+		Package metadata shared by every published Bat package (src/**/*.csproj).
+		All packages share one version: bump it here only (see AGENTS.md, rule 7).
+		Per-package values (Description, PackageTags, PackageReleaseNotes, Product, GeneratePackageOnBuild) stay in each csproj.
+	-->
+	<PropertyGroup Condition="'$(MSBuildProjectExtension)' == '.csproj'">
+		<Version>10.0.12</Version>
+		<Authors>Mehran Norouzi</Authors>
+		<Company>Mehran Norouzi</Company>
+		<Copyright>© All rights reserved.</Copyright>
+		<NeutralLanguage>en-US</NeutralLanguage>
+		<RepositoryType>git</RepositoryType>
+		<RepositoryUrl>https://github.com/mehrantrex1366/Bat</RepositoryUrl>
+		<!-- Bat.AspNetCore uses Microsoft.NET.Sdk.Web, which is not packable by default. -->
+		<IsPackable>true</IsPackable>
+	</PropertyGroup>
+
+</Project>

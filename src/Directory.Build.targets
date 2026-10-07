@@ -1,0 +1,17 @@
+<Project>
+
+	<!--
+		Package icon and readme for every published Bat package. Imported after the project file and the SDK default items,
+		so it sees the project's own files: a package gets Bat.png / readme.md only if that file exists next to its csproj.
+	-->
+	<PropertyGroup Condition="'$(MSBuildProjectExtension)' == '.csproj'">
+		<PackageIcon Condition="'$(PackageIcon)' == '' And Exists('$(MSBuildProjectDirectory)/Bat.png')">Bat.png</PackageIcon>
+		<PackageReadmeFile Condition="'$(PackageReadmeFile)' == '' And Exists('$(MSBuildProjectDirectory)/readme.md')">readme.md</PackageReadmeFile>
+	</PropertyGroup>
+
+	<ItemGroup Condition="'$(MSBuildProjectExtension)' == '.csproj'">
+		<None Update="Bat.png" Pack="true" PackagePath="\" Condition="'$(PackageIcon)' == 'Bat.png'" />
+		<None Update="readme.md" Pack="true" PackagePath="\" Condition="'$(PackageReadmeFile)' == 'readme.md'" />
+	</ItemGroup>
+
+</Project>

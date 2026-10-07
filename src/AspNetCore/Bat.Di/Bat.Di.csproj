@@ -8,47 +8,24 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<TargetFramework>net10.0</TargetFramework>
-		<Copyright>© All rights reserved.</Copyright>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<Version>10.0.2</Version>
-		<Authors>Mehran Norouzi</Authors>
-		<Company>Mehran Norouzi</Company>
 		<Product>Bat.Di</Product>
 		<Description>This Package Contain Useful Library And Extention Method For Dependency Injection in High Tech .Net Application.
 
 ForExample : ExtensionMethods For Dynamically Register Service And Componnent Base On Inherit From ITransientInjection, IScopedInjection Or ISingletonInjection</Description>
-		<PackageIcon>Bat.png</PackageIcon>
-		<PackageIconUrl />
-		<RepositoryType>git</RepositoryType>
 		<PackageTags>Ioc Di Dependency DependencyInjection AutofacExtension ExtentionMethod Autofac DryIoc</PackageTags>
 		<PackageReleaseNotes>For Contact Us Please Send Mail Or Call To :
 
 Tel : +989301919109
 Mail : mehrannoruzi@gmail.com		</PackageReleaseNotes>
-		<NeutralLanguage>en-US</NeutralLanguage>
-		<PackageReadmeFile>readme.md</PackageReadmeFile>
-		<RepositoryUrl>https://github.com/mehrannoruzi/Bat</RepositoryUrl>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Autofac.Extensions.DependencyInjection" Version="11.0.2" />
-		<PackageReference Include="DryIoc.Microsoft.DependencyInjection" Version="8.0.0-preview-04" />
+		<PackageReference Include="Autofac.Extensions.DependencyInjection" />
+		<PackageReference Include="DryIoc.Microsoft.DependencyInjection" />
 	</ItemGroup>
 
 	<ItemGroup>
 	  <ProjectReference Include="..\..\Core\Bat.Core\Bat.Core.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <None Update="Bat.png">
-	    <Pack>True</Pack>
-	    <PackagePath>\</PackagePath>
-	  </None>
-	  <None Update="readme.md">
-	    <Pack>True</Pack>
-	  <PackagePath>\</PackagePath>
-	  </None>
 	</ItemGroup>
 
 </Project>

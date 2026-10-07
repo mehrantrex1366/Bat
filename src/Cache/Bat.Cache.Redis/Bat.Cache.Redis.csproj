@@ -8,28 +8,16 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<TargetFramework>net10.0</TargetFramework>
-		<ImplicitUsings>enable</ImplicitUsings>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-		<Copyright>© All rights reserved.</Copyright>
-		<RepositoryType>git</RepositoryType>
 		<Description>This Package Contain Useful Library And Extension Method For Easy Develop High Tech .Net Application.
 
 ForExample : Implementation Of StackExchange Library Of Redis, ...
 		</Description>
-		<Authors>Mehran Norouzi</Authors>
-		<Company>Mehran Norouzi</Company>
-		<PackageIcon>Bat.png</PackageIcon>
-		<PackageIconUrl />
 		<PackageTags>Cache Redis StackExchange ExtensionMethods RedisConfiguration</PackageTags>
 		<PackageReleaseNotes>For Contact Us Please Send Mail Or Call To :
 
 Tel : 09301919109
 Mail : mehrannoruzi@gmail.com</PackageReleaseNotes>
-		<NeutralLanguage>en-US</NeutralLanguage>
-		<Version>10.0.2</Version>
-		<RepositoryUrl>https://github.com/mehrannoruzi/Bat</RepositoryUrl>
-		<PackageReadmeFile>readme.md</PackageReadmeFile>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -45,25 +33,14 @@ Mail : mehrannoruzi@gmail.com</PackageReleaseNotes>
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.Extensions.Caching.Hybrid" Version="10.10.0" />
-		<PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.12" />
-		<PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.12" />
-		<PackageReference Include="StackExchange.Redis" Version="3.3.1" />
+		<PackageReference Include="Microsoft.Extensions.Caching.Hybrid" />
+		<PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" />
+		<PackageReference Include="Microsoft.Extensions.Configuration" />
+		<PackageReference Include="StackExchange.Redis" />
 	</ItemGroup>
 
 	<ItemGroup>
 	  <ProjectReference Include="..\..\Core\Bat.Core\Bat.Core.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <None Update="Bat.png">
-	    <Pack>True</Pack>
-	    <PackagePath>\</PackagePath>
-	  </None>
-	  <None Update="readme.md">
-	    <PackagePath>\</PackagePath>
-	    <Pack>True</Pack>
-	  </None>
 	</ItemGroup>
 
 </Project>

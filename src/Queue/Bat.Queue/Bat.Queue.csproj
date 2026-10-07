@@ -8,43 +8,25 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<TargetFramework>net10.0</TargetFramework>
-		<ImplicitUsings>enable</ImplicitUsings>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-		<Version>10.0.2</Version>
-		<Authors>Mehran Norouzi</Authors>
-		<Company>Mehran Norouzi</Company>
 		<Description>This Package Contain Useful Library And Method For Easy Develop High Tech .Net Application.
 
 ForExample : Implementation Of MSM Queue, Rabbit MQueue,  ...</Description>
-		<Copyright>© All rights reserved.</Copyright>
-		<PackageIconUrl></PackageIconUrl>
-		<RepositoryType>git</RepositoryType>
-		<RepositoryUrl>https://github.com/mehrannoruzi/Bat</RepositoryUrl>
 		<PackageReleaseNotes>For Contact Us Please Send Mail Or Call To :
 
 Tel : +989301919109
 Mail : mehrannoruzi@gmail.com</PackageReleaseNotes>
 		<PackageTags>Queue MSMQ Rabbit RabbitMQ Producer Concumer Publish Subscribe</PackageTags>
-		<PackageIcon>Bat.png</PackageIcon>
-		<NeutralLanguage>en-US</NeutralLanguage>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Experimental.System.Messaging" Version="1.2.0" />
-		<PackageReference Include="Microsoft.Extensions.Options" Version="10.0.12" />
-		<PackageReference Include="RabbitMQ.Client" Version="7.2.2" />
+		<PackageReference Include="Experimental.System.Messaging" />
+		<PackageReference Include="Microsoft.Extensions.Options" />
+		<PackageReference Include="RabbitMQ.Client" />
 	</ItemGroup>
 
 	<ItemGroup>
 	  <ProjectReference Include="..\..\Core\Bat.Core\Bat.Core.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <None Update="Bat.png">
-	    <Pack>True</Pack>
-	    <PackagePath>\</PackagePath>
-	  </None>
 	</ItemGroup>
 
 </Project>

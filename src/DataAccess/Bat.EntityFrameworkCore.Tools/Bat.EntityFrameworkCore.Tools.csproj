@@ -8,48 +8,25 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<TargetFramework>net10.0</TargetFramework>
-		<ImplicitUsings>enable</ImplicitUsings>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-		<Version>10.0.2</Version>
-		<Authors>Mehran Norouzi</Authors>
-		<Company>Mehran Norouzi</Company>
 		<Description>This Package Contain Useful Library And Extension Method For Easy Develop High Tech .Net Application With EntityFrameworkCore.
 
 ForExample : Implementation Of Custom Entity Validation, Extension Method, Bulk Operation, Annotation, StoredProcedure ...</Description>
-		<Copyright>© All rights reserved.</Copyright>
-		<PackageIconUrl></PackageIconUrl>
-		<RepositoryType>git</RepositoryType>
 		<PackageTags>EntityValidation ExtensionMethod Annotation StoredProcedure ModelBuilder</PackageTags>
 		<PackageReleaseNotes>For Contact Us Please Send Mail Or Call To :
 
 Tel : +989301919109
 Mail : mehrannoruzi@gmail.com
 		</PackageReleaseNotes>
-		<PackageIcon>Bat.png</PackageIcon>
-		<NeutralLanguage>en-US</NeutralLanguage>
-		<PackageReadmeFile>readme.md</PackageReadmeFile>
-		<RepositoryUrl>https://github.com/mehrannoruzi/Bat</RepositoryUrl>
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="EFCore.BulkExtensions.SqlServer" Version="10.0.1" />
+	  <PackageReference Include="EFCore.BulkExtensions.SqlServer" />
 	</ItemGroup>
 
 	<ItemGroup>
 	  <ProjectReference Include="..\..\Core\Bat.Core\Bat.Core.csproj" />
 	  <ProjectReference Include="..\Bat.EntityFrameworkCore\Bat.EntityFrameworkCore.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <None Update="Bat.png">
-	    <Pack>True</Pack>
-	    <PackagePath>\</PackagePath>
-	  </None>
-	  <None Update="readme.md">
-	    <Pack>True</Pack>
-	    <PackagePath>\</PackagePath>
-	  </None>
 	</ItemGroup>
 
 </Project>

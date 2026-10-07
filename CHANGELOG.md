@@ -2,6 +2,28 @@
 
 All packages share one version. Newest first.
 
+## 10.0.12 — Central Package Management and shared build files (2026-10)
+
+Build-only change: no source code, public API or dependency version changed. Spec: [Specs/central-package-management/](Specs/central-package-management/README.md).
+
+- Package version jumps from 10.0.2 to **10.0.12** to line up with the .NET 10.0.12 servicing release the packages are built on.
+- Repository address is now **<https://github.com/mehrantrex1366/Bat>** (`RepositoryUrl`, Bat.EntityFrameworkCore `PackageProjectUrl`,
+  root README); it was `mehrannoruzi/Bat`. It now matches the git remote, so Source Link and the nuspec point to the same repository.
+- All NuGet versions moved to `Directory.Packages.props` (CPM); `<PackageReference>`s no longer carry `Version=`.
+- Shared settings moved out of the csproj files: `Directory.Build.props` (target framework, implicit usings, Source Link,
+  `snupkg` symbols, deterministic) and `src/Directory.Build.props` / `src/Directory.Build.targets` (version, authors, company,
+  copyright, repository, icon, readme). The package version is now set in one place.
+- `RepositoryType` is `git` for every package (was `GitHub` / `Microsoft DevOps Server`); Bat.Queue now has a `RepositoryUrl`.
+
+Packaging fixes (`dotnet pack Bat.NoSql.slnf` now produces all 12 packages):
+- **Bat.AspNetCore** was not packable (`Microsoft.NET.Sdk.Web` defaults to `IsPackable=false`); now packed. Its
+  `appsettings.json` is excluded from the package.
+- **Bat.Tools** failed to pack (`NU5046`: icon declared but `Bat.png` not included); now includes the icon.
+- **Bat.Test** was packed as `1.0.0` with authors `Bat.Test`; now uses the shared version, metadata and its `readme.md`.
+
+Apart from version and repository URL, the other 9 packages are identical to before (nuspec and file list compared). Assembly attribute change only:
+Bat.Dapper's `AssemblyCompany` is now `Mehran Norouzi` (was empty → defaulted to `Bat.Dapper`).
+
 ## 10.0.2 — dependency updates (2026-10)
 
 All NuGet dependencies updated to their latest stable versions. No code changes; build has 0 warnings, all regression tests

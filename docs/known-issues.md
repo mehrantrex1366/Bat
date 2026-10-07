@@ -37,5 +37,13 @@ or public API, or needs a decision from the owner. Fix them only with an explici
 - `Bat.Http` references Polly packages but performs no retries.
 - `Bat.SqlClrAssembly` has its own copy of `PersianDateTime` (old DST logic, old month-name bug).
 
+## Packaging
+- `Bat.Cache.Redis` packs its sample `appsettings.json` as content (`content/` + `contentFiles/`), so it is added to consuming
+  projects. Kept because removing it changes what existing consumers get; set `Pack="false"` on it once agreed.
+- `Bat.AspNetCore` uses `Microsoft.NET.Sdk.Web` and is an `Exe` with an empty public `Bat.AspNetCore.Mvc.Program.Main`
+  (public type, so not removed). The package therefore also contains `Bat.AspNetCore.runtimeconfig.json` (harmless).
+  Its `appsettings.json` is excluded from the package (`Pack="false"`).
+- `Bat.Di` depends on the prerelease `DryIoc.Microsoft.DependencyInjection 8.0.0-preview-04` → pack warning `NU5104`.
+
 ## Not reviewed in depth
 `Bat.Test` builders, Razor tag helpers, Swagger filters (compiled and read, no runtime test).
