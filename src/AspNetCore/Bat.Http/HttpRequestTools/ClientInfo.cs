@@ -36,26 +36,15 @@ public static class ClientInfo
         }
     }
 
+    /// <summary>
+    /// Value for the <c>Accept-CH</c> response header. Chromium browsers then send the high-entropy client hints
+    /// (real Windows 10/11, macOS and Android versions, device model, full browser version) on later HTTPS requests,
+    /// and <see cref="GetRequestDetails(HttpContext)"/> uses them.
+    /// </summary>
+    public const string AcceptClientHints = "Sec-CH-UA-Platform-Version, Sec-CH-UA-Model, Sec-CH-UA-Full-Version-List";
+
     public static void GetRequestOs(string userAgent, out string os, out string version)
-    {
-        version = string.Empty;
-        if (userAgent.Contains("Android")) { os = "Android"; version = GetRequestOsVersion(userAgent, os); }
-        else if (userAgent.Contains("iPad")) { os = "IOS"; version = GetRequestOsVersion(userAgent, "OS"); }
-        else if (userAgent.Contains("iPhone")) { os = "IOS"; version = GetRequestOsVersion(userAgent, "OS"); }
-        else if (userAgent.Contains("Linux") && userAgent.Contains("KFAPWI")) os = "Linux";
-        else if (userAgent.Contains("RIM Tablet") || (userAgent.Contains("BB") && userAgent.Contains("Mobile"))) { os = "Black Berry"; version = GetRequestOsVersion(userAgent, os); }
-        else if (userAgent.Contains("Windows Phone")) { os = "Windows Phone"; version = GetRequestOsVersion(userAgent, os); }
-        else if (userAgent.Contains("Mac OS")) { os = "Mac OS"; version = GetRequestOsVersion(userAgent, "OS"); }
-        else if (userAgent.Contains("Windows NT 5.1") || userAgent.Contains("Windows NT 5.2")) os = "Windows XP";
-        else if (userAgent.Contains("Windows NT 6.0")) os = "Windows Vista";
-        else if (userAgent.Contains("Windows NT 6.1")) os = "Windows 7";
-        else if (userAgent.Contains("Windows NT 6.2")) os = "Windows 8";
-        else if (userAgent.Contains("Windows NT 6.3")) os = "Windows 8.1";
-        else if (userAgent.Contains("Windows NT 10")) os = "Windows 10";
-        else if (userAgent.Contains("Windows NT 11")) os = "Windows 11";
-        else if (userAgent.Contains("Postman")) { os = "Postman"; version = GetRequestOsVersion(userAgent, os); }
-        else os = "Unknown";
-    }
+        => UserAgentParser.ParseOs(UserAgentParser.Normalize(userAgent), out os, out version);
 
     public static string GetRequestOsVersion(string userAgent, string os)
     {
@@ -69,50 +58,9 @@ public static class ClientInfo
 
     public static void GetRequestBrowser(string userAgent, out string browser, out string version)
     {
-        version = "0.0";
-        browser = "Unknown";
-        var result = userAgent[(userAgent.LastIndexOf(")") + 1)..].Trim();
-
-        if (result.Contains("Edge"))
-        {
-            browser = "Edge";
-            version = GetRequestBrowserVersion(userAgent, browser);
-        }
-        else if (result.Contains("Chrome"))
-        {
-            browser = "Chrome";
-            version = GetRequestBrowserVersion(userAgent, browser);
-        }
-        else if (result.Contains("Firefox"))
-        {
-            browser = "Firefox";
-            version = GetRequestBrowserVersion(userAgent, browser);
-        }
-        else if (result.Contains("Safari"))
-        {
-            browser = "Safari";
-            version = GetRequestBrowserVersion(userAgent, browser);
-        }
-        else if (result.Contains("OPR"))
-        {
-            browser = "Opera";
-            version = GetRequestBrowserVersion(userAgent, "OPR");
-        }
-        else if (result.Contains("UCBrowser"))
-        {
-            browser = "UCBrowser";
-            version = GetRequestBrowserVersion(userAgent, browser);
-        }
-        else if (result.Contains("SamsungBrowser"))
-        {
-            browser = "SamsungBrowser";
-            version = GetRequestBrowserVersion(userAgent, browser);
-        }
-        else if (result.Contains("Postman"))
-        {
-            browser = "Postman";
-            version = GetRequestBrowserVersion(userAgent, browser);
-        }
+        var ua = UserAgentParser.Normalize(userAgent);
+        UserAgentParser.ParseOs(ua, out var os, out _);
+        UserAgentParser.ParseBrowser(ua, os, out browser, out version, out _);
     }
 
     public static string GetRequestBrowserVersion(string userAgent, string browser)
@@ -145,16 +93,10 @@ public static class ClientInfo
 
     public static string GetRequestDeviceModel(string userAgent)
     {
-        // Fixed: user agents without "(...)" (health checks, curl, bots) threw an exception on every request,
-        // which made GetRequestDetails return null after paying for an exception.
-        var open = userAgent.IndexOf('(');
-        var close = open < 0 ? -1 : userAgent.IndexOf(')', open);
-        if (open < 0 || close < 0) return string.Empty;
-
-        var model = userAgent[open..close];
-        var result = model.Split(';');
-
-        return result[^1];
+        var ua = UserAgentParser.Normalize(userAgent);
+        UserAgentParser.ParseOs(ua, out var os, out _);
+        UserAgentParser.ParseDevice(ua, os, false, out _, out _, out var model);
+        return model;
     }
 
     public static string GetRequestDeviceManufacture(string os)
@@ -178,26 +120,21 @@ public static class ClientInfo
         return manufacture;
     }
 
+    /// <summary>Parses a User-Agent string (no client hints). Never returns <c>null</c>.</summary>
+    public static RequestDetails ParseUserAgent(string userAgent) => UserAgentParser.Parse(userAgent, null);
+
+    /// <summary>
+    /// Parses a User-Agent string and refines the result with User-Agent Client Hints found in <paramref name="headers"/>
+    /// (<c>Sec-CH-UA*</c>, see <see cref="AcceptClientHints"/>). Never returns <c>null</c>.
+    /// </summary>
+    public static RequestDetails ParseUserAgent(string userAgent, IHeaderDictionary headers) => UserAgentParser.Parse(userAgent, headers);
+
     public static RequestDetails GetRequestDetails(HttpContext httpContext)
     {
-        var result = new RequestDetails();
         try
         {
-            var os = string.Empty;
-            var osVersion = string.Empty;
-            var browser = string.Empty;
-            var browserVersion = string.Empty;
-            var userAgent = httpContext.Request.Headers["User-Agent"].ToString();
-            GetRequestOs(userAgent, out os, out osVersion);
-            GetRequestBrowser(userAgent, out browser, out browserVersion);
-
-            result.OsName = os;
-            result.OsVersion = osVersion;
-            result.BrowserName = browser;
-            result.BrowserVersion = browserVersion;
-            result.IsMobile = userAgent.Contains("Mobile");
-            result.Model = GetRequestDeviceModel(userAgent);
-            result.Manufacture = GetRequestDeviceManufacture(os);
+            var headers = httpContext.Request.Headers;
+            var result = UserAgentParser.Parse(headers["User-Agent"].ToString(), headers);
             result.IP = GetIP(httpContext);
             return result;
         }

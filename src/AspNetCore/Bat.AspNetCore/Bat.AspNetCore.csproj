@@ -22,8 +22,6 @@ Mail : mehrannoruzi@gmail.com		</PackageReleaseNotes>
 	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
 		<PackageReference Include="Swashbuckle.AspNetCore" />
-		<!-- Pinned: the version pulled in by Swashbuckle has a known high-severity vulnerability (NU1903). -->
-		<PackageReference Include="Microsoft.OpenApi" />
 	</ItemGroup>
 
 	<ItemGroup>

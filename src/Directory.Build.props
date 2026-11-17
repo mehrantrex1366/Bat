@@ -9,7 +9,7 @@
 		Per-package values (Description, PackageTags, PackageReleaseNotes, Product, GeneratePackageOnBuild) stay in each csproj.
 	-->
 	<PropertyGroup Condition="'$(MSBuildProjectExtension)' == '.csproj'">
-		<Version>10.0.12</Version>
+		<Version>10.0.14</Version>
 		<Authors>Mehran Norouzi</Authors>
 		<Company>Mehran Norouzi</Company>
 		<Copyright>© All rights reserved.</Copyright>

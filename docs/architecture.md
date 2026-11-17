@@ -18,16 +18,18 @@ Bat.SqlClrAssembly (.NET Framework, standalone; contains its own copies of Persi
 Every package depends on **Bat.Core**. A change in Bat.Core ships to every consumer, which is why all packages share
 one version number (see [build-test-release.md](build-test-release.md)).
 
-## Third-party dependencies (as of 10.0.2)
+## Third-party dependencies (as of 10.0.14)
+
+Exact versions: `Directory.Packages.props`. Microsoft packages stay on the latest `10.0.x` servicing release (the 11.0 packages target .NET 11 or belong to its release train).
 
 | Package | Main dependencies |
 |---|---|
 | Bat.Core | none (BCL only) |
-| Bat.Tools | EPPlus 8.x, EPPlus.DataExtractor, System.Security.Cryptography.Xml (pinned, vulnerability fix) |
+| Bat.Tools | EPPlus 8.x, EPPlus.DataExtractor |
 | Bat.Cache | System.Runtime.Caching |
 | Bat.Cache.Redis | StackExchange.Redis 3.x, Microsoft.Extensions.Caching.StackExchangeRedis, Microsoft.Extensions.Caching.Hybrid |
 | Bat.Http | Microsoft.AspNetCore.Http.Abstractions 2.3 (for `HttpContext`), Polly / Microsoft.Extensions.Http.Polly (referenced, not used by code) |
-| Bat.AspNetCore | `Microsoft.NET.Sdk.Web`, JwtBearer, Swashbuckle 10, Microsoft.OpenApi (pinned) |
+| Bat.AspNetCore | `Microsoft.NET.Sdk.Web`, JwtBearer, Swashbuckle 10 (Microsoft.OpenApi 2.x comes transitively; its types are part of the public API) |
 | Bat.Di | Autofac.Extensions.DependencyInjection, DryIoc.Microsoft.DependencyInjection |
 | Bat.EntityFrameworkCore | EF Core 10 + SqlServer provider |
 | Bat.EntityFrameworkCore.Tools | EFCore.BulkExtensions.SqlServer |
