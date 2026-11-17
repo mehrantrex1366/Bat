@@ -3,8 +3,6 @@
   <ItemGroup>
     <PackageReference Include="EPPlus" />
     <PackageReference Include="EPPlus.DataExtractor" />
-    <!-- Pinned: the version pulled in by EPPlus has known high-severity vulnerabilities (NU1903). -->
-    <PackageReference Include="System.Security.Cryptography.Xml" />
   </ItemGroup>
 
   <ItemGroup>

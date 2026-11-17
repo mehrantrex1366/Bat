@@ -2,6 +2,76 @@
 
 All packages share one version. Newest first.
 
+## 10.0.14 — Bat.Http: User-Agent detection rewrite (2026-10)
+
+`ClientInfo` user-agent parsing was rewritten (`src/AspNetCore/Bat.Http/HttpRequestTools/UserAgentParser.cs`, internal).
+No public member was removed or changed; all existing `ClientInfo` methods keep their signatures and now use the new parser.
+
+New:
+- `ClientInfo.ParseUserAgent(string userAgent)` and `ParseUserAgent(string userAgent, IHeaderDictionary headers)` (never return `null`).
+- `RequestDetails.DeviceType` (`Desktop`, `Mobile`, `Tablet`, `TV`, `Console`, `Wearable`, `Bot`, `Unknown`), `IsTablet`, `IsBot`,
+  `EngineName` (`Blink`, `WebKit`, `Gecko`, `Trident`, `EdgeHTML`, `Presto`, ...) and `EngineVersion`.
+- **User-Agent Client Hints** (`Sec-CH-UA*`, Chromium browsers over HTTPS) are used by `GetRequestDetails(HttpContext)`:
+  Windows 11 vs 10, real macOS / Android versions, the device model and the full browser version that Chrome hides in its
+  reduced User-Agent, and Brave. Send `Accept-CH: ClientInfo.AcceptClientHints` in responses to receive the high-entropy hints.
+- Detected browsers: Chrome, Edge (Chromium, legacy, Android, iOS), Firefox (+ iOS, Focus, Klar), Safari, Opera (+ Mini, Mobile, Touch, iOS),
+  Internet Explorer / IE Mobile, Samsung Internet, Yandex, UC, MIUI, Huawei, HeyTap, Oppo, Vivo, Silk, DuckDuckGo, QQ, Brave, Vivaldi,
+  Whale, Coc Coc, Maxthon, Puffin, Avast/AVG, Chromium, Chrome Headless, Electron, SeaMonkey, Waterfox, Pale Moon, GNOME Web, Konqueror, ...;
+  Android WebView, iOS WebView and the in-app browsers of Instagram, Facebook, TikTok, Snapchat, Pinterest, LinkedIn, Twitter, WeChat, Line, Google App;
+  bots (Googlebot, Bingbot, Yandex, Baidu, social preview fetchers, AI crawlers, SEO crawlers, uptime monitors, kube-probe, generic `*bot/`, `crawler`, `spider`);
+  tools (Postman, curl, Wget, PowerShell, OkHttp, Python, Go, Java, axios, Dart, Dalvik, CFNetwork, ...).
+- Detected operating systems: Windows 95 to 11, Windows Phone / Mobile, macOS, iOS / iPadOS (incl. the iOS 26 frozen-version fix), watchOS, tvOS,
+  Android, HarmonyOS, Fire OS, Chrome OS, Linux and distributions (Ubuntu, Fedora, Debian, ...), FreeBSD / OpenBSD / NetBSD, Solaris,
+  BlackBerry, Symbian, KaiOS, Tizen, webOS, Sailfish, Firefox OS, Chromecast, Roku, Xbox, PlayStation, Nintendo.
+- Device manufacturer and model for Apple, Samsung, Google, Xiaomi, Huawei/Honor, OPPO, Realme, vivo, OnePlus, Motorola, LG, Nokia, Sony,
+  Amazon and others (from the User-Agent model code or `Sec-CH-UA-Model`).
+
+### Behavior changes (review when upgrading)
+Existing OS / browser names are kept (`IOS`, `Mac OS`, `Black Berry`, `Windows 10`, `SamsungBrowser`, `UCBrowser`, `Postman`, `Unknown`, ...)
+so stored values and reports stay comparable. What changes:
+- Browsers that were reported as `Chrome` are now detected correctly: Edge (`Edg/`), Opera (`OPR/`), Samsung Internet, Yandex, MIUI, Instagram, ...
+- **Safari version** is now the real version (`Version/17.4.1`); it was the WebKit build number (`604.1`).
+- Previously `Unknown` values are now detected: Internet Explorer, Linux desktops, Chrome OS, iPod, bots, TVs, consoles, ... (see lists above).
+- macOS `OsVersion` is `10.15.7` (frozen by browsers; the real version comes from client hints) instead of empty.
+- Windows Phone 10 is `Windows Phone` (was `Android`). Kindle / Fire devices are `Fire OS` (were `Android` or `Linux`).
+- With client hints, Windows 11 is reported as `Windows 11` (the User-Agent alone still says `Windows 10`).
+- `Manufacture` is the device maker (`Apple`, `Samsung`, `Xiaomi`, ... or `Unknown`) instead of `Microsoft Windows 10` / `Apple IOS`;
+  `Model` is the device model (`SM-S911B`, `iPhone`, `Pixel 5`, ...) instead of the last segment inside `(...)` (e.g. ` x64`).
+  `DeviceLog.Device` changes accordingly. `GetRequestDeviceManufacture(os)` itself is unchanged.
+- `IsMobile` is `true` for phones, tablets and wearables (Android tablets were `false`; iPads were already `true`) and `false` for bots
+  (Googlebot's smartphone User-Agent was `true`).
+- `GetRequestOs` / `GetRequestBrowser` / `GetRequestDeviceModel` accept `null` (treated as an empty User-Agent) instead of throwing.
+- User agents longer than 1024 characters are parsed on their first 1024 characters only.
+
+### Dependencies (all packages)
+Every dependency moved to its latest version that supports `net10.0`; no source change was needed.
+- Microsoft 10.0.x servicing → **10.0.15**: EF Core (+ SqlServer, InMemory, Tools), JwtBearer, Microsoft.Extensions.Caching.StackExchangeRedis,
+  Configuration, Options, Http.Polly, System.Runtime.Caching. Microsoft.Extensions.Caching.Hybrid 10.10.0 → **10.11.0**,
+  Microsoft.AspNetCore.Http.Abstractions 2.3.13 → **2.3.14**.
+- Microsoft.Data.SqlClient 7.1.1 → **7.1.2**, StackExchange.Redis 3.3.1 → **3.4.35**, Swashbuckle.AspNetCore 10.2.3 → **10.3.1**,
+  EPPlus 8.7.1 → **8.7.2**, Polly 8.8.0 → **8.9.1**, MockQueryable.Moq / .EntityFrameworkCore 10.0.12 → **10.0.13**.
+- Test tooling: Microsoft.NET.Test.Sdk 18.12.0, xunit.runner.visualstudio 4.0.1.
+- **Security pins removed**: `System.Security.Cryptography.Pkcs` (Bat.Dapper, Bat.EntityFrameworkCore, Bat.EntityFrameworkCore.Tools),
+  `System.Security.Cryptography.Xml` (Bat.Tools) and `Microsoft.OpenApi` (Bat.AspNetCore) are no longer direct dependencies.
+  The upgraded parent packages bring patched versions; `dotnet list package --vulnerable --include-transitive` reports nothing.
+- Not adopted on purpose: the 11.0 packages (EF Core 11 / MockQueryable 11 need .NET 11; the rest belong to the .NET 11 release train)
+  and Swashbuckle.AspNetCore 11 (moves to Microsoft.OpenApi 3, a breaking change for consumers' own Swagger filters and for
+  `AddBatSwagger(OpenApiInfo, ...)`). Prereleases (StackExchange.Redis 4 alpha, SqlClient 8 preview, EPPlus 9 preview) are not used.
+
+## 10.0.13 — republish of 10.0.12 (2026-10)
+
+No source change. The 10.0.12 packages on nuget.org were not produced by `dotnet pack`: they contain the **10.0.2**
+assemblies (`AssemblyVersion 10.0.2.0`) with a hand-edited, outdated nuspec. For Bat.Cache.Redis the nuspec declared
+`StackExchange.Redis >= 2.10.1` while the DLL was compiled against 3.3.1, so consumers got
+`CS1705: ... uses 'StackExchange.Redis, Version=3.0.0.0' which has a higher version than referenced assembly ... Version=2.0.0.0`.
+10.0.13 is packed with `dotnet pack` from the repository (dependencies come from `Directory.Packages.props`).
+Unlist 10.0.12 on nuget.org and update consumers to 10.0.13 (all Bat packages together).
+
+Security pins (new advisories GHSA-846f-f764-76mx, GHSA-2fmv-rv2c-59x7, GHSA-7hqp-7c5m-4vq6, GHSA-c399-9853-6jmj):
+- `System.Security.Cryptography.Xml` 10.0.12 → **10.0.13** (Bat.Tools, via EPPlus).
+- `System.Security.Cryptography.Pkcs` pinned to **10.0.13** (was 9.0.x transitively via Microsoft.Data.SqlClient) in
+  Bat.Dapper, Bat.EntityFrameworkCore and Bat.EntityFrameworkCore.Tools.
+
 ## 10.0.12 — Central Package Management and shared build files (2026-10)
 
 Build-only change: no source code, public API or dependency version changed. Spec: [Specs/central-package-management/](Specs/central-package-management/README.md).

@@ -13,8 +13,10 @@ on that project (`MSB4278 ... SSDT ... targets`) — expected. If you add a proj
 
 Single project: `dotnet build src/Core/Bat.Core/Bat.Core.csproj -c Release -p:GeneratePackageOnBuild=false`.
 
-Expected result: 0 warnings, 0 errors. Vulnerable transitive packages are pinned explicitly (see the "Security pins"
-group in `Directory.Packages.props`); if a new `NU1903` warning appears, pin the patched version the same way.
+Expected result: 0 warnings, 0 errors. There are no security pins at the moment (10.0.14 removed them: the parent packages
+now bring patched versions). If a new `NU1903` warning appears, pin the patched version in the "Security pins" section of
+`Directory.Packages.props` (see [runbook](../Specs/central-package-management/runbook.md)), and check
+`dotnet list Bat.NoSql.slnf package --vulnerable --include-transitive` after every upgrade.
 
 ## Build files (Central Package Management)
 | File | Holds |
@@ -34,7 +36,11 @@ dotnet test Bat.NoSql.slnf            # or: dotnet test tests/Bat.Regression.Tes
 `tests/Bat.Regression.Tests` (xUnit) needs no network, database, Redis or RabbitMQ:
 - `CoreTests.cs` — JSON conventions, shared options, known ciphertexts (data compatibility!), validators, Persian date/time, misc fixes.
 - `DataAccessTests.cs` — `BatDbContext` SaveChanges pipeline (EF InMemory), changed-entity helpers, dynamic `OrderBy`, factories, Dapper TVP, memory cache.
-- `HttpTests.cs` — `HttpRequestTools` against an in-process Kestrel server (headers, cookies, timeouts, PUT form), `ClientInfo` parsing.
+- `HttpTests.cs` — `HttpRequestTools` against an in-process Kestrel server (headers, cookies, timeouts, PUT form), `ClientInfo` probe user agents.
+- `ClientInfoTests.cs` — User-Agent detection (~80 real user agents: OS, browser, engine, device type, manufacturer/model), client hints, hostile input.
+
+`HttpTests.cs` calls `http://localhost`: if the machine has `HTTP_PROXY` / `HTTPS_PROXY` set, add `localhost,127.0.0.1`
+to `NO_PROXY`, otherwise those tests fail with empty responses (the requests go to the proxy).
 
 Not covered by automated tests (need infrastructure): Redis provider/lock, RabbitMQ, SQL Server specifics, Swagger filters, tag helpers.
 For 10.0.1 and 10.0.2 the Redis provider + distributed lock were verified manually against a local `redis-server`, and the RabbitMQ
@@ -44,7 +50,7 @@ change those parts and describe what you verified.
 `src/Test/Bat.Test` is **not** a test project; it is a published helper library for consumers' unit tests.
 
 ## Versioning
-- All packages share one version: `<Version>` in `src/Directory.Build.props` (currently `10.0.12`).
+- All packages share one version: `<Version>` in `src/Directory.Build.props` (currently `10.0.14`).
 - Major = .NET major (10). Patch for fixes/perf, minor for new APIs.
 - Any change → bump the version there (it applies to **all** packages) + entry in `CHANGELOG.md`.
 
@@ -58,6 +64,10 @@ readme and `Bat.Test` has no icon. `ContinuousIntegrationBuild=true` makes the b
 for Source Link; don't set it for local debugging builds. Pack from a pushed commit: Source Link points at the current commit.
 Expected pack warning: `NU5104` on Bat.Di (depends on the prerelease `DryIoc.Microsoft.DependencyInjection`, the only published version).
 Publishing (NuGet feed and API key) is done by the owner; agents must not publish packages.
+Publish only the `.nupkg` files produced by this command. Don't build packages by hand (e.g. NuGet Package Explorer
+or an old `.nuspec`): 10.0.12 was published that way with the 10.0.2 DLLs and stale dependencies
+(`StackExchange.Redis >= 2.10.1` for a DLL compiled against 3.x → `CS1705` in consumers).
+Before pushing, check: `unzip -p artifacts/Bat.Cache.Redis.<ver>.nupkg "*.nuspec"` shows the versions from `Directory.Packages.props`.
 
 ## After releasing
 Consumers must update **all** Bat packages to the same version (e.g. a service that uses Bat.Cache.Redis and Bat.Http

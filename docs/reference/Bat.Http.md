@@ -36,9 +36,36 @@ JSON string; `resultEncoding` is actually the **request** content encoding (defa
 ## ClientInfo / HttpExtensions
 - `HttpContext.GetIP()` (RemoteIpAddress), `GetIPBehindCloud()` (`CF-Connecting-IP`, then `True-Client-IP`, then remote IP),
   `GetDeviceLog()` → `DeviceLog { IsMobile, IP, Os (≤25), Device (≤50), Application (≤50) }`.
-- `ClientInfo.GetRequestDetails(HttpContext)` → `RequestDetails { OsName, OsVersion, BrowserName, BrowserVersion,
-  Manufacture, Model, IP, IsMobile }` parsed from `User-Agent` with simple `Contains` rules; returns `null` only on unexpected errors.
-  User agents without `(...)` (probes, curl) return an empty model instead of throwing.
+- `ClientInfo.GetRequestDetails(HttpContext)` → `RequestDetails { OsName, OsVersion, BrowserName, BrowserVersion, EngineName, EngineVersion,
+  DeviceType, Manufacture, Model, IP, IsMobile, IsTablet, IsBot }` parsed from `User-Agent` + client hints; returns `null` only for a null context.
+- `ClientInfo.ParseUserAgent(userAgent[, headers])` — same parsing without an `HttpContext` (IP is `null`); never returns `null`.
+- `GetRequestOs`, `GetRequestBrowser`, `GetRequestDeviceModel` use the same parser (old signatures). `GetRequestOsVersion` /
+  `GetRequestBrowserVersion` (read the version after a token) and `GetRequestDeviceManufacture(os)` are unchanged legacy helpers.
+
+### User-Agent parsing (since 10.0.14)
+Implementation: `HttpRequestTools/UserAgentParser.cs` (internal). Ordered token rules, ordinal `IndexOf` + span slicing; no Regex,
+no exceptions, ~1.7 µs and ~270 B per call. Only the first 1024 chars of the User-Agent are scanned; names/versions are clipped.
+Rule order matters (specific tokens first: `Edg/`, `OPR/`, `SamsungBrowser/` before `Chrome/`; `Windows Phone` before `Android`;
+`iPhone` before `Mac OS X`); add new rules next to their family and a test case in `tests/Bat.Regression.Tests/ClientInfoTests.cs`.
+
+| Field | Values |
+|---|---|
+| `OsName` | `Windows 95`…`Windows 11`, `Windows NT`, `Windows Phone`, `Windows Mobile`, `Mac OS`, `IOS` (iPhone/iPad/iPod), `watchOS`, `tvOS`, `Android`, `HarmonyOS`, `Fire OS`, `Chrome OS`, `Linux`, `Ubuntu`/`Fedora`/`Debian`/…, `FreeBSD`/`OpenBSD`/`NetBSD`, `Solaris`, `Black Berry`, `Symbian`, `KaiOS`, `Tizen`, `webOS`, `Sailfish OS`, `Firefox OS`, `Chromecast`, `Roku OS`, `Xbox`, `PlayStation`, `Nintendo`, `Postman`, `Unknown` |
+| `OsVersion` | `14`, `17.4.1`, `10.15.7`, … or empty. Windows desktop versions are in the name (empty version). |
+| `BrowserName` | `Chrome`, `Edge`, `Firefox`, `Safari`, `Opera`, `Opera Mini`, `Internet Explorer`, `SamsungBrowser`, `Yandex`, `UCBrowser`, `Brave`, `Chrome WebView`, `iOS WebView`, `Android Browser`, in-app (`Instagram`, `Facebook`, …), bots (`Googlebot`, …), tools (`curl`, `Postman`, …), `Unknown` (version `0.0`) |
+| `EngineName` | `Blink`, `WebKit`, `Gecko`, `Trident`, `EdgeHTML`, `Presto`, `Goanna`, `KHTML`, `Unknown` |
+| `DeviceType` | `Desktop`, `Mobile`, `Tablet`, `TV`, `Console`, `Wearable`, `Bot`, `Unknown` |
+| `Manufacture` / `Model` | `Apple`/`iPhone`, `Samsung`/`SM-S911B`, `Xiaomi`/`2201123C`, `Huawei`/`ANA-AN00`, … ; `Unknown`/empty when not sent (desktops, Chrome's reduced `Android 10; K`) |
+
+Client hints (`Sec-CH-UA*`, Chromium browsers, HTTPS only) refine the result in `GetRequestDetails(HttpContext)` /
+`ParseUserAgent(ua, headers)`: Windows 11 (`Sec-CH-UA-Platform-Version` ≥ 13), real macOS/Android versions, `Sec-CH-UA-Model`,
+full browser version (`Sec-CH-UA-Full-Version-List`), Brave (`Sec-CH-UA` brand). The low-entropy hints are sent by default; for the
+others the app must send `Accept-CH`, e.g. `app.Use((ctx, next) => { ctx.Response.Headers["Accept-CH"] = ClientInfo.AcceptClientHints; return next(); });`
+(browsers then send them from the next request on).
+
+Limits (not fixable from the server): iPadOS 13+ Safari sends a Mac User-Agent (reported as `Mac OS` / `Desktop`); Safari and
+Firefox freeze macOS at 10.15; without client hints Windows 11 is `Windows 10` and Chrome on Android hides the model (`K`) and
+reports Android 10; Brave, Arc and Vivaldi (desktop) look like Chrome unless client hints are present.
 - `ClientInfo.GetIP(IHttpContextAccessor)` — falls back to the machine's DNS addresses when the accessor is null.
 
 ## Pitfalls
