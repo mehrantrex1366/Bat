@@ -6,7 +6,7 @@ the whole solution**: `docs/reference/<Package>.md` describes every package's pu
 
 ## What this repository is
 
-Bat is a set of NuGet libraries (all `net10.0`, C# latest, version `10.0.x`) that the owner's team uses as the
+Bat is a set of NuGet libraries (all `net11.0`, C# latest, version `11.0.x`) that the owner's team uses as the
 shared foundation of several internal products (CRM, payment gateway, link shortener, bulk messaging, ...).
 Those products are ASP.NET Core microservices (DDD, Clean/Onion), mostly hosted on **Kubernetes (Linux)**;
 the payment gateway runs on **Windows servers**. Code here therefore must work on both Linux and Windows,
@@ -28,7 +28,7 @@ than elegance.**
 | Bat.Queue | `src/Queue/Bat.Queue` | RabbitMQ producer/consumer (RabbitMQ.Client 7), MSMQ interface | [docs/reference/Bat.Queue.md](docs/reference/Bat.Queue.md) |
 | Bat.Test | `src/Test/Bat.Test` | Test **helpers** for consumers (Moq/NSubstitute/Bogus builders). Not a test project. | [docs/reference/Bat.Test.md](docs/reference/Bat.Test.md) |
 | Bat.SqlClrAssembly | `src/Sql/Bat.SqlAssembly` | SQL Server CLR functions (.NET Framework, SSDT). Windows/Visual Studio only | [docs/reference/Bat.SqlClrAssembly.md](docs/reference/Bat.SqlClrAssembly.md) |
-| Bat.Regression.Tests | `tests/Bat.Regression.Tests` | xUnit regression tests for this repo | [docs/build-test-release.md](docs/build-test-release.md) |
+| Bat.Regression.Tests | `tests/Bat.Regression.Tests` | xUnit v3 regression tests for this repo (Microsoft.Testing.Platform) | [docs/build-test-release.md](docs/build-test-release.md) |
 
 Dependency graph and cross-cutting design: [docs/architecture.md](docs/architecture.md).
 
@@ -36,11 +36,12 @@ Dependency graph and cross-cutting design: [docs/architecture.md](docs/architect
 
 ```bash
 dotnet build Bat.NoSql.slnf -c Release -p:GeneratePackageOnBuild=false   # everything except the SQL CLR project
-dotnet test  Bat.NoSql.slnf                                              # regression tests (local only, no network/DB needed)
+dotnet test  Bat.NoSql.slnf -c Release -p:GeneratePackageOnBuild=false  # regression tests (local only, no network/DB needed)
 ```
 
 - `Bat.sln` also contains `Bat.SqlClrAssembly.sqlproj`, which only builds in Visual Studio on Windows (SSDT).
   `dotnet build Bat.sln` fails on that project by design — use `Bat.NoSql.slnf`.
+- Requires the .NET 11 SDK (`global.json`). `dotnet test` runs on Microsoft.Testing.Platform (`global.json` → `test.runner`).
 - Several projects have `GeneratePackageOnBuild=true`; pass `-p:GeneratePackageOnBuild=false` unless you want `.nupkg` files.
 - The build must stay at **0 errors and 0 warnings** (including `NU1903` vulnerability warnings).
 - Never run `git clean -x` in a working copy you don't own: it deletes untracked work (docs, new files) and local settings.
@@ -96,6 +97,7 @@ dotnet test  Bat.NoSql.slnf                                              # regre
 | Build, test, pack, version, publish | [docs/build-test-release.md](docs/build-test-release.md) |
 | Known bugs / tech debt not fixed yet | [docs/known-issues.md](docs/known-issues.md) |
 | What changed and why | [CHANGELOG.md](CHANGELOG.md) |
+| Upgrading a service from Bat 10 to Bat 11 | [docs/migration-to-11.md](docs/migration-to-11.md) |
 | Build files, package versions (CPM), shared metadata | [Specs/central-package-management/](Specs/central-package-management/README.md) |
 
 Keep these docs up to date in the same change when you alter a package's behavior or public surface.

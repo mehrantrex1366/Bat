@@ -10,7 +10,7 @@ public sealed class LocalServer : IAsyncLifetime
     public WebApplication App { get; private set; }
     public string Url { get; private set; }
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         App = WebApplication.CreateBuilder().Build();
         App.Urls.Add("http://127.0.0.1:0");
@@ -27,23 +27,24 @@ public sealed class LocalServer : IAsyncLifetime
         Url = App.Urls.First();
     }
 
-    public async Task DisposeAsync() => await App.DisposeAsync();
+    public async ValueTask DisposeAsync() => await App.DisposeAsync();
 }
 
 public class HttpRequestToolsTests(LocalServer server) : IClassFixture<LocalServer>
 {
     private static readonly Dictionary<string, string> None = [];
+    private static CancellationToken Ct => TestContext.Current.CancellationToken;
 
     [Fact]
     public async Task Headers_AreSent_AndNotLeakedBetweenCalls()
     {
-        var withHeader = await HttpRequestTools.GetAsync<Dictionary<string, string>>($"{server.Url}/json", None, new Dictionary<string, string> { ["X-T"] = "v" });
+        var withHeader = await HttpRequestTools.GetAsync<Dictionary<string, string>>($"{server.Url}/json", None, new Dictionary<string, string> { ["X-T"] = "v" }, cancellationToken: Ct);
         Assert.Equal("v", withHeader["h"]);
 
-        var accept = await HttpRequestTools.GetAsync<Dictionary<string, string>>($"{server.Url}/json", "application/xml");
+        var accept = await HttpRequestTools.GetAsync<Dictionary<string, string>>($"{server.Url}/json", "application/xml", cancellationToken: Ct);
         Assert.Equal("application/xml", accept["accept"]);
 
-        var plain = await HttpRequestTools.GetAsync<Dictionary<string, string>>($"{server.Url}/json", None, None);
+        var plain = await HttpRequestTools.GetAsync<Dictionary<string, string>>($"{server.Url}/json", None, None, cancellationToken: Ct);
         Assert.Equal("", plain["accept"]);
         Assert.Equal("", plain["h"]);
     }
@@ -51,8 +52,8 @@ public class HttpRequestToolsTests(LocalServer server) : IClassFixture<LocalServ
     [Fact]
     public async Task Cookies_AreNotSharedBetweenCalls()
     {
-        await HttpRequestTools.GetAsync($"{server.Url}/setcookie");
-        var result = await HttpRequestTools.GetAsync<Dictionary<string, string>>($"{server.Url}/json", None, None);
+        await HttpRequestTools.GetAsync($"{server.Url}/setcookie", cancellationToken: Ct);
+        var result = await HttpRequestTools.GetAsync<Dictionary<string, string>>($"{server.Url}/json", None, None, cancellationToken: Ct);
         Assert.Equal("", result["cookie"]);
     }
 
@@ -60,7 +61,7 @@ public class HttpRequestToolsTests(LocalServer server) : IClassFixture<LocalServ
     public async Task Timeout_IsPerRequest()
     {
         var ex = await Assert.ThrowsAsync<TaskCanceledException>(() =>
-            HttpRequestTools.GetAsync<string>($"{server.Url}/slow", None, None, false, 1));
+            HttpRequestTools.GetAsync<string>($"{server.Url}/slow", None, None, false, 1, cancellationToken: Ct));
         Assert.IsType<TimeoutException>(ex.InnerException);
     }
 
@@ -68,15 +69,15 @@ public class HttpRequestToolsTests(LocalServer server) : IClassFixture<LocalServ
     public async Task CallerClient_CanBeReusedWithTimeout()
     {
         using var client = new HttpClient();
-        await HttpRequestTools.GetAsync(client, $"{server.Url}/json", None, None, 5);
-        var second = await HttpRequestTools.GetAsync(client, $"{server.Url}/json", None, None, 5);
+        await HttpRequestTools.GetAsync(client, $"{server.Url}/json", None, None, 5, cancellationToken: Ct);
+        var second = await HttpRequestTools.GetAsync(client, $"{server.Url}/json", None, None, 5, cancellationToken: Ct);
         Assert.Equal(HttpStatusCode.OK, second.httpStatusCode);
     }
 
     [Fact]
     public async Task PutForm_SendsHeadersAndBody()
     {
-        var result = await HttpRequestTools.PutFormAsync($"{server.Url}/form", new Dictionary<string, string> { ["a"] = "1" }, new Dictionary<string, string> { ["X-T"] = "hdr" }, false);
+        var result = await HttpRequestTools.PutFormAsync($"{server.Url}/form", new Dictionary<string, string> { ["a"] = "1" }, new Dictionary<string, string> { ["X-T"] = "hdr" }, false, cancellationToken: Ct);
         Assert.Equal("hdr|1", result.response);
     }
 

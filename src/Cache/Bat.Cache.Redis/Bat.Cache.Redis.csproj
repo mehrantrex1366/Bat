@@ -36,6 +36,7 @@ Mail : mehrannoruzi@gmail.com</PackageReleaseNotes>
 		<PackageReference Include="Microsoft.Extensions.Caching.Hybrid" />
 		<PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" />
 		<PackageReference Include="Microsoft.Extensions.Configuration" />
+		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" />
 		<PackageReference Include="StackExchange.Redis" />
 	</ItemGroup>
 

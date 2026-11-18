@@ -8,7 +8,7 @@
 
 	<!-- SDK-style C# projects only: the SSDT project (Bat.SqlClrAssembly.sqlproj) targets .NET Framework 4.8. -->
 	<PropertyGroup Condition="'$(MSBuildProjectExtension)' == '.csproj'">
-		<TargetFramework>net10.0</TargetFramework>
+		<TargetFramework>net11.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 	</PropertyGroup>
 

@@ -106,12 +106,36 @@ All regex-based checks use the shared instances in `BatRegex` built from `RegexP
   (pass phrase, salt, hash, iterations, key size). Output is pinned by tests.
 - `HashGenerator.Hash(key[, salt])` = Base64(SHA256(UTF-16(salt + key))), default salt hard-coded; `VerifyHash`, `IsCorrectHash` (length heuristics).
 - `RsaEncryptor.Sign(pemPath, password, data)` / `Verify(pemPath, data, signature)` — SHA256/PKCS1; reads the key file on every call.
+- Compatibility: ciphertexts, hashes, JWTs and RSA signatures produced on .NET 10 (Bat 10.0.14) were verified identical / valid on .NET 11
+  in both directions (270 values); `CoreTests.CiphertextsAndHashes_FromNet10_StillMatchOnNet11` pins a sample.
+
+### Modern crypto for new data (11.0.0)
+- `AuthenticatedEncryption` — AES-256-GCM, random key per message wrapped with your master key by AES Key Wrap (RFC 3394, .NET 11
+  `Aes.EncryptKeyWrap`). `GenerateKey()` (Base64, 32 bytes), `Encrypt/Decrypt(string, base64Key, associatedData = null)`,
+  `TryDecrypt`, `byte[]` overloads (master key 16/24/32 bytes). Format `[0x01][wrapped key 40][nonce 12][tag 16][cipher]`, Base64.
+  Randomized (same input → different output), tamper-evident, key from configuration. **Not** a replacement for existing
+  `Encryption`/`AesEncryption` data (that stays as it is); not usable for equality lookups.
+- `X25519KeyAgreement` — `IsSupported`, `GenerateKeyPair()` (Base64 raw keys), `DeriveSharedKey(myPrivate, peerPublic, length = 32, context)`
+  (HKDF-SHA256 over the X25519 secret), `DeriveSharedKeyBase64` (ready for `AuthenticatedEncryption`). Windows 10+/Server 2019+, Linux (OpenSSL).
 
 ## Pagination and responses
 - `PagingParameter { PageNumber = 1, PageSize = 10 }`. `PagingList<T> : List<T>` + `PagingDetails`.
 - `ToPagingListDetails(IQueryable|IEnumerable, PagingParameter)`: count + Skip/Take (PageSize ≤ 0 → 10, PageNumber ≤ 0 → 1).
   `ToPagingListModel(...)`: wraps an already-paged list (no Skip/Take). EF async versions live in Bat.EntityFrameworkCore.
 - `Response` / `Response<T>`: `Success(...)`, `Error(...)`, ctor overloads; `ResultCode` default 200; `ExecutionTime` is `DateTime.Now` at read time.
+
+## Compression, JSON Lines, validation, processes, metrics (11.0.0)
+- `CompressionTools` (.NET 11 `ZstandardStream`, standard zstd frames): `byte[].CompressZstd(quality = null)` / `DecompressZstd()`,
+  `string.CompressZstdToBase64()` / `DecompressZstdFromBase64()`, `Stream.CompressZstdAsync(dest)` / `DecompressZstdAsync(dest)`.
+  Nothing in Bat compresses automatically (stored formats are unchanged); use it explicitly for large payloads.
+- `JsonLinesExtensions`: `IAsyncEnumerable<T>|IEnumerable<T>.SerializeToJsonLinesAsync(stream)` (.NET 11 `SerializeAsyncEnumerable`,
+  one value per line) and `Stream.DeSerializeJsonLinesAsync<T>()`, both with `SerializationExtension.DefaultOptions`.
+- `DataAnnotationsValidationExtensions`: `obj.ValidateDataAnnotationsAsync(serviceProvider, ct)` → errors (sync **and** .NET 11 async
+  `AsyncValidationAttribute` / `IAsyncValidatableObject`), `IsValidDataAnnotationsAsync`, `JoinErrors()` (`|`-joined like `GetModelError`).
+- `ProcessTools.RunAsync(fileName, args, timeout, ct)` → `ProcessRunResult(ExitCode, StandardOutput, StandardError, TimedOut)` with
+  .NET 11 `Process.RunAndCaptureTextAsync` (arguments passed as a list, no shell quoting; the process is killed on timeout/cancel).
+- `BatCacheMetrics` — meter `Bat.Cache`, counter `bat.cache.requests` with tags `bat.cache.provider` (`memory`, `hybrid`) and
+  `bat.cache.request.result` (`hit`/`miss`). Free when nobody listens. OpenTelemetry: `.AddMeter(BatCacheMetrics.MeterName)`.
 
 ## Files and logging
 - `FileLoger.Info/CriticalInfo/Message/Error/CriticalError(…, path = "")`: appends to `<path or AppBase/Log>/<Kind>-yyyy-MM-dd.txt`

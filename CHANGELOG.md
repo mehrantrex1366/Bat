@@ -2,6 +2,82 @@
 
 All packages share one version. Newest first.
 
+## 11.0.0 — .NET 11 (2026-11)
+
+All packages now target **`net11.0`** (was `net10.0`) and require the .NET 11 SDK / runtime. Every public type and member of 10.0.14
+is still there with the same signature; encryption output and JSON defaults are unchanged (pinned by tests).
+Upgrade guide for services: [docs/migration-to-11.md](docs/migration-to-11.md).
+
+### Dependencies (all packages)
+- Microsoft 10.0.15 → **11.0.0**: EF Core (+ SqlServer, InMemory, Tools), Microsoft.AspNetCore.Authentication.JwtBearer,
+  Microsoft.Extensions.Caching.StackExchangeRedis, Configuration, Options, Http.Polly, System.Runtime.Caching;
+  Microsoft.Extensions.Caching.Hybrid 10.11.0 → **11.0.0**.
+- **Swashbuckle.AspNetCore 10.3.1 → 11.0.1** (Microsoft.OpenApi 2.x → **3.11**). Microsoft.OpenApi types are part of
+  Bat.AspNetCore's public API (`AddBatSwagger(OpenApiInfo, ...)`, the Swagger filters) — consumers' own Swagger filters may need changes.
+- MockQueryable.Moq / .EntityFrameworkCore 10.0.13 → **11.0.0** (Bat.Test).
+- Already latest and kept: Autofac.Extensions.DependencyInjection 11.0.2, Dapper 2.1.89, Microsoft.Data.SqlClient 7.1.2,
+  StackExchange.Redis 3.4.35, RabbitMQ.Client 7.2.2, EPPlus 8.7.2, Polly 8.9.1, NSubstitute 6.2.0, Moq 4.21.0.
+- **EFCore.BulkExtensions.SqlServer stays on 10.0.1**: no EF Core 11 build is published yet. It compiles and restores against
+  EF Core 11 but was not verified on SQL Server (see known issues).
+- Not adopted: prereleases (StackExchange.Redis 4 alpha, SqlClient 8 preview, EPPlus 9 preview, RabbitMQ.Client 7.3 beta,
+  AutoFixture 5 rc, DryIoc.Microsoft.DependencyInjection is still `8.0.0-preview-04` → `NU5104` on pack as before).
+- Removed redundant references that .NET 11 reports as `NU1510` (already part of the shared framework):
+  `System.ComponentModel.Annotations` (Bat.Dapper) and `Microsoft.Extensions.Options` (Bat.Queue). The types still come from the framework.
+- New dependency: Bat.Cache.Redis → `Microsoft.Extensions.Diagnostics.HealthChecks` 11.0.0 (for `AddBatRedisHealthCheck`).
+- `dotnet list package --vulnerable --include-transitive`: no vulnerable packages.
+
+### New
+- `services.AddBatHybridCache(Action<HybridCacheOptions> = null)` (Bat.Cache.Redis, namespace `Bat.Cache.Hybrid`): registers
+  `HybridCache` and `IHybridCacheProvider`. Before, `IHybridCacheProvider` could not be resolved at all (internal implementation).
+- `IHybridCacheProvider.GetOrSetAsync(key, factory, expiration)` and `GetOrSetAsync(key, factory, expiration, ct)`: the same call
+  did not compile before (CS0121, ambiguous between the flags and tags overloads). `IHybridCacheProvider.DeleteByTagAsync(tag, ct)`.
+  All three are default interface members, so existing implementations/mocks keep compiling.
+- `BatSwaggerAuthorizeFilter.BearerSchemeName` (`"Bearer"`).
+
+**HybridCache (Bat.Cache.Redis)**
+- L2 values are written with Bat's JSON contract (`BatHybridCacheSerializerFactory`, registered by `AddBatHybridCache`): the HybridCache
+  default wrote PascalCase and silently dropped public fields.
+- `GetOrSetAsync(key, factory, HybridCacheEntryOptions, tags, ct)` (flags **and** tags together), `GetOrSetWithStateAsync` (no closure),
+  `GetOrSetWithContextAsync` (.NET 11 `HybridCacheEntryContext`), `SetAsync`. Default interface members with distinct parameter types
+  or names, so no existing call becomes ambiguous (a test compiles the 10.x call shapes).
+- `AddBatHybridCacheWithRedis(instanceName, configure)`: Redis L2 on the connection of `IRedisCacheProvider` (no second multiplexer).
+- `AddBatCacheStatistics()`: .NET 11 `MemoryCacheOptions.TrackStatistics` (`dotnet.cache.*` metrics).
+- Hit/miss metrics: `BatCacheMetrics` (Bat.Core) — meter `Bat.Cache`, counter `bat.cache.requests`; recorded by `IHybridCacheProvider`
+  and `MemoryCacheProvider.Get/GetCacheItem` (no cost without a listener).
+
+**.NET 11 features (all opt-in, nothing changes until a service calls them)**
+- Bat.Core: `CompressionTools` (zstd, `ZstandardStream`), `JsonLinesExtensions` (`SerializeAsyncEnumerable`, Bat JSON),
+  `DataAnnotationsValidationExtensions` (async DataAnnotations), `ProcessTools.RunAsync` (`Process.RunAndCaptureTextAsync`),
+  `AuthenticatedEncryption` (AES-256-GCM + AES Key Wrap `Aes.EncryptKeyWrap`, for **new** data only), `X25519KeyAgreement`.
+- Bat.AspNetCore: `AddBatHealthChecks` / `MapBatHealthChecks` (live/ready probes with `ShortCircuit`), `AddBatResponseCompression` /
+  `UseBatResponseCompression` (zstd + Brotli + gzip), `BatAsyncValidationAttribute`, `JwtSettingsValidator` + `ValidateBatJwtSettings()`.
+- Bat.Cache.Redis: `RedisHealthCheck` + `AddBatRedisHealthCheck()`, `RedisSettingsValidator` + `ValidateBatRedisSettings()`.
+
+### Fixes
+- `BatSwaggerAuthorizeFilter` created `new OpenApiSecuritySchemeReference("")`; Microsoft.OpenApi 3 throws on the empty id, so
+  `swagger.json` returned **500** as soon as one action had `[Authorize]`. It now references the document's `Bearer` scheme.
+- `BatSwaggerExcludeFilter` removed `[SwaggerExclude]` properties by their CLR name (`Secret`) while schema keys are camelCase (`secret`),
+  so nothing was excluded. Names are now matched case-insensitively; reflection results are cached per type.
+
+### Behavior changes (review when upgrading)
+- `net11.0` only: services must move to .NET 11 (SDK, Docker images, Windows Hosting Bundle) together with Bat 11.
+- Swagger: properties marked `[SwaggerExclude]` now disappear from the generated schemas (they were visible before).
+- Swagger: `[Authorize]` actions reference the `Bearer` security scheme; add `AddSecurityDefinition("Bearer", ...)` (see Bat.AspNetCore docs).
+
+### Build and tests
+- `global.json`: SDK `11.0.100` (`rollForward: latestFeature`, no prereleases) and `"test": { "runner": "Microsoft.Testing.Platform" }`.
+- Tests moved to **xUnit v3** (`xunit.v3` 4.0.3, Microsoft.Testing.Platform; `OutputType=Exe`) and from `Microsoft.NET.Sdk.Web` to
+  `Microsoft.NET.Sdk` + `FrameworkReference Microsoft.AspNetCore.App` (the .NET 11 static web assets targets fail on a Web-SDK test project).
+- New tests (135 → 172): Swagger setup and filters against a real `swagger.json`, Bat.Di auto-registration, JWT round trip / rejection,
+  `AddBatHybridCache` (in-memory), EF encryptor value converters (pinned ciphertext). Loopback requests bypass `HTTP_PROXY`
+  automatically (`TestSetup.cs`), so the HTTP tests no longer need `NO_PROXY` on developer machines.
+  `Net11FeatureTests.cs` covers every feature above; `CoreTests.CiphertextsAndHashes_FromNet10_StillMatchOnNet11` pins values produced on .NET 10.
+
+### Compatibility verification
+- Microsoft ApiCompat, each of the 12 packages 11.0.0 vs 10.0.14: **no breaking change** in the public API.
+- Crypto: 270 ciphertexts/hashes generated by Bat 10.0.14 on .NET 10.0.15 and by 11.0.0 on .NET 11.0.0 are byte-for-byte identical; each side
+  decrypts the other's values and validates the other's JWE tokens and RSA signatures (Windows; algorithms are standard, Linux not run).
+
 ## 10.0.14 — Bat.Http: User-Agent detection rewrite (2026-10)
 
 `ClientInfo` user-agent parsing was rewritten (`src/AspNetCore/Bat.Http/HttpRequestTools/UserAgentParser.cs`, internal).

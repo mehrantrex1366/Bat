@@ -4,6 +4,7 @@
 
 ## MemoryCacheProvider : IMemoryCacheProvider (ISingletonInjection)
 Wraps one `System.Runtime.Caching.MemoryCache` (name `Bat.MemoryCache` or the ctor argument). Register as a singleton.
+Since 11.0.0 `Get` and `GetCacheItem` record hit/miss on the `Bat.Cache` meter (provider `memory`; see `BatCacheMetrics` in Bat.Core).
 
 | Member | Behavior |
 |---|---|

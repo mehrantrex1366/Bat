@@ -24,7 +24,6 @@ Mail : mehrannoruzi@gmail.com		</PackageReleaseNotes>
 	<ItemGroup>
 		<PackageReference Include="Dapper" />
 		<PackageReference Include="Microsoft.Data.SqlClient" />
-		<PackageReference Include="System.ComponentModel.Annotations" />
 	</ItemGroup>
 
 	<ItemGroup>

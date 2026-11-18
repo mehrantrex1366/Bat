@@ -2,7 +2,7 @@
 
 ## Upgrade a package
 
-1. Change its `<PackageVersion>` in `Directory.Packages.props`. Keep the `10.0.x` Microsoft family on the same servicing release.
+1. Change its `<PackageVersion>` in `Directory.Packages.props`. Keep the Microsoft family (`11.0.x` since Bat 11; `10.0.x` before) on the same servicing release.
 2. If it is the parent of a security pin (Swashbuckle → Microsoft.OpenApi, EPPlus → System.Security.Cryptography.Xml),
    check whether the pin is still needed; remove both the `PackageVersion` and the project's `PackageReference` if not.
 3. Build (0 warnings), test, and add a row to the dependency table in `CHANGELOG.md`.

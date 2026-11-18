@@ -36,7 +36,7 @@
 ✅ **توسعه سریع**: کاهش زمان توسعه با ابزارهای از پیش آماده  
 ✅ **Best Practices**: پیاده‌سازی الگوهای استاندارد مانند Repository، UnitOfWork  
 ✅ **مستندسازی کامل**: هر پکیج دارای مستندات و مثال‌های عملی  
-✅ **به‌روز**: پشتیبانی از .NET 10 و آخرین استانداردها  
+✅ **به‌روز**: پشتیبانی از .NET 11 و آخرین استانداردها  
 ✅ **تولید شخصی**: با تجربه واقعی و نیازهای عملی توسعه یافته  
 
 ---
@@ -258,7 +258,7 @@ SQL Server CLR Integration:
 - ✅ Custom SQL CLR Functions
 - ✅ SQL CLR Stored Procedures
 - ✅ توابع سفارشی برای SQL Server
-- ✅ Integration با .NET 10
+- ✅ Integration با .NET 11
 
 ---
 
@@ -716,7 +716,7 @@ public class UserServiceTests
 
 </div>
 
-- **.NET 10.0**
+- **.NET 11.0**
 - **Entity Framework Core**
 - **ASP.NET Core**
 - **Redis (StackExchange.Redis)**
@@ -740,8 +740,8 @@ public class UserServiceTests
 
 - ✅ **Stable**: تمام پکیج‌های Core
 - 🔄 **Active Development**: به‌روزرسانی مستمر
-- 📦 **Versioning**: Semantic Versioning (10.0.0)
-- 🎯 **.NET Support**: .NET 10
+- 📦 **Versioning**: Semantic Versioning (11.0.0)
+- 🎯 **.NET Support**: .NET 11
 
 <div dir="rtl">
 

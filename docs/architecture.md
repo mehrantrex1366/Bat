@@ -18,21 +18,22 @@ Bat.SqlClrAssembly (.NET Framework, standalone; contains its own copies of Persi
 Every package depends on **Bat.Core**. A change in Bat.Core ships to every consumer, which is why all packages share
 one version number (see [build-test-release.md](build-test-release.md)).
 
-## Third-party dependencies (as of 10.0.14)
+## Third-party dependencies (as of 11.0.0)
 
-Exact versions: `Directory.Packages.props`. Microsoft packages stay on the latest `10.0.x` servicing release (the 11.0 packages target .NET 11 or belong to its release train).
+All packages target `net11.0`. Exact versions: `Directory.Packages.props`. Microsoft packages (EF Core, ASP.NET Core, Microsoft.Extensions.*)
+stay on the latest `11.0.x` servicing release.
 
 | Package | Main dependencies |
 |---|---|
 | Bat.Core | none (BCL only) |
 | Bat.Tools | EPPlus 8.x, EPPlus.DataExtractor |
 | Bat.Cache | System.Runtime.Caching |
-| Bat.Cache.Redis | StackExchange.Redis 3.x, Microsoft.Extensions.Caching.StackExchangeRedis, Microsoft.Extensions.Caching.Hybrid |
+| Bat.Cache.Redis | StackExchange.Redis 3.x, Microsoft.Extensions.Caching.StackExchangeRedis, Microsoft.Extensions.Caching.Hybrid, Microsoft.Extensions.Diagnostics.HealthChecks (11.0.0) |
 | Bat.Http | Microsoft.AspNetCore.Http.Abstractions 2.3 (for `HttpContext`), Polly / Microsoft.Extensions.Http.Polly (referenced, not used by code) |
-| Bat.AspNetCore | `Microsoft.NET.Sdk.Web`, JwtBearer, Swashbuckle 10 (Microsoft.OpenApi 2.x comes transitively; its types are part of the public API) |
+| Bat.AspNetCore | `Microsoft.NET.Sdk.Web`, JwtBearer, Swashbuckle 11 (Microsoft.OpenApi 3.x comes transitively; its types are part of the public API) |
 | Bat.Di | Autofac.Extensions.DependencyInjection, DryIoc.Microsoft.DependencyInjection |
-| Bat.EntityFrameworkCore | EF Core 10 + SqlServer provider |
-| Bat.EntityFrameworkCore.Tools | EFCore.BulkExtensions.SqlServer |
+| Bat.EntityFrameworkCore | EF Core 11 + SqlServer provider |
+| Bat.EntityFrameworkCore.Tools | EFCore.BulkExtensions.SqlServer 10.x (no EF Core 11 build yet, see known issues) |
 | Bat.Dapper | Dapper, Microsoft.Data.SqlClient |
 | Bat.Queue | RabbitMQ.Client 7, Experimental.System.Messaging (MSMQ, Windows only) |
 | Bat.Test | Moq, NSubstitute, AutoFixture.AutoMoq, AutoBogus, MockQueryable |

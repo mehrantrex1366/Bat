@@ -33,9 +33,19 @@ public class MemoryCacheProvider : IMemoryCacheProvider
 
     public bool Delete(string key) { var cacheItem = _cache.Remove(key); return cacheItem != null; }
 
-    public object Get(string key) => _cache.Get(key);
+    public object Get(string key)
+    {
+        var value = _cache.Get(key);
+        BatCacheMetrics.RecordRequest("memory", value is not null);
+        return value;
+    }
 
-    public CacheItem GetCacheItem(string key) => _cache.GetCacheItem(key);
+    public CacheItem GetCacheItem(string key)
+    {
+        var item = _cache.GetCacheItem(key);
+        BatCacheMetrics.RecordRequest("memory", item is not null);
+        return item;
+    }
 
     public IDictionary<string, object> GetAll(IEnumerable<string> keys) => _cache.GetValues(keys);
 

@@ -92,6 +92,26 @@ public class CryptoTests
         Assert.Equal("jWXI4GuVvusD/euQHIxiqw==", AesAlgorithm.Encrypt("سلام 1", "key1", "salt12", "SHA1", 2, "XYZxyzAZSawsTRCE", 256));
         Assert.Equal("سلام 1", AesAlgorithm.Decrypt("jWXI4GuVvusD/euQHIxiqw==", "key1", "salt12", "SHA1", 2, "XYZxyzAZSawsTRCE", 256));
     }
+
+    [Fact]
+    public void CiphertextsAndHashes_FromNet10_StillMatchOnNet11()
+    {
+        // Produced by Bat 10.0.14 on .NET 10.0.15 (Windows). The upgrade to .NET 11 must not change any of them:
+        // services on Bat 10 and Bat 11 share the same databases, tokens and stored hashes.
+        const string fa = "سلام دنیا ۱۲۳ 123";
+        Assert.Equal("OjSSeGhZOC/gCkFEC6WyycOLAoESIaZYi3EjVJ/QsZs=", HashGenerator.Hash("hello"));
+        Assert.Equal("VwhtOTZlPtx+gaal6Qb2Z90hN/hlJLL58h9ZWUEB0fY=", HashGenerator.Hash(fa));
+        Assert.Equal("pRw2zz0QV+0+hlqkRodz9e+8BW4UP/vVPVPultuqp58=", HashGenerator.Hash(fa, "custom-salt"));
+        Assert.True(HashGenerator.VerifyHash("hello", "OjSSeGhZOC/gCkFEC6WyycOLAoESIaZYi3EjVJ/QsZs="));
+
+        Assert.Equal("X6zmjYSbuvqNvo/1kSqclI5IGruq3rO2K2DpXxYztpM=", AesEncryption.Encrypt(fa, HashAlgorithmsTypes.SHA256, EncryptKeySize.KeySize256));
+        Assert.Equal(fa, AesEncryption.Decrypt("X6zmjYSbuvqNvo/1kSqclI5IGruq3rO2K2DpXxYztpM=", HashAlgorithmsTypes.SHA256, EncryptKeySize.KeySize256));
+        Assert.Equal("2ZwRK3Eo8X4+N/oZVKoJbr8KXXCSnq18piSFsoZeJJQ=", Encryption.Encrypt(fa, HashAlgorithmsTypes.SHA1, EncryptKeySize.KeySize256));
+        Assert.Equal("ncjNWQEO6qLVGUFzei4QOA==", AesEncryption.Encrypt("hello", "my-key", "my-salt", HashAlgorithmsTypes.SHA1));
+        Assert.Equal("NtP/3YEsgZQodAd2wieBfniBQgFd2uTAAq+diGJgjx0=",
+            AesEncryption.Encrypt("{\"id\":42,\"name\":\"علی\"}", "my-key", "my-salt", "1234567890abcdef", HashAlgorithmsTypes.MD5));
+        Assert.Equal("SxRSwu/XkoGeEqfLthbt8s3Z7Ieexp2t8ykYXLHobVw=", AesAlgorithm.Encrypt(fa, "pass", "salt-value", "SHA256", 1000, "XYZxyzAZSawsTRCE", 256));
+    }
 }
 
 public class ValidatorTests
